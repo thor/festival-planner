@@ -255,8 +255,8 @@ class FilmfrasorScraper(BaseScraper):
                 logger.warning("Could not find title", url=url)
                 return []
 
-            # Extract country
-            country = self._extract_country(soup)
+            # Extract country and year
+            country, year = self._extract_country_and_year(soup)
 
             # Extract screening times
             # Look for elements that contain screening information
@@ -275,6 +275,7 @@ class FilmfrasorScraper(BaseScraper):
                             screening = Film(
                                 title=title,
                                 country=country,
+                                year=year,
                                 start_time=start_time,
                                 end_time=end_time,
                                 cinema=cinema,
@@ -326,37 +327,63 @@ class FilmfrasorScraper(BaseScraper):
 
         return None
 
-    def _extract_country(self, soup: BeautifulSoup) -> str:
-        """Extract country information from the page.
+    def _extract_country_and_year(
+        self, soup: BeautifulSoup
+    ) -> tuple[str, Optional[int]]:
+        """Extract country and year information from the page.
 
         Country is in: .entry-info > .extra > span
-        Year is also in .extra but after the span and before the link.
+        Year is in .extra but after the span and before the link (a element).
+
+        Returns:
+            Tuple of (country, year) where year may be None if not found
         """
         # Find the entry-info container
         entry_info = soup.find(class_="entry-info")
         if not entry_info:
             logger.debug("No element with class 'entry-info' found")
-            return "Unknown"
+            return "Unknown", None
 
         # Find the extra div within entry-info
         extra_div = entry_info.find(class_="extra")
         if not extra_div:
             logger.debug("No element with class 'extra' found within entry-info")
-            return "Unknown"
+            return "Unknown", None
 
         # Find the span within extra - this contains the country
         country_span = extra_div.find("span")
-        if not country_span:
-            logger.debug("No span found within extra div")
-            return "Unknown"
-
-        country = country_span.get_text(strip=True)
-        if country:
+        country = "Unknown"
+        if country_span:
+            country = country_span.get_text(strip=True)
             logger.debug("Found country", country=country)
-            return country
+        else:
+            logger.debug("No span found within extra div")
 
-        logger.debug("Country span was empty")
-        return "Unknown"
+        # Extract year - it's text between the span and the a element
+        # Get all text from extra_div and extract the year
+        year = None
+        extra_text = extra_div.get_text(strip=True)
+
+        # Remove the country text to isolate the year
+        if country_span:
+            country_text = country_span.get_text(strip=True)
+            extra_text = extra_text.replace(country_text, "")
+
+        # Remove link text (after the a element)
+        link = extra_div.find("a")
+        if link:
+            link_text = link.get_text(strip=True)
+            extra_text = extra_text.replace(link_text, "")
+
+        # Extract year with regex - looking for 4 digits
+        year_match = re.search(r"\b(19\d{2}|20\d{2})\b", extra_text)
+        if year_match:
+            year = int(year_match.group(1))
+            logger.debug("Found year", year=year)
+        else:
+            logger.debug("No year found in extra text", extra_text=extra_text[:100])
+
+        return country, year
 
     def _find_screening_elements(self, soup: BeautifulSoup) -> list:
         """Find elements that contain screening information.

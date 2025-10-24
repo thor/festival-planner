@@ -3,8 +3,6 @@
 import pytest
 from pathlib import Path
 from festival_planner.scrapers.filmfrasor import FilmfrasorScraper
-from festival_planner.models import Film, build_normalization_map
-from festival_planner.config import ConfigLoader
 
 
 class TestCinemaAndAuditoriumParsing:

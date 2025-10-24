@@ -29,6 +29,7 @@ class Film(BaseModel):
 
     title: str = Field(..., description="Film title")
     country: str = Field(..., description="Country of origin")
+    year: Optional[int] = Field(None, description="Year of release")
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
