@@ -20,11 +20,11 @@ travel_times:
   # Cinemateket (Dronningens gate) <-> Vika Kino (Vika)
   - from: "Cinemateket"
     to: "Vika"
-    minutes: 10
+    minutes: 20
   
   - from: "Vika"
     to: "Cinemateket"
-    minutes: 10
+    minutes: 20
   
   # Cinemateket (Dronningens gate) <-> Vega (Torggata)
   - from: "Cinemateket"
@@ -36,11 +36,12 @@ travel_times:
     minutes: 20
   
   # Vika Kino (Vika) <-> Vega (Torggata)
+  # Requires a bicycle, otherwise it's 25 minutes walking
   - from: "Vika"
     to: "Vega"
-    minutes: 25
+    minutes: 15
   
   - from: "Vega"
     to: "Vika"
-    minutes: 25
+    minutes: 15
 
