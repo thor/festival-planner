@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .config import ConfigLoader
-from .models import SeenFilm, ScheduledFilm
+from .models import SeenFilm, ScheduledFilm, Film
 from .solver import FestivalScheduleSolver
 from .scrapers import FilmfrasorScraper
 from ._logging import configure_logging, get_logger
@@ -290,25 +290,37 @@ def validate(
         console.print("\n[bold green]All validations passed![/bold green]")
 
 
-def display_film_overview(all_films: list, scheduled_films: list):
-    """Display overview of all unique films with scheduled status."""
-    # Get unique films by title
-    films_by_title = {}
-    for film in all_films:
+def _group_films_by_title(films: list[Film]) -> dict[str, list[Film]]:
+    """Group films by title.
+    
+    Args:
+        films: List of films to group
+        
+    Returns:
+        Dictionary mapping film titles to lists of screenings
+    """
+    films_by_title: dict[str, list[Film]] = {}
+    for film in films:
         if film.title not in films_by_title:
             films_by_title[film.title] = []
         films_by_title[film.title].append(film)
+    return films_by_title
 
-    # Track which films are scheduled
-    scheduled_titles = {sf.film.title for sf in scheduled_films}
-    scheduled_by_title = {sf.film.title: sf for sf in scheduled_films}
 
-    # Count statistics
-    total_unique = len(films_by_title)
-    total_screenings = len(all_films)
-    scheduled_count = len(scheduled_titles)
-    missed_count = total_unique - scheduled_count
-
+def _print_festival_statistics(
+    total_unique: int,
+    total_screenings: int,
+    scheduled_count: int,
+    missed_count: int,
+) -> None:
+    """Print festival overview statistics.
+    
+    Args:
+        total_unique: Total number of unique films
+        total_screenings: Total number of screenings
+        scheduled_count: Number of films scheduled
+        missed_count: Number of films missed
+    """
     console.print("\n[bold]Festival Overview[/bold]")
     console.print(f"Unique films: {total_unique}")
     console.print(f"Total screenings: {total_screenings}")
@@ -316,7 +328,22 @@ def display_film_overview(all_films: list, scheduled_films: list):
     console.print(f"Films missed: [red]{missed_count}[/red]")
     console.print()
 
-    # Create table
+
+def _build_film_overview_table(
+    films_by_title: dict[str, list[Film]],
+    scheduled_titles: set[str],
+    scheduled_by_title: dict[str, ScheduledFilm],
+) -> Table:
+    """Build the film overview table with scheduling details.
+    
+    Args:
+        films_by_title: Films grouped by title
+        scheduled_titles: Set of scheduled film titles
+        scheduled_by_title: Mapping of titles to scheduled films
+        
+    Returns:
+        Formatted Rich Table
+    """
     table = Table(title="All Films in Festival")
     table.add_column("Status", justify="center", style="bold", width=6)
     table.add_column("Title", style="bold")
@@ -372,12 +399,47 @@ def display_film_overview(all_films: list, scheduled_films: list):
             style=style,
         )
 
+    return table
+
+
+def display_film_overview(all_films: list[Film], scheduled_films: list[ScheduledFilm]) -> None:
+    """Display overview of all unique films with scheduled status.
+    
+    Args:
+        all_films: All available film screenings
+        scheduled_films: Films that have been scheduled
+    """
+    # Get unique films by title
+    films_by_title = _group_films_by_title(all_films)
+
+    # Track which films are scheduled
+    scheduled_titles = {sf.film.title for sf in scheduled_films}
+    scheduled_by_title: dict[str, ScheduledFilm] = {sf.film.title: sf for sf in scheduled_films}
+
+    # Calculate and print statistics
+    total_unique = len(films_by_title)
+    total_screenings = len(all_films)
+    scheduled_count = len(scheduled_titles)
+    missed_count = total_unique - scheduled_count
+
+    _print_festival_statistics(
+        total_unique, total_screenings, scheduled_count, missed_count
+    )
+
+    # Build and display table
+    table = _build_film_overview_table(
+        films_by_title, scheduled_titles, scheduled_by_title
+    )
     console.print(table)
     console.print()
 
 
-def display_schedule(scheduled_films: list):
-    """Display the schedule in a nice table format."""
+def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
+    """Display the schedule in a nice table format.
+    
+    Args:
+        scheduled_films: List of scheduled films to display
+    """
     if not scheduled_films:
         console.print("[yellow]No films in schedule[/yellow]")
         return
@@ -411,8 +473,13 @@ def display_schedule(scheduled_films: list):
         console.print()
 
 
-def save_schedule_to_file(scheduled_films: list, filepath: Path):
-    """Save the schedule to a file."""
+def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) -> None:
+    """Save the schedule to a file.
+    
+    Args:
+        scheduled_films: List of scheduled films to save
+        filepath: Path to output file
+    """
     with open(filepath, "w") as f:
         f.write("# Festival Schedule\n\n")
 
