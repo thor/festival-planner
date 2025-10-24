@@ -282,6 +282,7 @@ class FilmfrasorScraper(BaseScraper):
                                 special_notes=special_notes,
                             )
                             screenings.append(screening)
+                            logger.debug("Added screening", **screening.dict())
                         except ValidationError as e:
                             # Log validation error as warning and continue
                             logger.warning(
@@ -349,74 +350,71 @@ class FilmfrasorScraper(BaseScraper):
     def _find_screening_elements(self, soup: BeautifulSoup) -> list:
         """Find elements that contain screening information.
 
-        Filmfrasor.no uses a structure where each screening is in a div
-        that contains three child divs:
-        1. Date (e.g., "lør. 08.11")
-        2. Time range (e.g., "13:15 - 14:53")
-        3. Cinema (e.g., "Vika 3")
+        Filmfrasor.no uses divs with class "show-item" for each screening.
+        Each show-item contains:
+        - class "date": Date (e.g., "lør. 08.11")
+        - class "time": Time range (e.g., "13:15 - 14:53")
+        - class "location": Cinema (e.g., "Vika 3")
+        - class "special": Special notes (optional)
         """
-        screening_elements = []
+        # Look for all divs with class "show-item"
+        screening_elements = soup.find_all("div", attrs={"class": "show-item"})
+        
+        logger.info(
+            "Found screening elements with class 'show-item'",
+            count=len(screening_elements)
+        )
 
-        # Look for div elements that have exactly 3 direct div children
-        # and match the screening pattern
-        for container in soup.find_all("div", attrs={"class": "event-shows-container"}):
-            # Get direct div children only (not nested)
-            direct_divs = [child for child in container.children if child.name == "div"]
-
-            # We want exactly 3 direct children (date, time, cinema)
-            if len(direct_divs) == 3:
-                # Check if they match the screening pattern
-                div_texts = [d.get_text(strip=True) for d in direct_divs]
-
-                # Pattern check:
-                # 1st div: date like "lør. 08.11"
-                # 2nd div: time range like "13:15 - 14:53"
-                # 3rd div: cinema name like "Vika 3"
-
-                has_date = re.search(r"\d{1,2}\.\d{1,2}", div_texts[0])
-                has_time_range = re.search(
-                    r"\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}", div_texts[1]
-                )
-
-                if has_date and has_time_range:
-                    # This looks like a valid screening element
-                    screening_elements.append(container)
+        if not screening_elements:
+            # Log diagnostic information if no elements found
+            logger.warning(
+                "No elements found with class 'show-item'. "
+                "Website structure may have changed."
+            )
 
         return screening_elements
 
     def _parse_screening_element(self, element) -> Optional[tuple]:
         """Parse a screening element to extract time, cinema, etc.
 
-        The element contains three child divs:
-        1. Date (e.g., "lør. 08.11")
-        2. Time range (e.g., "13:15 - 14:53")
-        3. Cinema with auditorium (e.g., "Vika 3")
+        The element is a div with class "show-item" containing:
+        - class "date": Date (e.g., "lør. 08.11")
+        - class "time": Time range (e.g., "13:15 - 14:53")
+        - class "location": Cinema (e.g., "Vika 3")
+        - class "special": Special notes (optional)
 
         Returns:
             Tuple of (start_time, end_time, cinema, auditorium, special_notes) or None
         """
-        # Get the three direct child divs
-        direct_divs = [child for child in element.children if child.name == "div"]
-
-        if len(direct_divs) != 3:
+        # Extract date from element with class "date"
+        date_elem = element.find(class_="date")
+        if not date_elem:
+            logger.debug("No date element found in show-item")
             return None
-        print([x.get_text(strip=True) for x in direct_divs])
-
-        date_text = direct_divs[0].get_text(strip=True)
-        time_text = direct_divs[1].get_text(strip=True)
-        cinema_text = direct_divs[2].get_text(strip=True)
-
+        
+        date_text = date_elem.get_text(strip=True)
+        
         # Parse date: "lør. 08.11" -> day 08, month 11
         date_match = re.search(r"(\d{1,2})\.(\d{1,2})", date_text)
         if not date_match:
+            logger.debug("Could not parse date from text", date_text=date_text)
             return None
 
         day = int(date_match.group(1))
         month = int(date_match.group(2))
 
+        # Extract time from element with class "time"
+        time_elem = element.find(class_="time")
+        if not time_elem:
+            logger.debug("No time element found in show-item")
+            return None
+        
+        time_text = time_elem.get_text(strip=True)
+        
         # Parse time range: "13:15 - 14:53"
         time_match = re.search(r"(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})", time_text)
         if not time_match:
+            logger.debug("Could not parse time from text", time_text=time_text)
             return None
 
         start_hour = int(time_match.group(1))
@@ -430,16 +428,25 @@ class FilmfrasorScraper(BaseScraper):
         try:
             start_time = datetime(year, month, day, start_hour, start_minute)
             end_time = datetime(year, month, day, end_hour, end_minute)
-        except ValueError:
+        except ValueError as e:
+            logger.debug("Invalid date/time values", error=str(e), day=day, month=month)
             return None
 
+        # Extract cinema from element with class "location"
+        location_elem = element.find(class_="location")
+        if not location_elem:
+            logger.debug("No location element found in show-item")
+            return None
+        
+        cinema_text = location_elem.get_text(strip=True)
+        
         # Extract cinema name and auditorium
         # Pattern: "Vika 3" -> cinema="Vika", auditorium="3"
-        cinema, auditorium = self._split_cinema_and_auditorium(cinema_text.strip())
+        cinema, auditorium = self._split_cinema_and_auditorium(cinema_text)
 
-        # Extract special notes from the parent container
-        full_text = element.get_text(" ", strip=True)
-        special_notes = self._extract_special_notes(full_text)
+        # Extract special notes from element with class "special" (if present)
+        special_elem = element.find(class_="special")
+        special_notes = special_elem.get_text(strip=True) if special_elem else None
 
         return (start_time, end_time, cinema, auditorium, special_notes)
 

@@ -53,7 +53,7 @@ films:
   end_time: '2025-11-09T17:51:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: A Warm Christmas
   country: Unknown
@@ -61,7 +61,7 @@ films:
   end_time: '2025-11-13T19:06:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
   country: Unknown
@@ -77,7 +77,7 @@ films:
   end_time: '2025-11-12T19:45:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
   country: Unknown
@@ -109,7 +109,7 @@ films:
   end_time: '2025-11-14T09:45:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Frokostvisning
   preference_weight: 1.0
 - title: Bare et uhell (It Was Just an Accident)
   country: Unknown
@@ -125,7 +125,7 @@ films:
   end_time: '2025-11-11T19:42:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Blame
   country: Unknown
@@ -141,7 +141,7 @@ films:
   end_time: '2025-11-07T19:40:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Artist Talk
   preference_weight: 1.0
 - title: Blå spor (The Blue Trail)
   country: Unknown
@@ -197,7 +197,7 @@ films:
   end_time: '2025-11-09T22:58:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Bury Us in a Lone Desert
   country: Unknown
@@ -245,7 +245,7 @@ films:
   end_time: '2025-11-09T19:54:00'
   cinema: Vika
   auditorium: '3'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Cielo
   country: Unknown
@@ -253,7 +253,7 @@ films:
   end_time: '2025-11-12T20:09:00'
   cinema: Vika
   auditorium: '4'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Cielo
   country: Unknown
@@ -293,7 +293,7 @@ films:
   end_time: '2025-11-15T20:11:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Samtale & Fest
   preference_weight: 1.0
 - title: Corina
   country: Unknown
@@ -333,7 +333,7 @@ films:
   end_time: '2025-11-09T16:45:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: 'Daibosatsu Pass: The Final Chapter'
   country: Unknown
@@ -381,7 +381,7 @@ films:
   end_time: '2025-11-13T19:08:00'
   cinema: Vika
   auditorium: '1'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Everest Dark
   country: Unknown
@@ -397,7 +397,7 @@ films:
   end_time: '2025-11-15T20:13:00'
   cinema: Vega
   auditorium: Salongen
-  special_notes: null
+  special_notes: Film & Konsert
   preference_weight: 1.0
 - title: Frantz Fanon
   country: Unknown
@@ -405,7 +405,7 @@ films:
   end_time: '2025-11-07T19:00:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Frantz Fanon
   country: Unknown
@@ -429,7 +429,7 @@ films:
   end_time: '2025-11-11T19:47:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Artist Talk
   preference_weight: 1.0
 - title: Fremdeles her (I'm Still Here)
   country: Unknown
@@ -501,7 +501,7 @@ films:
   end_time: '2025-11-10T18:54:00'
   cinema: Vika
   auditorium: '1'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
   country: Unknown
@@ -509,7 +509,7 @@ films:
   end_time: '2025-11-11T22:39:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
   country: Unknown
@@ -525,7 +525,7 @@ films:
   end_time: '2025-11-08T21:38:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Happyend
   country: Unknown
@@ -637,7 +637,7 @@ films:
   end_time: '2025-11-07T22:10:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Hotspring Sharkattack
   country: Unknown
@@ -693,7 +693,7 @@ films:
   end_time: '2025-11-09T23:03:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Kill the Jockey
   country: Unknown
@@ -765,7 +765,7 @@ films:
   end_time: '2025-11-08T14:15:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Lille Amelie
   country: Unknown
@@ -773,7 +773,7 @@ films:
   end_time: '2025-11-09T14:15:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Livet på landet (Living the land)
   country: Unknown
@@ -813,7 +813,7 @@ films:
   end_time: '2025-11-07T19:42:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Lust in the Rain
   country: Unknown
@@ -933,7 +933,7 @@ films:
   end_time: '2025-11-08T16:24:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Miyazaki, Spirit of Nature
   country: Unknown
@@ -1021,7 +1021,7 @@ films:
   end_time: '2025-11-14T20:04:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Night Stage
   country: Unknown
@@ -1045,7 +1045,7 @@ films:
   end_time: '2025-11-09T22:33:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Noise
   country: Unknown
@@ -1069,7 +1069,7 @@ films:
   end_time: '2025-11-08T20:09:00'
   cinema: Vika
   auditorium: '2'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: North South Man Woman
   country: Unknown
@@ -1085,7 +1085,7 @@ films:
   end_time: '2025-11-16T17:24:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Nostalgia for the Light
   country: Unknown
@@ -1141,7 +1141,7 @@ films:
   end_time: '2025-11-10T19:49:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: 'Oceania: Journey to the Center'
   country: Unknown
@@ -1157,7 +1157,7 @@ films:
   end_time: '2025-11-09T17:44:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: On Becoming a Guinea Fowl
   country: Unknown
@@ -1197,7 +1197,7 @@ films:
   end_time: '2025-11-14T18:52:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Outcry
   country: Unknown
@@ -1205,7 +1205,7 @@ films:
   end_time: '2025-11-12T19:04:00'
   cinema: Vika
   auditorium: '1'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Outcry
   country: Unknown
@@ -1213,7 +1213,7 @@ films:
   end_time: '2025-11-13T20:19:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Outcry
   country: Unknown
@@ -1229,7 +1229,7 @@ films:
   end_time: '2025-11-07T19:58:00'
   cinema: Vika
   auditorium: '1'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Palestine 36
   country: Unknown
@@ -1245,7 +1245,7 @@ films:
   end_time: '2025-11-09T17:16:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Phoenix Fury
   country: Unknown
@@ -1253,7 +1253,7 @@ films:
   end_time: '2025-11-14T22:40:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Prinsesse Mononoke
   country: Unknown
@@ -1269,7 +1269,7 @@ films:
   end_time: '2025-11-09T15:02:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Prinsesse i røde sko
   country: Unknown
@@ -1309,7 +1309,7 @@ films:
   end_time: '2025-11-07T22:30:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Return to Seoul
   country: Unknown
@@ -1317,7 +1317,7 @@ films:
   end_time: '2025-11-09T14:56:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Ringu
   country: Unknown
@@ -1325,7 +1325,7 @@ films:
   end_time: '2025-11-08T18:36:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Rita
   country: Unknown
@@ -1357,7 +1357,7 @@ films:
   end_time: '2025-11-07T18:52:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Scarlet
   country: Unknown
@@ -1429,7 +1429,7 @@ films:
   end_time: '2025-11-09T21:26:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: SØRprise
   country: Unknown
@@ -1438,14 +1438,14 @@ films:
   cinema: Vega
   auditorium: '1'
   special_notes: null
-  preference_weight: 1.0
+  preference_weight: 100.0
 - title: The Conspiracy of the Yagyu Clan
   country: Unknown
   start_time: '2025-11-08T20:30:00'
   end_time: '2025-11-08T22:40:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: The Dating Game
   country: Unknown
@@ -1477,7 +1477,7 @@ films:
   end_time: '2025-11-09T19:00:00'
   cinema: Cinemateket
   auditorium: Lillebil
-  special_notes: null
+  special_notes: Japansk Helg
   preference_weight: 1.0
 - title: The Message
   country: Unknown
@@ -1573,7 +1573,7 @@ films:
   end_time: '2025-11-10T19:47:00'
   cinema: Cinemateket
   auditorium: Tancred
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: The Shadow Scholars
   country: Unknown
@@ -1581,7 +1581,7 @@ films:
   end_time: '2025-11-11T19:57:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: The Things You Kill
   country: Unknown
@@ -1621,7 +1621,7 @@ films:
   end_time: '2025-11-14T22:42:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: The Weekend
   country: Unknown
@@ -1637,7 +1637,7 @@ films:
   end_time: '2025-11-11T18:49:00'
   cinema: Vika
   auditorium: '1'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: This City is a Battlefield
   country: Unknown
@@ -1645,7 +1645,7 @@ films:
   end_time: '2025-11-12T19:49:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Møt regissøren
   preference_weight: 1.0
 - title: This City is a Battlefield
   country: Unknown
@@ -1661,7 +1661,7 @@ films:
   end_time: '2025-11-09T20:28:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Under the Flags, the Sun
   country: Unknown
@@ -1693,7 +1693,7 @@ films:
   end_time: '2025-11-09T17:33:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: What Does That Nature Say To You
   country: Unknown
@@ -1741,7 +1741,7 @@ films:
   end_time: '2025-11-14T17:45:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
+  special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Winter in Sokcho
   country: Unknown
@@ -1749,7 +1749,7 @@ films:
   end_time: '2025-11-09T14:59:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Winter in Sokcho
   country: Unknown
@@ -1773,7 +1773,7 @@ films:
   end_time: '2025-11-08T19:52:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Yanuni
   country: Unknown
@@ -1821,5 +1821,5 @@ films:
   end_time: '2025-11-09T13:00:00'
   cinema: Vega
   auditorium: '1'
-  special_notes: null
+  special_notes: Koreansk kulturdag
   preference_weight: 1.0
