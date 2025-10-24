@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .config import ConfigLoader
-from .models import SeenFilm
+from .models import SeenFilm, ScheduledFilm
 from .solver import FestivalScheduleSolver
 from .scrapers import FilmfrasorScraper
 from ._logging import configure_logging, get_logger
@@ -36,6 +36,24 @@ def get_default_paths():
     """Get default paths for config and data directories."""
     cwd = Path.cwd()
     return cwd / "config", cwd / "data"
+
+
+def _group_films_by_date(scheduled_films: list[ScheduledFilm]) -> dict[date, list[ScheduledFilm]]:
+    """Group scheduled films by date.
+    
+    Args:
+        scheduled_films: List of scheduled films
+        
+    Returns:
+        Dictionary mapping dates to lists of scheduled films
+    """
+    by_date: dict[date, list[ScheduledFilm]] = {}
+    for sf in scheduled_films:
+        film_date = sf.film.date
+        if film_date not in by_date:
+            by_date[film_date] = []
+        by_date[film_date].append(sf)
+    return by_date
 
 
 @app.command()
@@ -365,12 +383,7 @@ def display_schedule(scheduled_films: list):
         return
 
     # Group by date
-    by_date = {}
-    for sf in scheduled_films:
-        film_date = sf.film.date
-        if film_date not in by_date:
-            by_date[film_date] = []
-        by_date[film_date].append(sf)
+    by_date = _group_films_by_date(scheduled_films)
 
     # Display each day
     for film_date in sorted(by_date.keys()):
@@ -404,12 +417,7 @@ def save_schedule_to_file(scheduled_films: list, filepath: Path):
         f.write("# Festival Schedule\n\n")
 
         # Group by date
-        by_date = {}
-        for sf in scheduled_films:
-            film_date = sf.film.date
-            if film_date not in by_date:
-                by_date[film_date] = []
-            by_date[film_date].append(sf)
+        by_date = _group_films_by_date(scheduled_films)
 
         # Write each day
         for film_date in sorted(by_date.keys()):
