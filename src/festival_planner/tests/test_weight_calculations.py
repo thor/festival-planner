@@ -22,9 +22,9 @@ def test_base_weight():
         preference_weight=0.0,
     )
 
-    # Base weight should be 1.0 (base) + 0.0 (preference) = 1.0
+    # Base weight should be 0.0 (base) + 0.0 (preference) = 0.0
     weight = solver._calculate_film_weight(film)
-    assert weight == 1.0
+    assert weight == 0.0
 
 
 def test_preference_weight():
@@ -42,9 +42,9 @@ def test_preference_weight():
         preference_weight=0.5,
     )
 
-    # Weight should be 1.0 (base) + 0.5 (preference) = 1.5
+    # Weight should be 0.0 (base) + 0.5 (preference) = 0.5
     weight = solver._calculate_film_weight(film)
-    assert weight == 1.5
+    assert weight == 0.5
 
 
 def test_year_weight_adjustment():
@@ -67,7 +67,7 @@ def test_year_weight_adjustment():
     )
 
     weight = solver._calculate_film_weight(film_1960)
-    assert weight == 1.3  # 1.0 (base) + 0.0 (preference) + 0.3 (year)
+    assert weight == 0.3  # 0.0 (base) + 0.0 (preference) + 0.3 (year)
 
     # Film from 2025 (not in year_weights) should not get boost
     film_2025 = Film(
@@ -81,7 +81,7 @@ def test_year_weight_adjustment():
     )
 
     weight = solver._calculate_film_weight(film_2025)
-    assert weight == 1.0  # 1.0 (base) + 0.0 (preference)
+    assert weight == 0.0  # 0.0 (base) + 0.0 (preference)
 
 
 def test_special_notes_weight():
@@ -105,7 +105,7 @@ def test_special_notes_weight():
     )
 
     weight = solver._calculate_film_weight(film_special)
-    assert weight == 1.5  # 1.0 (base) + 0.0 (preference) + 0.5 (special)
+    assert weight == 0.5  # 0.0 (base) + 0.0 (preference) + 0.5 (special)
 
     # Film without special notes should not get boost
     film_regular = Film(
@@ -120,7 +120,7 @@ def test_special_notes_weight():
     )
 
     weight = solver._calculate_film_weight(film_regular)
-    assert weight == 1.0  # 1.0 (base) + 0.0 (preference)
+    assert weight == 0.0  # 0.0 (base) + 0.0 (preference)
 
 
 def test_combined_weights():
@@ -145,8 +145,8 @@ def test_combined_weights():
     )
 
     weight = solver._calculate_film_weight(film)
-    # 1.0 (base) + 0.2 (preference) + 0.3 (year) + 0.5 (special) = 2.0
-    assert weight == 2.0
+    # 0.0 (base) + 0.2 (preference) + 0.3 (year) + 0.5 (special) = 1.0
+    assert weight == 1.0
 
 
 def test_negative_weights():
@@ -170,8 +170,8 @@ def test_negative_weights():
     )
 
     weight = solver._calculate_film_weight(film)
-    # 1.0 (base) + 0.0 (preference) - 0.2 (year) - 0.1 (special) = 0.7
-    assert weight == pytest.approx(0.7)
+    # 0.0 (base) + 0.0 (preference) - 0.2 (year) - 0.1 (special) = -0.3
+    assert weight == pytest.approx(-0.3)
 
 
 def test_film_without_year():
@@ -194,7 +194,7 @@ def test_film_without_year():
 
     weight = solver._calculate_film_weight(film)
     # Should only have base weight since year is None
-    assert weight == 1.0
+    assert weight == 0.0
 
 
 if __name__ == "__main__":

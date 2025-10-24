@@ -76,13 +76,13 @@ class ConfigLoader:
         """Load seen/ignored films from YAML file.
 
         Args:
-            filepath: Optional custom filepath, defaults to data/seen_films.yaml
+            filepath: Optional custom filepath, defaults to config/seen_films.yaml
 
         Returns:
             SeenFilmList containing all seen films
         """
         return self._load_yaml_model(
-            SeenFilmList, self.data_dir / "seen_films.yaml", filepath
+            SeenFilmList, self.config_dir / "seen_films.yaml", filepath
         )
 
     def load_cinema_config(self, filepath: Optional[Path] = None) -> CinemaConfig:
@@ -139,10 +139,10 @@ class ConfigLoader:
 
         Args:
             seen_list: SeenFilmList to save
-            filepath: Optional custom filepath, defaults to data/seen_films.yaml
+            filepath: Optional custom filepath, defaults to config/seen_films.yaml
         """
         if filepath is None:
-            filepath = self.data_dir / "seen_films.yaml"
+            filepath = self.config_dir / "seen_films.yaml"
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
