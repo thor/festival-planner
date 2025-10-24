@@ -127,6 +127,14 @@ class SeenFilm(BaseModel):
     date: Optional[datetime.date] = None
 
 
+class FilmWeight(BaseModel):
+    """Represents a custom weight override for a specific film screening."""
+
+    title: str = Field(..., description="Film title")
+    start_time: datetime.datetime = Field(..., description="Screening start time")
+    weight: float = Field(..., description="Custom weight override")
+
+
 class ScheduleConfig(BaseModel):
     """Configuration for the schedule optimizer."""
 
@@ -158,6 +166,14 @@ class SeenFilmList(BaseModel):
 
     seen: list[SeenFilm] = Field(
         default_factory=list, description="List of seen or ignored films"
+    )
+
+
+class FilmWeightList(BaseModel):
+    """Container for a list of film weight overrides."""
+
+    weights: list[FilmWeight] = Field(
+        default_factory=list, description="List of custom film weight overrides"
     )
 
 

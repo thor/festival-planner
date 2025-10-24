@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .config import ConfigLoader
-from .models import SeenFilm, ScheduledFilm, Film
+from .models import SeenFilm, ScheduledFilm, Film, FilmWeight
 from .solver import FestivalScheduleSolver
 from .scrapers import FilmfrasorScraper
 from ._logging import configure_logging, get_logger
@@ -160,6 +160,14 @@ def solve(
         f"[green]{len(relevant_films)} film screenings available to schedule[/green]"
     )
 
+    # Load and apply weight overrides
+    weight_list = loader.load_film_weights()
+    if weight_list.weights:
+        relevant_films = loader.apply_weight_overrides(relevant_films, weight_list.weights)
+        console.print(
+            f"[blue]Applied {len(weight_list.weights)} custom weight override(s)[/blue]"
+        )
+
     # Load cinema configuration
     cinema_config = loader.load_cinema_config()
     travel_matrix = loader.build_travel_time_matrix(cinema_config)
@@ -218,6 +226,95 @@ def add_seen(
         console.print(f"[green]Marked '{title}' on {film_date} as seen[/green]")
     else:
         console.print(f"[green]Marked all screenings of '{title}' as seen[/green]")
+
+
+@app.command()
+def set_weight(
+    search: Optional[str] = typer.Option(
+        None,
+        "--search",
+        "-s",
+        help="Search term to filter films by title",
+    ),
+):
+    """Set a custom weight for a specific film screening."""
+    config_dir, data_dir = get_default_paths()
+    loader = ConfigLoader(config_dir, data_dir)
+
+    # Load all films
+    film_list = loader.load_films()
+    
+    # Filter by search term if provided
+    films = film_list.films
+    if search:
+        search_lower = search.lower()
+        films = [f for f in films if search_lower in f.title.lower()]
+        
+    if not films:
+        console.print("[yellow]No films found matching your search.[/yellow]")
+        return
+    
+    # Sort by date and time
+    films.sort(key=lambda f: (f.date, f.start_time))
+    
+    # Display films with numbers
+    console.print("\n[bold]Available film screenings:[/bold]")
+    for i, film in enumerate(films, 1):
+        date_str = film.start_time.strftime("%a %d/%m")
+        time_str = film.start_time.strftime("%H:%M")
+        cinema_str = film.cinema
+        if film.auditorium:
+            cinema_str += f" {film.auditorium}"
+        
+        console.print(
+            f"{i:3d}. {film.title[:50]:<50} | {date_str} {time_str} | {cinema_str[:20]:<20} | Current: {film.preference_weight:+.1f}"
+        )
+    
+    # Ask user to select
+    console.print()
+    selection = typer.prompt("Enter the number of the screening", type=int)
+    
+    if selection < 1 or selection > len(films):
+        console.print("[red]Invalid selection.[/red]")
+        raise typer.Exit(1)
+    
+    selected_film = films[selection - 1]
+    
+    # Ask for weight
+    weight = typer.prompt(
+        f"Enter custom weight for '{selected_film.title}' (current: {selected_film.preference_weight:+.1f})",
+        type=float,
+    )
+    
+    # Load existing weights
+    weight_list = loader.load_film_weights()
+    
+    # Check if this screening already has an override
+    existing_idx = None
+    for i, w in enumerate(weight_list.weights):
+        if w.title == selected_film.title and w.start_time == selected_film.start_time:
+            existing_idx = i
+            break
+    
+    # Add or update weight
+    film_weight = FilmWeight(
+        title=selected_film.title,
+        start_time=selected_film.start_time,
+        weight=weight,
+    )
+    
+    if existing_idx is not None:
+        weight_list.weights[existing_idx] = film_weight
+        console.print(f"[green]Updated weight for '{selected_film.title}' to {weight:+.1f}[/green]")
+    else:
+        weight_list.weights.append(film_weight)
+        console.print(f"[green]Set weight for '{selected_film.title}' to {weight:+.1f}[/green]")
+    
+    # Save
+    loader.save_film_weights(weight_list)
+    
+    date_str = selected_film.start_time.strftime("%a %d/%m at %H:%M")
+    console.print(f"[dim]({date_str} at {selected_film.cinema})[/dim]")
 
 
 @app.command()

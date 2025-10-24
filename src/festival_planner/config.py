@@ -8,10 +8,12 @@ from pydantic import BaseModel
 from .models import (
     FilmList,
     SeenFilmList,
+    FilmWeightList,
     CinemaConfig,
     ScheduleConfig,
     Film,
     SeenFilm,
+    FilmWeight,
 )
 
 T = TypeVar('T', bound=BaseModel)
@@ -111,6 +113,19 @@ class ConfigLoader:
             ScheduleConfig, self.config_dir / "preferences.yaml", filepath
         )
 
+    def load_film_weights(self, filepath: Optional[Path] = None) -> FilmWeightList:
+        """Load film weight overrides from YAML file.
+
+        Args:
+            filepath: Optional custom filepath, defaults to config/film_weights.yaml
+
+        Returns:
+            FilmWeightList containing all custom weight overrides
+        """
+        return self._load_yaml_model(
+            FilmWeightList, self.config_dir / "film_weights.yaml", filepath
+        )
+
     def save_films(self, film_list: FilmList, filepath: Optional[Path] = None) -> None:
         """Save films to YAML file.
 
@@ -149,6 +164,29 @@ class ConfigLoader:
         with open(filepath, "w") as f:
             yaml.dump(
                 seen_list.model_dump(mode="json"),
+                f,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
+            )
+
+    def save_film_weights(
+        self, weight_list: FilmWeightList, filepath: Optional[Path] = None
+    ) -> None:
+        """Save film weight overrides to YAML file.
+
+        Args:
+            weight_list: FilmWeightList to save
+            filepath: Optional custom filepath, defaults to config/film_weights.yaml
+        """
+        if filepath is None:
+            filepath = self.config_dir / "film_weights.yaml"
+
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(filepath, "w") as f:
+            yaml.dump(
+                weight_list.model_dump(mode="json"),
                 f,
                 default_flow_style=False,
                 sort_keys=False,
@@ -229,3 +267,35 @@ class ConfigLoader:
             unseen_films.append(film)
 
         return unseen_films
+
+    def apply_weight_overrides(
+        self, films: list[Film], weight_overrides: list[FilmWeight]
+    ) -> list[Film]:
+        """Apply custom weight overrides to films.
+
+        Args:
+            films: List of films to modify
+            weight_overrides: List of custom weight overrides
+
+        Returns:
+            List of films with overridden weights applied
+        """
+        # Build lookup map: (title, start_time) -> weight
+        override_map = {
+            (w.title, w.start_time): w.weight for w in weight_overrides
+        }
+
+        # Apply overrides
+        modified_films = []
+        for film in films:
+            key = (film.title, film.start_time)
+            if key in override_map:
+                # Create a copy with the overridden weight
+                film_dict = film.model_dump()
+                film_dict['preference_weight'] = override_map[key]
+                modified_film = Film(**film_dict)
+                modified_films.append(modified_film)
+            else:
+                modified_films.append(film)
+
+        return modified_films
