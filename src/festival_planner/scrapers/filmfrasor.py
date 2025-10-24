@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from hishel import Controller, SQLiteStorage, CacheClient
 from pydantic import ValidationError
 
-from ..models import Film, FilmList, build_normalization_map
+from ..models import Cinema, Film, FilmList, build_normalization_map
 from ..config import ConfigLoader
 from .base import BaseScraper
 from .._logging import get_logger
@@ -30,6 +30,7 @@ class FilmfrasorScraper(BaseScraper):
         year: Optional[int] = None,
         force_refresh: bool = False,
         config_dir: Optional[Path] = None,
+        language: Optional[str] = "no",
     ):
         """Initialize the Filmfrasor scraper.
 
@@ -43,7 +44,8 @@ class FilmfrasorScraper(BaseScraper):
         self.year = year or datetime.now().year
         self.force_refresh = force_refresh
         self.config_dir = config_dir
-        self.known_cinemas = set()  # Store known cinema names for parsing
+        self.language = language
+        self.known_cinemas: set[Cinema] = set()  # Store known cinema names for parsing
 
         # Set up HTTP cache directory
         if cache_dir:
@@ -96,15 +98,17 @@ class FilmfrasorScraper(BaseScraper):
 
             # Build and set normalization map from cinema aliases
             if cinema_config.cinema_aliases:
-                normalization_map = build_normalization_map(cinema_config.cinema_aliases)
+                normalization_map = build_normalization_map(
+                    cinema_config.cinema_aliases
+                )
                 Film.set_normalization_map(normalization_map)
-                
+
                 # Store known cinema names (canonical + aliases) for parsing
                 for canonical, aliases in cinema_config.cinema_aliases.items():
                     self.known_cinemas.add(canonical.lower())
                     for alias in aliases:
                         self.known_cinemas.add(alias.lower())
-                
+
                 logger.info(
                     "Cinema normalization enabled",
                     canonical_names=sorted(cinema_config.cinema_aliases.keys()),
@@ -119,7 +123,9 @@ class FilmfrasorScraper(BaseScraper):
             if valid_cinemas:
                 # Set valid cinemas on Film model for validation
                 Film.set_valid_cinemas(valid_cinemas)
-                logger.info("Cinema validation enabled", valid_cinemas=sorted(valid_cinemas))
+                logger.info(
+                    "Cinema validation enabled", valid_cinemas=sorted(valid_cinemas)
+                )
             else:
                 logger.warning("No cinemas found in config - validation disabled")
 
@@ -137,11 +143,11 @@ class FilmfrasorScraper(BaseScraper):
         Returns:
             FilmList containing all scraped films
         """
-        films = []
+        films: list[Film] = []
 
         try:
             # Fetch the programme page
-            programme_url = f"{self.BASE_URL}/no/program"
+            programme_url = f"{self.BASE_URL}/{self.language}/program"
 
             logger.info("Fetching programme", url=programme_url)
             if self.force_refresh:
@@ -199,7 +205,7 @@ class FilmfrasorScraper(BaseScraper):
             logger.error("Error while scraping", error=str(e), exc_info=True)
 
         logger.info("Scraping complete", total_screenings=len(films))
-        return FilmList(films=films)
+        return FilmList(films=sorted(films, key=lambda x: x.title))
 
     def _extract_film_links(self, soup: BeautifulSoup) -> list[str]:
         """Extract all film page links from the programme page.
@@ -210,7 +216,7 @@ class FilmfrasorScraper(BaseScraper):
         Returns:
             List of absolute URLs to film pages
         """
-        film_links = []
+        film_links = set()
 
         # Look for links that point to film pages
         # Filmfrasor.no film pages typically have URLs like /no/film/film-title
@@ -218,7 +224,7 @@ class FilmfrasorScraper(BaseScraper):
             href = link["href"]
 
             # Check if this looks like a film page link
-            if "/no/film/" in href or "/en/film/" in href:
+            if f"/{self.language}/film/" in href:
                 # Make it an absolute URL if it's relative
                 if href.startswith("/"):
                     full_url = f"{self.BASE_URL}{href}"
@@ -226,10 +232,9 @@ class FilmfrasorScraper(BaseScraper):
                     full_url = href
 
                 # Avoid duplicates
-                if full_url not in film_links:
-                    film_links.append(full_url)
+                film_links.add(full_url)
 
-        return film_links
+        return list(film_links)
 
     def _parse_film_page(self, soup: BeautifulSoup, url: str) -> list[Film]:
         """Parse a single film page to extract screening information.
@@ -247,7 +252,7 @@ class FilmfrasorScraper(BaseScraper):
             # Extract film title
             title = self._extract_title(soup)
             if not title:
-                print(f"  Could not find title for {url}")
+                logger.warning("Could not find title", url=url)
                 return []
 
             # Extract country
@@ -354,7 +359,7 @@ class FilmfrasorScraper(BaseScraper):
 
         # Look for div elements that have exactly 3 direct div children
         # and match the screening pattern
-        for container in soup.find_all("div"):
+        for container in soup.find_all("div", attrs={"class": "event-shows-container"}):
             # Get direct div children only (not nested)
             direct_divs = [child for child in container.children if child.name == "div"]
 
@@ -438,9 +443,11 @@ class FilmfrasorScraper(BaseScraper):
 
         return (start_time, end_time, cinema, auditorium, special_notes)
 
-    def _split_cinema_and_auditorium(self, cinema_text: str) -> tuple[str, Optional[str]]:
+    def _split_cinema_and_auditorium(
+        self, cinema_text: str
+    ) -> tuple[str, Optional[str]]:
         """Split cinema text into cinema name and auditorium.
-        
+
         Uses config-based cinema names to intelligently parse the text.
         Cinema normalization is handled by the Film model's validator.
 
@@ -459,30 +466,30 @@ class FilmfrasorScraper(BaseScraper):
         cinema_text = cinema_text.strip()
         if not cinema_text:
             return cinema_text, None
-        
+
         cinema_text_lower = cinema_text.lower()
-        
+
         # Try to match known cinema names (longest first to avoid partial matches)
         if self.known_cinemas:
             # Sort by length descending to match longest names first
             sorted_cinemas = sorted(self.known_cinemas, key=len, reverse=True)
-            
+
             for known_cinema in sorted_cinemas:
                 if cinema_text_lower.startswith(known_cinema):
                     # Extract cinema name (preserve original case)
-                    cinema_name = cinema_text[:len(known_cinema)]
+                    cinema_name = cinema_text[: len(known_cinema)]
                     # Extract rest as auditorium
-                    rest = cinema_text[len(known_cinema):].strip()
-                    
+                    rest = cinema_text[len(known_cinema) :].strip()
+
                     return cinema_name, rest if rest else None
-        
+
         # Fallback: Generic pattern matching for "Cinema Number"
         match = re.search(r"^(.+?)\s+(\d+)$", cinema_text)
         if match:
             cinema = match.group(1).strip()
             auditorium = match.group(2)
             return cinema, auditorium
-        
+
         # No auditorium found
         return cinema_text, None
 
