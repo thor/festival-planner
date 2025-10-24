@@ -1,0 +1,7 @@
+[tools]
+python = "3.13"
+uv = "latest"
+
+[tasks.festival-planner]
+run = "uv run festival-planner"
+description = "Run the festival planner"

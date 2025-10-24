@@ -1,0 +1,32 @@
+# Cinema configuration with travel times
+# Travel times are in minutes between venues
+# Estimates based on cycling or taking the bus in Oslo
+
+travel_times:
+  # Cinemateket (Dronningens gate) <-> Vika Kino (Vika)
+  - from: "Cinemateket"
+    to: "Vika Kino"
+    minutes: 10
+  
+  - from: "Vika Kino"
+    to: "Cinemateket"
+    minutes: 10
+  
+  # Cinemateket (Dronningens gate) <-> Vega (Torggata)
+  - from: "Cinemateket"
+    to: "Vega"
+    minutes: 20
+  
+  - from: "Vega"
+    to: "Cinemateket"
+    minutes: 20
+  
+  # Vika Kino (Vika) <-> Vega (Torggata)
+  - from: "Vika Kino"
+    to: "Vega"
+    minutes: 25
+  
+  - from: "Vega"
+    to: "Vika Kino"
+    minutes: 25
+

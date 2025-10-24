@@ -1,0 +1,11 @@
+# Schedule optimization preferences
+
+# Default buffer time before each film (in minutes)
+# This accounts for buying tickets, finding seats, etc.
+buffer_time_minutes: 15
+
+# Optional: Filter films by date range
+# Uncomment and set dates to limit the schedule to specific dates
+# start_date: "2024-09-15"
+# end_date: "2024-09-22"
+

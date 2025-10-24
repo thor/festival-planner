@@ -1,0 +1,31 @@
+[project]
+name = "festival-planner"
+version = "0.1.0"
+description = "A modular film festival scheduling optimizer"
+requires-python = ">=3.13"
+dependencies = [
+    "ortools>=9.8.3296",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+    "httpx>=0.27.0",
+    "beautifulsoup4>=4.12.0",
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+festival-planner = "festival_planner.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/festival_planner"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "ruff>=0.3.0",
+]
+
