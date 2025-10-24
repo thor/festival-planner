@@ -1,8 +1,9 @@
 """Configuration management for loading and validating YAML files."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TypeVar, Type
 import yaml
+from pydantic import BaseModel
 
 from .models import (
     FilmList,
@@ -12,6 +13,8 @@ from .models import (
     Film,
     SeenFilm,
 )
+
+T = TypeVar('T', bound=BaseModel)
 
 
 class ConfigLoader:
@@ -27,6 +30,35 @@ class ConfigLoader:
         self.config_dir = config_dir
         self.data_dir = data_dir
 
+    def _load_yaml_model(
+        self,
+        model_class: Type[T],
+        default_path: Path,
+        filepath: Optional[Path] = None,
+    ) -> T:
+        """Generic YAML model loader with validation.
+
+        Args:
+            model_class: Pydantic model class to instantiate
+            default_path: Default file path if filepath is None
+            filepath: Optional custom filepath
+
+        Returns:
+            Instance of model_class, empty if file doesn't exist or is empty
+        """
+        target_path = filepath if filepath is not None else default_path
+
+        if not target_path.exists():
+            return model_class()
+
+        with open(target_path, "r") as f:
+            data = yaml.safe_load(f)
+
+        if data is None:
+            return model_class()
+
+        return model_class(**data)
+
     def load_films(self, filepath: Optional[Path] = None) -> FilmList:
         """Load films from YAML file.
 
@@ -36,19 +68,9 @@ class ConfigLoader:
         Returns:
             FilmList containing all films
         """
-        if filepath is None:
-            filepath = self.data_dir / "films.yaml"
-
-        if not filepath.exists():
-            return FilmList(films=[])
-
-        with open(filepath, "r") as f:
-            data = yaml.safe_load(f)
-
-        if data is None:
-            return FilmList(films=[])
-
-        return FilmList(**data)
+        return self._load_yaml_model(
+            FilmList, self.data_dir / "films.yaml", filepath
+        )
 
     def load_seen_films(self, filepath: Optional[Path] = None) -> SeenFilmList:
         """Load seen/ignored films from YAML file.
@@ -59,19 +81,9 @@ class ConfigLoader:
         Returns:
             SeenFilmList containing all seen films
         """
-        if filepath is None:
-            filepath = self.data_dir / "seen_films.yaml"
-
-        if not filepath.exists():
-            return SeenFilmList(seen=[])
-
-        with open(filepath, "r") as f:
-            data = yaml.safe_load(f)
-
-        if data is None:
-            return SeenFilmList(seen=[])
-
-        return SeenFilmList(**data)
+        return self._load_yaml_model(
+            SeenFilmList, self.data_dir / "seen_films.yaml", filepath
+        )
 
     def load_cinema_config(self, filepath: Optional[Path] = None) -> CinemaConfig:
         """Load cinema configuration from YAML file.
@@ -82,19 +94,9 @@ class ConfigLoader:
         Returns:
             CinemaConfig containing travel times
         """
-        if filepath is None:
-            filepath = self.config_dir / "cinemas.yaml"
-
-        if not filepath.exists():
-            return CinemaConfig(travel_times=[])
-
-        with open(filepath, "r") as f:
-            data = yaml.safe_load(f)
-
-        if data is None:
-            return CinemaConfig(travel_times=[])
-
-        return CinemaConfig(**data)
+        return self._load_yaml_model(
+            CinemaConfig, self.config_dir / "cinemas.yaml", filepath
+        )
 
     def load_schedule_config(self, filepath: Optional[Path] = None) -> ScheduleConfig:
         """Load schedule configuration from YAML file.
@@ -105,19 +107,9 @@ class ConfigLoader:
         Returns:
             ScheduleConfig with optimization preferences
         """
-        if filepath is None:
-            filepath = self.config_dir / "preferences.yaml"
-
-        if not filepath.exists():
-            return ScheduleConfig()
-
-        with open(filepath, "r") as f:
-            data = yaml.safe_load(f)
-
-        if data is None:
-            return ScheduleConfig()
-
-        return ScheduleConfig(**data)
+        return self._load_yaml_model(
+            ScheduleConfig, self.config_dir / "preferences.yaml", filepath
+        )
 
     def save_films(self, film_list: FilmList, filepath: Optional[Path] = None) -> None:
         """Save films to YAML file.
