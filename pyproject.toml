@@ -13,6 +13,7 @@ dependencies = [
     "rich>=13.0.0",
     "hishel>=0.1.5",
     "structlog>=25.4.0",
+    "iterfzf>=1.0.0",
 ]
 
 [project.scripts]

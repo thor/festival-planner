@@ -6,6 +6,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
+from iterfzf import iterfzf
 
 from .config import ConfigLoader
 from .models import SeenFilm, ScheduledFilm, Film, FilmWeight
@@ -234,10 +235,10 @@ def set_weight(
         None,
         "--search",
         "-s",
-        help="Search term to filter films by title",
+        help="Initial search term to filter films (you can further filter in fzf)",
     ),
 ):
-    """Set a custom weight for a specific film screening."""
+    """Set a custom weight for a specific film screening using interactive fuzzy finder."""
     config_dir, data_dir = get_default_paths()
     loader = ConfigLoader(config_dir, data_dir)
 
@@ -257,32 +258,42 @@ def set_weight(
     # Sort by date and time
     films.sort(key=lambda f: (f.date, f.start_time))
     
-    # Display films with numbers
-    console.print("\n[bold]Available film screenings:[/bold]")
-    for i, film in enumerate(films, 1):
+    # Create formatted strings and mapping
+    film_strings = []
+    film_map = {}
+    
+    for film in films:
         date_str = film.start_time.strftime("%a %d/%m")
         time_str = film.start_time.strftime("%H:%M")
         cinema_str = film.cinema
         if film.auditorium:
             cinema_str += f" {film.auditorium}"
         
-        console.print(
-            f"{i:3d}. {film.title[:50]:<50} | {date_str} {time_str} | {cinema_str[:20]:<20} | Current: {film.preference_weight:+.1f}"
+        # Create a formatted string for fzf display
+        formatted = f"{film.title:<60} │ {date_str} {time_str} │ {cinema_str:<25} │ Weight: {film.preference_weight:+.1f}"
+        film_strings.append(formatted)
+        film_map[formatted] = film
+    
+    # Use iterfzf for interactive selection
+    try:
+        selected = iterfzf(
+            film_strings,
+            prompt="Select a film screening > ",
+            query=search or "",
         )
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Selection cancelled.[/yellow]")
+        return
     
-    # Ask user to select
-    console.print()
-    selection = typer.prompt("Enter the number of the screening", type=int)
+    if not selected:
+        console.print("[yellow]No film selected.[/yellow]")
+        return
     
-    if selection < 1 or selection > len(films):
-        console.print("[red]Invalid selection.[/red]")
-        raise typer.Exit(1)
-    
-    selected_film = films[selection - 1]
+    selected_film = film_map[selected]
     
     # Ask for weight
     weight = typer.prompt(
-        f"Enter custom weight for '{selected_film.title}' (current: {selected_film.preference_weight:+.1f})",
+        f"\nEnter custom weight for '{selected_film.title}' (current: {selected_film.preference_weight:+.1f})",
         type=float,
     )
     
