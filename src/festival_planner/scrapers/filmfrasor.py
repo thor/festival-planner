@@ -3,14 +3,16 @@
 import re
 import sqlite3
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import httpx
 from bs4 import BeautifulSoup
-from hishel import Controller, SQLiteStorage, CacheTransport, CacheClient
+from hishel import Controller, SQLiteStorage, CacheClient
+from pydantic import ValidationError
 
-from ..models import Film, FilmList
+from ..models import Film, FilmList, build_normalization_map
+from ..config import ConfigLoader
 from .base import BaseScraper
 from .._logging import get_logger
 
@@ -27,6 +29,7 @@ class FilmfrasorScraper(BaseScraper):
         cache_dir: Optional[Path] = None,
         year: Optional[int] = None,
         force_refresh: bool = False,
+        config_dir: Optional[Path] = None,
     ):
         """Initialize the Filmfrasor scraper.
 
@@ -34,10 +37,12 @@ class FilmfrasorScraper(BaseScraper):
             cache_dir: Directory to cache scraped data and HTTP responses
             year: Festival year (defaults to current year)
             force_refresh: If True, bypass HTTP cache and fetch fresh data
+            config_dir: Directory containing config files (for cinema validation)
         """
         super().__init__(cache_dir)
         self.year = year or datetime.now().year
         self.force_refresh = force_refresh
+        self.config_dir = config_dir
 
         # Set up HTTP cache directory
         if cache_dir:
@@ -46,6 +51,12 @@ class FilmfrasorScraper(BaseScraper):
             self.http_cache_dir = Path(".cache") / "filmfrasor_http"
 
         self.http_cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Load valid cinemas if config_dir provided
+        if config_dir:
+            self._setup_cinema_validation(config_dir)
+        else:
+            logger.warning("No config_dir provided - cinema validation disabled")
 
         # Create HTTP client (with or without caching)
         if self.force_refresh:
@@ -69,6 +80,44 @@ class FilmfrasorScraper(BaseScraper):
                 timeout=30.0,
                 follow_redirects=True,
             )
+
+    def _setup_cinema_validation(self, config_dir: Path) -> None:
+        """Set up cinema validation from config.
+
+        Args:
+            config_dir: Directory containing cinemas.yaml
+        """
+        try:
+            # Load cinema config
+            data_dir = config_dir.parent / "data"  # Dummy data_dir, not used here
+            loader = ConfigLoader(config_dir, data_dir)
+            cinema_config = loader.load_cinema_config()
+
+            # Build and set normalization map from cinema aliases
+            if cinema_config.cinema_aliases:
+                normalization_map = build_normalization_map(cinema_config.cinema_aliases)
+                Film.set_normalization_map(normalization_map)
+                logger.info(
+                    "Cinema normalization enabled",
+                    canonical_names=sorted(cinema_config.cinema_aliases.keys()),
+                    total_aliases=len(normalization_map),
+                )
+            else:
+                logger.warning("No cinema aliases found in config")
+
+            # Extract valid cinemas
+            valid_cinemas = loader.get_valid_cinemas(cinema_config)
+
+            if valid_cinemas:
+                # Set valid cinemas on Film model for validation
+                Film.set_valid_cinemas(valid_cinemas)
+                logger.info("Cinema validation enabled", valid_cinemas=sorted(valid_cinemas))
+            else:
+                logger.warning("No cinemas found in config - validation disabled")
+
+        except Exception as e:
+            logger.error("Failed to load cinema config", error=str(e))
+            logger.warning("Cinema validation disabled due to config load error")
 
     def get_festival_name(self) -> str:
         """Get the name of the festival."""
@@ -209,19 +258,34 @@ class FilmfrasorScraper(BaseScraper):
                             screening_info
                         )
 
-                        screening = Film(
-                            title=title,
-                            country=country,
-                            start_time=start_time,
-                            end_time=end_time,
-                            cinema=cinema,
-                            auditorium=auditorium,
-                            special_notes=special_notes,
-                        )
-                        screenings.append(screening)
+                        try:
+                            screening = Film(
+                                title=title,
+                                country=country,
+                                start_time=start_time,
+                                end_time=end_time,
+                                cinema=cinema,
+                                auditorium=auditorium,
+                                special_notes=special_notes,
+                            )
+                            screenings.append(screening)
+                        except ValidationError as e:
+                            # Log validation error as warning and continue
+                            logger.warning(
+                                "Invalid film screening - skipping",
+                                title=title,
+                                cinema=cinema,
+                                start_time=start_time,
+                                error=str(e),
+                            )
+                            continue
 
                 except Exception as e:
-                    print(f"  Error parsing screening element: {e}")
+                    logger.warning(
+                        "Error parsing screening element",
+                        title=title,
+                        error=str(e),
+                    )
                     continue
 
         except Exception as e:
@@ -323,6 +387,7 @@ class FilmfrasorScraper(BaseScraper):
 
         if len(direct_divs) != 3:
             return None
+        print([x.get_text(strip=True) for x in direct_divs])
 
         date_text = direct_divs[0].get_text(strip=True)
         time_text = direct_divs[1].get_text(strip=True)
@@ -368,21 +433,50 @@ class FilmfrasorScraper(BaseScraper):
     def _split_cinema_and_auditorium(self, cinema_text: str) -> tuple[str, str]:
         """Split cinema text into cinema name and auditorium.
 
+        Rules:
+        - "Vika Kino" -> cinema="Vika", auditorium=None
+        - "Vika Kino 3" -> cinema="Vika", auditorium="3"
+        - "Vika 3" -> cinema="Vika", auditorium="3"
+        - "Cinemateket Lillebil" -> cinema="Cinemateket", auditorium="Lillebil"
+        - "Cinemateket" -> cinema="Cinemateket", auditorium=None
+        - "Vega 2" -> cinema="Vega", auditorium="2"
+        - "Vega" -> cinema="Vega", auditorium=None
+
         Args:
-            cinema_text: Text like "Vika 3" or "Cinemateket USF"
+            cinema_text: Text like "Vika 3" or "Cinemateket Lillebil"
 
         Returns:
-            Tuple of (cinema, auditorium)
+            Tuple of (cinema, auditorium) where auditorium may be None
         """
-        # Look for number at the end which is typically the auditorium
+        cinema_text = cinema_text.strip()
+
+        # Special case: "Vika Kino" should be normalized to just "Vika"
+        if cinema_text.lower().startswith("vika kino"):
+            # Check if there's a number after "Vika Kino"
+            rest = cinema_text[len("vika kino"):].strip()
+            if rest and rest.isdigit():
+                return "Vika", rest
+            return "Vika", None
+
+        # Pattern: "Cinema Number" (e.g., "Vika 3", "Vega 2")
         match = re.search(r"^(.+?)\s+(\d+)$", cinema_text)
         if match:
             cinema = match.group(1).strip()
             auditorium = match.group(2)
+            # Normalize "Vika Kino" to "Vika" in cinema part
+            if cinema.lower() == "vika kino":
+                cinema = "Vika"
             return cinema, auditorium
 
-        # If no number found, use the whole text as cinema and "Main" as auditorium
-        return cinema_text, "Main"
+        # Pattern: "Cinemateket Word" (e.g., "Cinemateket Lillebil")
+        if cinema_text.lower().startswith("cinemateket"):
+            parts = cinema_text.split(None, 1)  # Split on first whitespace
+            if len(parts) == 2:
+                return "Cinemateket", parts[1]
+            return "Cinemateket", None
+
+        # No auditorium found
+        return cinema_text, None
 
     def _extract_cinema_from_text(self, text: str) -> str:
         """Extract cinema name from text."""

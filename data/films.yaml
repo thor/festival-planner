@@ -1,17 +1,9 @@
 films:
 - title: A Bright Future
   country: Unknown
-  start_time: '2025-11-08T20:45:00'
-  end_time: '2025-11-08T22:23:00'
-  cinema: lør. 15.1115:45 - 17:23Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: A Bright Future
-  country: Unknown
   start_time: '2025-11-08T13:15:00'
   end_time: '2025-11-08T14:53:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -19,7 +11,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:45:00'
   end_time: '2025-11-12T22:23:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -33,17 +25,9 @@ films:
   preference_weight: 1.0
 - title: A Poet
   country: Unknown
-  start_time: '2025-11-09T20:30:00'
-  end_time: '2025-11-09T22:30:00'
-  cinema: søn. 16.1117:30 - 19:30Vega 1Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: A Poet
-  country: Unknown
   start_time: '2025-11-09T15:15:00'
   end_time: '2025-11-09T17:15:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -51,7 +35,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T22:30:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -67,7 +51,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T16:15:00'
   end_time: '2025-11-09T17:51:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -75,7 +59,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T17:30:00'
   end_time: '2025-11-13T19:06:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -89,17 +73,9 @@ films:
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
   country: Unknown
-  start_time: '2025-11-10T17:30:00'
-  end_time: '2025-11-10T19:45:00'
-  cinema: fre. 14.1115:30 - 17:15Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: At this Moment, in the Nation's Sky
-  country: Unknown
   start_time: '2025-11-10T20:45:00'
   end_time: '2025-11-10T22:30:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -107,7 +83,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T17:30:00'
   end_time: '2025-11-12T19:45:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -115,7 +91,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T15:30:00'
   end_time: '2025-11-14T17:15:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -123,7 +99,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T20:00:00'
   end_time: '2025-11-08T21:45:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -131,7 +107,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T22:15:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -153,14 +129,6 @@ films:
   preference_weight: 1.0
 - title: Blå spor (The Blue Trail)
   country: Unknown
-  start_time: '2025-11-06T18:00:00'
-  end_time: '2025-11-06T19:55:00'
-  cinema: Klingenberg
-  auditorium: '1'
-  special_notes: null
-  preference_weight: 1.0
-- title: Blå spor (The Blue Trail)
-  country: Unknown
   start_time: '2025-11-07T17:45:00'
   end_time: '2025-11-07T19:40:00'
   cinema: Vega
@@ -171,7 +139,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T19:25:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -187,7 +155,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T17:00:00'
   end_time: '2025-11-11T19:42:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -195,23 +163,15 @@ films:
   country: Unknown
   start_time: '2025-11-14T17:00:00'
   end_time: '2025-11-14T19:02:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
-  special_notes: null
-  preference_weight: 1.0
-- title: Boong
-  country: Unknown
-  start_time: '2025-11-08T13:00:00'
-  end_time: '2025-11-08T14:33:00'
-  cinema: lør. 15.1113:15 - 14:48Vika 3Kjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Boong
   country: Unknown
   start_time: '2025-11-08T15:15:00'
   end_time: '2025-11-08T16:48:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -227,7 +187,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T13:15:00'
   end_time: '2025-11-15T14:48:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -235,7 +195,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T17:45:00'
   end_time: '2025-11-09T19:35:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -249,17 +209,9 @@ films:
   preference_weight: 1.0
 - title: Bury Us in a Lone Desert
   country: Unknown
-  start_time: '2025-11-08T18:45:00'
-  end_time: '2025-11-08T19:47:00'
-  cinema: lør. 15.1115:15 - 16:17Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Bury Us in a Lone Desert
-  country: Unknown
   start_time: '2025-11-08T13:15:00'
   end_time: '2025-11-08T14:17:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -267,7 +219,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T18:45:00'
   end_time: '2025-11-13T19:47:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -283,7 +235,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T18:00:00'
   end_time: '2025-11-08T20:08:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -297,17 +249,9 @@ films:
   preference_weight: 1.0
 - title: Cielo
   country: Unknown
-  start_time: '2025-11-09T18:00:00'
-  end_time: '2025-11-09T20:09:00'
-  cinema: fre. 14.1115:00 - 16:49Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: Cielo
-  country: Unknown
   start_time: '2025-11-09T17:45:00'
   end_time: '2025-11-09T19:54:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -315,7 +259,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T20:09:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -327,35 +271,11 @@ films:
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
-- title: Coco
-  country: Unknown
-  start_time: '2025-11-01T10:00:00'
-  end_time: '2025-11-01T13:58:00'
-  cinema: Vestre gravlund
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Coco
-  country: Unknown
-  start_time: '2025-11-02T09:30:00'
-  end_time: '2025-11-02T13:28:00'
-  cinema: Vestre gravlund
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Comandante Fritz
-  country: Unknown
-  start_time: '2025-11-07T18:00:00'
-  end_time: '2025-11-07T19:46:00'
-  cinema: tor. 13.1116:15 - 18:01Vika 4Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
 - title: Comandante Fritz
   country: Unknown
   start_time: '2025-11-07T20:00:00'
   end_time: '2025-11-07T21:46:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -363,7 +283,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T18:00:00'
   end_time: '2025-11-11T19:46:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -371,7 +291,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T16:15:00'
   end_time: '2025-11-13T18:01:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -393,17 +313,9 @@ films:
   preference_weight: 1.0
 - title: 'Creation of the Gods II: Demon Force'
   country: Unknown
-  start_time: '2025-11-10T20:30:00'
-  end_time: '2025-11-10T22:55:00'
-  cinema: lør. 15.1120:00 - 22:25Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: 'Creation of the Gods II: Demon Force'
-  country: Unknown
   start_time: '2025-11-10T20:00:00'
   end_time: '2025-11-10T22:25:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -419,15 +331,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T20:00:00'
   end_time: '2025-11-15T22:25:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Dahomey
-  country: Unknown
-  start_time: '2025-11-16T12:00:00'
-  end_time: '2025-11-16T13:53:00'
-  cinema: Nasjonalmuseet
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -435,7 +339,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T15:00:00'
   end_time: '2025-11-09T16:45:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -443,7 +347,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T17:30:00'
   end_time: '2025-11-16T19:10:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -451,7 +355,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T20:15:00'
   end_time: '2025-11-10T21:30:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -459,7 +363,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T17:30:00'
   end_time: '2025-11-10T19:39:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -467,15 +371,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T18:00:00'
   end_time: '2025-11-14T19:22:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Everest Dark
-  country: Unknown
-  start_time: '2025-11-07T17:00:00'
-  end_time: '2025-11-07T19:08:00'
-  cinema: lør. 15.1113:15 - 14:43Vega 3Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -483,7 +379,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T18:00:00'
   end_time: '2025-11-07T19:28:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -491,7 +387,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T17:00:00'
   end_time: '2025-11-13T19:08:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -503,27 +399,11 @@ films:
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
-- title: Film & Konsert // Urban Girl Comes to Get Married
-  country: Unknown
-  start_time: '2025-11-15T19:00:00'
-  end_time: '2025-11-15T20:13:00'
-  cinema: Vega Salongen
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Frantz Fanon
-  country: Unknown
-  start_time: '2025-11-07T16:30:00'
-  end_time: '2025-11-07T18:00:00'
-  cinema: søn. 16.1113:00 - 14:30Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
 - title: Frantz Fanon
   country: Unknown
   start_time: '2025-11-07T17:00:00'
   end_time: '2025-11-07T19:00:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -545,17 +425,9 @@ films:
   preference_weight: 1.0
 - title: Fremdeles her (I'm Still Here)
   country: Unknown
-  start_time: '2025-11-08T17:00:00'
-  end_time: '2025-11-08T22:00:00'
-  cinema: Cosmopolite Scene
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Fremdeles her (I'm Still Here)
-  country: Unknown
   start_time: '2025-11-11T17:00:00'
   end_time: '2025-11-11T19:47:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -563,7 +435,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:00:00'
   end_time: '2025-11-12T22:17:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -579,15 +451,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T17:30:00'
   end_time: '2025-11-08T19:20:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Girls on Wire
-  country: Unknown
-  start_time: '2025-11-08T20:30:00'
-  end_time: '2025-11-08T22:25:00'
-  cinema: lør. 15.1120:30 - 22:25Vega 2Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -595,7 +459,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T15:30:00'
   end_time: '2025-11-08T17:25:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -603,7 +467,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T22:25:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -619,7 +483,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T20:00:00'
   end_time: '2025-11-09T22:40:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -627,23 +491,15 @@ films:
   country: Unknown
   start_time: '2025-11-15T20:00:00'
   end_time: '2025-11-15T22:40:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
   country: Unknown
-  start_time: '2025-11-10T20:45:00'
-  end_time: '2025-11-10T22:39:00'
-  cinema: lør. 15.1115:30 - 17:04Vika 3Kjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: Googoosh - Made of Fire
-  country: Unknown
   start_time: '2025-11-10T17:00:00'
   end_time: '2025-11-10T18:54:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -659,23 +515,15 @@ films:
   country: Unknown
   start_time: '2025-11-15T15:30:00'
   end_time: '2025-11-15T17:04:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
-  special_notes: null
-  preference_weight: 1.0
-- title: Happyend
-  country: Unknown
-  start_time: '2025-11-08T20:30:00'
-  end_time: '2025-11-08T22:23:00'
-  cinema: lør. 15.1120:30 - 22:23Vega 3Kjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Happyend
   country: Unknown
   start_time: '2025-11-08T19:45:00'
   end_time: '2025-11-08T21:38:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -699,15 +547,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T20:15:00'
   end_time: '2025-11-14T22:23:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Heart of Darkness
-  country: Unknown
-  start_time: '2025-11-09T15:45:00'
-  end_time: '2025-11-09T17:09:00'
-  cinema: søn. 16.1120:00 - 21:24Cinemateket LillebilKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -715,7 +555,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T20:45:00'
   end_time: '2025-11-09T22:09:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -731,15 +571,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T20:00:00'
   end_time: '2025-11-16T21:24:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Hei Frida!
-  country: Unknown
-  start_time: '2025-11-08T13:15:00'
-  end_time: '2025-11-08T14:37:00'
-  cinema: søn. 16.1113:00 - 14:22Cinemateket LillebilKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -747,7 +579,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T13:00:00'
   end_time: '2025-11-08T14:22:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -755,7 +587,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T13:15:00'
   end_time: '2025-11-09T14:37:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -763,7 +595,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T13:00:00'
   end_time: '2025-11-16T14:22:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -771,7 +603,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T17:30:00'
   end_time: '2025-11-08T18:59:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -787,7 +619,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T21:59:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -795,7 +627,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T16:15:00'
   end_time: '2025-11-15T17:44:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -803,15 +635,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:10:00'
-  cinema: tor. 13.1121:00 - 22:10Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Hotspring Sharkattack
-  country: Unknown
-  start_time: '2025-11-07T21:00:00'
-  end_time: '2025-11-07T22:10:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -833,17 +657,9 @@ films:
   preference_weight: 1.0
 - title: Jeg er sangen (I, the Song)
   country: Unknown
-  start_time: '2025-11-09T15:30:00'
-  end_time: '2025-11-09T17:23:00'
-  cinema: lør. 15.1115:00 - 16:53Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Jeg er sangen (I, the Song)
-  country: Unknown
   start_time: '2025-11-09T16:00:00'
   end_time: '2025-11-09T17:53:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -851,7 +667,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T15:30:00'
   end_time: '2025-11-12T17:23:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -859,7 +675,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T15:00:00'
   end_time: '2025-11-15T16:53:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -867,7 +683,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T15:00:00'
   end_time: '2025-11-14T16:45:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -879,19 +695,11 @@ films:
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
-- title: Joseph
-  country: Unknown
-  start_time: '2025-11-12T17:30:00'
-  end_time: '2025-11-12T20:30:00'
-  cinema: Nordic Black Theatre
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
 - title: Kill the Jockey
   country: Unknown
   start_time: '2025-11-07T20:30:00'
   end_time: '2025-11-07T22:06:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -899,7 +707,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:00:00'
   end_time: '2025-11-11T21:36:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -923,15 +731,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T20:45:00'
   end_time: '2025-11-15T22:21:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Left-Handed Girl
-  country: Unknown
-  start_time: '2025-11-10T17:30:00'
-  end_time: '2025-11-10T19:18:00'
-  cinema: søn. 16.1117:00 - 18:48Cinemateket TancredKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -947,7 +747,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T17:30:00'
   end_time: '2025-11-14T19:18:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -955,7 +755,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T17:00:00'
   end_time: '2025-11-16T18:48:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -963,7 +763,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T13:00:00'
   end_time: '2025-11-08T14:15:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -971,15 +771,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T13:00:00'
   end_time: '2025-11-09T14:15:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Livet på landet (Living the land)
-  country: Unknown
-  start_time: '2025-11-08T17:30:00'
-  end_time: '2025-11-08T19:42:00'
-  cinema: tor. 13.1117:45 - 19:57Vika 3Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -987,7 +779,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T18:00:00'
   end_time: '2025-11-08T20:12:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -995,7 +787,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T17:30:00'
   end_time: '2025-11-11T19:42:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1003,7 +795,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T17:45:00'
   end_time: '2025-11-13T19:57:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1011,23 +803,15 @@ films:
   country: Unknown
   start_time: '2025-11-09T13:15:00'
   end_time: '2025-11-09T15:28:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
-  special_notes: null
-  preference_weight: 1.0
-- title: Lust in the Rain
-  country: Unknown
-  start_time: '2025-11-07T20:30:00'
-  end_time: '2025-11-07T22:42:00'
-  cinema: tor. 13.1117:45 - 19:57Vega 2Kjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Lust in the Rain
   country: Unknown
   start_time: '2025-11-07T17:30:00'
   end_time: '2025-11-07T19:42:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1049,17 +833,9 @@ films:
   preference_weight: 1.0
 - title: MA - Cry of Silence
   country: Unknown
-  start_time: '2025-11-08T18:30:00'
-  end_time: '2025-11-08T19:44:00'
-  cinema: ons. 12.1118:15 - 19:29Vega 1Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: MA - Cry of Silence
-  country: Unknown
   start_time: '2025-11-08T13:45:00'
   end_time: '2025-11-08T14:59:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1067,7 +843,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T18:30:00'
   end_time: '2025-11-10T19:44:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1081,17 +857,9 @@ films:
   preference_weight: 1.0
 - title: Magellan
   country: Unknown
-  start_time: '2025-11-09T17:30:00'
-  end_time: '2025-11-09T20:10:00'
-  cinema: søn. 16.1113:30 - 16:10Cinemateket TancredKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Magellan
-  country: Unknown
   start_time: '2025-11-09T16:45:00'
   end_time: '2025-11-09T19:25:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1107,15 +875,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T13:30:00'
   end_time: '2025-11-16T16:10:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Manas
-  country: Unknown
-  start_time: '2025-11-09T17:30:00'
-  end_time: '2025-11-09T19:11:00'
-  cinema: fre. 14.1117:30 - 19:11Cinemateket TancredKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1123,7 +883,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T18:30:00'
   end_time: '2025-11-09T20:11:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1139,15 +899,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T17:30:00'
   end_time: '2025-11-14T19:11:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Mistura
-  country: Unknown
-  start_time: '2025-11-08T20:30:00'
-  end_time: '2025-11-08T22:11:00'
-  cinema: lør. 15.1117:30 - 19:11Vika 2Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1155,7 +907,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T14:45:00'
   end_time: '2025-11-08T16:26:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1171,23 +923,15 @@ films:
   country: Unknown
   start_time: '2025-11-15T17:30:00'
   end_time: '2025-11-15T19:11:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
-  special_notes: null
-  preference_weight: 1.0
-- title: Miyazaki, Spirit of Nature
-  country: Unknown
-  start_time: '2025-11-08T20:30:00'
-  end_time: '2025-11-08T21:54:00'
-  cinema: lør. 15.1116:15 - 17:39Vega 1Kjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Miyazaki, Spirit of Nature
   country: Unknown
   start_time: '2025-11-08T15:00:00'
   end_time: '2025-11-08T16:24:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1195,7 +939,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T21:54:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1211,15 +955,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:23:00'
-  cinema: tor. 13.1120:30 - 21:53Vika 4Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Monster Island
-  country: Unknown
-  start_time: '2025-11-07T21:00:00'
-  end_time: '2025-11-07T22:23:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1227,7 +963,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T21:00:00'
   end_time: '2025-11-09T22:23:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1235,23 +971,15 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T21:53:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
-  special_notes: null
-  preference_weight: 1.0
-- title: Motorsykkeldagbøkene
-  country: Unknown
-  start_time: '2025-11-12T18:00:00'
-  end_time: '2025-11-12T20:16:00'
-  cinema: Anne-Cath. Vestlys plass (utenfor Deichman Bjørvika)
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Motorsykkeldagbøkene
   country: Unknown
   start_time: '2025-11-15T13:15:00'
   end_time: '2025-11-15T15:21:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1259,7 +987,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T18:30:00'
   end_time: '2025-11-09T20:03:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1275,15 +1003,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T20:45:00'
   end_time: '2025-11-09T22:19:00'
-  cinema: fre. 14.1118:30 - 20:04Vega 2Nollywood-kveldKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: My Father's Shadow
-  country: Unknown
-  start_time: '2025-11-09T20:45:00'
-  end_time: '2025-11-09T22:19:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1291,7 +1011,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:45:00'
   end_time: '2025-11-11T22:19:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1307,7 +1027,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T20:45:00'
   end_time: '2025-11-08T22:42:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1317,14 +1037,6 @@ films:
   end_time: '2025-11-14T22:42:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
-  preference_weight: 1.0
-- title: Noise
-  country: Unknown
-  start_time: '2025-11-09T20:45:00'
-  end_time: '2025-11-09T22:18:00'
-  cinema: ons. 12.1120:30 - 22:03Cinemateket LillebilKjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Noise
@@ -1339,7 +1051,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T20:45:00'
   end_time: '2025-11-11T22:18:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1347,23 +1059,15 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:03:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: North South Man Woman
   country: Unknown
-  start_time: '2025-11-08T18:00:00'
-  end_time: '2025-11-08T19:34:00'
-  cinema: søn. 16.1115:30 - 17:24Vega 3Møt regissørenKjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: North South Man Woman
-  country: Unknown
   start_time: '2025-11-08T18:15:00'
   end_time: '2025-11-08T20:09:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1371,7 +1075,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T19:34:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1387,7 +1091,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T18:00:00'
   end_time: '2025-11-07T19:30:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1401,17 +1105,9 @@ films:
   preference_weight: 1.0
 - title: Noviembre
   country: Unknown
-  start_time: '2025-11-07T20:30:00'
-  end_time: '2025-11-07T21:48:00'
-  cinema: ons. 12.1116:00 - 17:18Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Noviembre
-  country: Unknown
   start_time: '2025-11-07T16:00:00'
   end_time: '2025-11-07T17:18:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1419,7 +1115,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T21:48:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1433,17 +1129,9 @@ films:
   preference_weight: 1.0
 - title: 'Oceania: Journey to the Center'
   country: Unknown
-  start_time: '2025-11-08T18:15:00'
-  end_time: '2025-11-08T19:49:00'
-  cinema: tor. 13.1113:30 - 14:44Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: 'Oceania: Journey to the Center'
-  country: Unknown
   start_time: '2025-11-08T15:45:00'
   end_time: '2025-11-08T16:59:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -1473,17 +1161,9 @@ films:
   preference_weight: 1.0
 - title: On Becoming a Guinea Fowl
   country: Unknown
-  start_time: '2025-11-10T15:30:00'
-  end_time: '2025-11-10T17:09:00'
-  cinema: søn. 16.1120:45 - 22:24Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: On Becoming a Guinea Fowl
-  country: Unknown
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T22:09:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1521,17 +1201,9 @@ films:
   preference_weight: 1.0
 - title: Outcry
   country: Unknown
-  start_time: '2025-11-12T18:15:00'
-  end_time: '2025-11-12T20:19:00'
-  cinema: søn. 16.1115:45 - 17:29Vika 3Kjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: Outcry
-  country: Unknown
   start_time: '2025-11-12T17:00:00'
   end_time: '2025-11-12T19:04:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1547,7 +1219,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T15:45:00'
   end_time: '2025-11-16T17:29:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1555,7 +1227,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T17:30:00'
   end_time: '2025-11-07T19:58:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1573,14 +1245,6 @@ films:
   end_time: '2025-11-09T17:16:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
-  preference_weight: 1.0
-- title: Perfect Days
-  country: Unknown
-  start_time: '2025-11-11T18:00:00'
-  end_time: '2025-11-11T20:13:00'
-  cinema: Anne-Cath. Vestlys plass (utenfor Deichman Bjørvika)
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Phoenix Fury
@@ -1603,7 +1267,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T13:00:00'
   end_time: '2025-11-15T14:32:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1617,17 +1281,9 @@ films:
   preference_weight: 1.0
 - title: Promised Sky
   country: Unknown
-  start_time: '2025-11-09T18:15:00'
-  end_time: '2025-11-09T19:47:00'
-  cinema: lør. 15.1113:30 - 15:02Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Promised Sky
-  country: Unknown
   start_time: '2025-11-09T14:15:00'
   end_time: '2025-11-09T15:47:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1635,7 +1291,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T18:15:00'
   end_time: '2025-11-13T19:47:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1651,7 +1307,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T20:30:00'
   end_time: '2025-11-07T22:30:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1667,15 +1323,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T17:00:00'
   end_time: '2025-11-08T18:36:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Rita
-  country: Unknown
-  start_time: '2025-11-07T18:00:00'
-  end_time: '2025-11-07T19:47:00'
-  cinema: søn. 16.1113:00 - 14:47Vega 2Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1683,7 +1331,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:47:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1705,17 +1353,9 @@ films:
   preference_weight: 1.0
 - title: Scarlet
   country: Unknown
-  start_time: '2025-11-07T20:00:00'
-  end_time: '2025-11-07T21:52:00'
-  cinema: tor. 13.1118:00 - 19:52Vega 1Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Scarlet
-  country: Unknown
   start_time: '2025-11-07T17:00:00'
   end_time: '2025-11-07T18:52:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1723,7 +1363,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T20:00:00'
   end_time: '2025-11-09T21:52:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -1737,17 +1377,9 @@ films:
   preference_weight: 1.0
 - title: Silent City Driver
   country: Unknown
-  start_time: '2025-11-10T20:15:00'
-  end_time: '2025-11-10T22:33:00'
-  cinema: søn. 16.1117:45 - 20:03Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Silent City Driver
-  country: Unknown
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T22:48:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1755,7 +1387,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:15:00'
   end_time: '2025-11-12T22:33:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1765,14 +1397,6 @@ films:
   end_time: '2025-11-16T20:03:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
-  preference_weight: 1.0
-- title: Silver
-  country: Unknown
-  start_time: '2025-11-10T18:15:00'
-  end_time: '2025-11-10T19:34:00'
-  cinema: fre. 14.1115:00 - 16:19Vika 3Kjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Silver
@@ -1787,7 +1411,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T18:15:00'
   end_time: '2025-11-12T19:34:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1795,7 +1419,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T15:00:00'
   end_time: '2025-11-14T16:19:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1803,7 +1427,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T20:15:00'
   end_time: '2025-11-09T21:26:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1819,15 +1443,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T20:30:00'
   end_time: '2025-11-08T22:40:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: The Dating Game
-  country: Unknown
-  start_time: '2025-11-07T20:30:00'
-  end_time: '2025-11-07T22:02:00'
-  cinema: fre. 14.1114:45 - 16:17Vega 1Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1835,7 +1451,7 @@ films:
   country: Unknown
   start_time: '2025-11-07T15:45:00'
   end_time: '2025-11-07T17:17:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1843,7 +1459,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:02:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1859,15 +1475,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T17:30:00'
   end_time: '2025-11-09T19:00:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: The Message
-  country: Unknown
-  start_time: '2025-11-09T18:45:00'
-  end_time: '2025-11-09T20:16:00'
-  cinema: søn. 16.1120:30 - 22:01Vega 1Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1875,7 +1483,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T13:00:00'
   end_time: '2025-11-09T14:31:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1897,17 +1505,9 @@ films:
   preference_weight: 1.0
 - title: The Nature of Invisible Things
   country: Unknown
-  start_time: '2025-11-08T18:30:00'
-  end_time: '2025-11-08T20:00:00'
-  cinema: søn. 16.1118:30 - 20:00Vega 3Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: The Nature of Invisible Things
-  country: Unknown
   start_time: '2025-11-08T15:45:00'
   end_time: '2025-11-08T17:15:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1915,7 +1515,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T18:30:00'
   end_time: '2025-11-13T20:00:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1931,7 +1531,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T17:45:00'
   end_time: '2025-11-10T19:37:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -1941,14 +1541,6 @@ films:
   end_time: '2025-11-13T15:22:00'
   cinema: Vega
   auditorium: '3'
-  special_notes: null
-  preference_weight: 1.0
-- title: The Secret Agent
-  country: Unknown
-  start_time: '2025-11-16T16:30:00'
-  end_time: '2025-11-16T19:08:00'
-  cinema: søn. 16.1119:30 - 22:08Cinemateket TancredKjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: The Secret Agent
@@ -1963,7 +1555,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T16:30:00'
   end_time: '2025-11-16T19:08:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -1971,7 +1563,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T19:30:00'
   end_time: '2025-11-16T22:08:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1979,7 +1571,7 @@ films:
   country: Unknown
   start_time: '2025-11-10T17:30:00'
   end_time: '2025-11-10T19:47:00'
-  cinema: Cinemateket Tancred
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -1993,17 +1585,9 @@ films:
   preference_weight: 1.0
 - title: The Things You Kill
   country: Unknown
-  start_time: '2025-11-10T20:45:00'
-  end_time: '2025-11-10T22:39:00'
-  cinema: lør. 15.1118:00 - 19:54Vega 2Kjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: The Things You Kill
-  country: Unknown
   start_time: '2025-11-10T17:45:00'
   end_time: '2025-11-10T19:39:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2027,15 +1611,7 @@ films:
   country: Unknown
   start_time: '2025-11-12T20:45:00'
   end_time: '2025-11-12T22:42:00'
-  cinema: lør. 15.1117:30 - 19:27Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: The Weekend
-  country: Unknown
-  start_time: '2025-11-12T20:45:00'
-  end_time: '2025-11-12T22:42:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -2051,23 +1627,15 @@ films:
   country: Unknown
   start_time: '2025-11-15T17:30:00'
   end_time: '2025-11-15T19:27:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: This City is a Battlefield
   country: Unknown
-  start_time: '2025-11-11T17:30:00'
-  end_time: '2025-11-11T19:49:00'
-  cinema: fre. 14.1120:30 - 22:29Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: regissør
-  preference_weight: 1.0
-- title: This City is a Battlefield
-  country: Unknown
   start_time: '2025-11-11T16:30:00'
   end_time: '2025-11-11T18:49:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -2083,7 +1651,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T20:30:00'
   end_time: '2025-11-14T22:29:00'
-  cinema: Cinemateket Lillebil
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2097,17 +1665,9 @@ films:
   preference_weight: 1.0
 - title: Under the Flags, the Sun
   country: Unknown
-  start_time: '2025-11-09T18:30:00'
-  end_time: '2025-11-09T20:00:00'
-  cinema: tor. 13.1116:15 - 17:45Cinemateket LillebilKjøp billett
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Under the Flags, the Sun
-  country: Unknown
   start_time: '2025-11-09T13:45:00'
   end_time: '2025-11-09T15:15:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -2115,7 +1675,7 @@ films:
   country: Unknown
   start_time: '2025-11-11T18:30:00'
   end_time: '2025-11-11T20:00:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0
@@ -2123,15 +1683,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T16:15:00'
   end_time: '2025-11-13T17:45:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: What Does That Nature Say To You
-  country: Unknown
-  start_time: '2025-11-09T20:45:00'
-  end_time: '2025-11-09T22:33:00'
-  cinema: lør. 15.1118:30 - 20:18Cinemateket TancredKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2147,7 +1699,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:45:00'
   end_time: '2025-11-13T22:33:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -2155,15 +1707,7 @@ films:
   country: Unknown
   start_time: '2025-11-15T18:30:00'
   end_time: '2025-11-15T20:18:00'
-  cinema: Cinemateket Tancred
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: What We Wanted To Be
-  country: Unknown
-  start_time: '2025-11-08T20:00:00'
-  end_time: '2025-11-08T21:24:00'
-  cinema: søn. 16.1113:30 - 14:54Vika 3Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2171,7 +1715,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T20:45:00'
   end_time: '2025-11-08T22:09:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '2'
   special_notes: null
   preference_weight: 1.0
@@ -2179,7 +1723,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:00:00'
   end_time: '2025-11-13T21:24:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '1'
   special_notes: null
   preference_weight: 1.0
@@ -2187,7 +1731,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T13:30:00'
   end_time: '2025-11-16T14:54:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -2197,14 +1741,6 @@ films:
   end_time: '2025-11-14T17:45:00'
   cinema: Vega
   auditorium: '2'
-  special_notes: null
-  preference_weight: 1.0
-- title: Winter in Sokcho
-  country: Unknown
-  start_time: '2025-11-09T20:00:00'
-  end_time: '2025-11-09T21:44:00'
-  cinema: søn. 16.1115:00 - 16:44Cinemateket LillebilKjøp billett
-  auditorium: Main
   special_notes: null
   preference_weight: 1.0
 - title: Winter in Sokcho
@@ -2219,7 +1755,7 @@ films:
   country: Unknown
   start_time: '2025-11-14T20:00:00'
   end_time: '2025-11-14T21:44:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -2227,15 +1763,7 @@ films:
   country: Unknown
   start_time: '2025-11-16T15:00:00'
   end_time: '2025-11-16T16:44:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Yanuni
-  country: Unknown
-  start_time: '2025-11-08T15:15:00'
-  end_time: '2025-11-08T17:07:00'
-  cinema: tor. 13.1120:45 - 22:37Cinemateket LillebilKjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2251,7 +1779,7 @@ films:
   country: Unknown
   start_time: '2025-11-09T15:15:00'
   end_time: '2025-11-09T17:07:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '3'
   special_notes: null
   preference_weight: 1.0
@@ -2259,15 +1787,7 @@ films:
   country: Unknown
   start_time: '2025-11-13T20:45:00'
   end_time: '2025-11-13T22:37:00'
-  cinema: Cinemateket Lillebil
-  auditorium: Main
-  special_notes: null
-  preference_weight: 1.0
-- title: Zafari
-  country: Unknown
-  start_time: '2025-11-08T16:00:00'
-  end_time: '2025-11-08T17:30:00'
-  cinema: tor. 13.1116:00 - 17:30Vega 3Kjøp billett
+  cinema: Cinemateket
   auditorium: Main
   special_notes: null
   preference_weight: 1.0
@@ -2275,7 +1795,7 @@ films:
   country: Unknown
   start_time: '2025-11-08T21:00:00'
   end_time: '2025-11-08T22:30:00'
-  cinema: Vika
+  cinema: Vika Kino
   auditorium: '4'
   special_notes: null
   preference_weight: 1.0

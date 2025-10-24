@@ -45,11 +45,12 @@ def main():
     if args.refresh:
         print("Force refresh enabled - fetching fresh data")
     
-    # Initialize scraper
+    # Initialize scraper with cinema validation
     scraper = FilmfrasorScraper(
         cache_dir=data_dir,
         year=args.year,
-        force_refresh=args.refresh
+        force_refresh=args.refresh,
+        config_dir=config_dir,
     )
     
     # Scrape programme

@@ -163,6 +163,21 @@ class ConfigLoader:
                 allow_unicode=True,
             )
 
+    def get_valid_cinemas(self, cinema_config: CinemaConfig) -> set[str]:
+        """Extract valid cinema names from cinema configuration.
+
+        Args:
+            cinema_config: CinemaConfig containing travel times
+
+        Returns:
+            Set of valid cinema names
+        """
+        cinemas = set()
+        for travel_time in cinema_config.travel_times:
+            cinemas.add(travel_time.from_cinema)
+            cinemas.add(travel_time.to_cinema)
+        return cinemas
+
     def build_travel_time_matrix(
         self, cinema_config: CinemaConfig
     ) -> dict[tuple[str, str], int]:
@@ -183,10 +198,7 @@ class ConfigLoader:
             )
 
         # Add zero travel time for same cinema
-        cinemas = set()
-        for travel_time in cinema_config.travel_times:
-            cinemas.add(travel_time.from_cinema)
-            cinemas.add(travel_time.to_cinema)
+        cinemas = self.get_valid_cinemas(cinema_config)
 
         for cinema in cinemas:
             travel_matrix[(cinema, cinema)] = 0

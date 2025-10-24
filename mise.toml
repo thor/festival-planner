@@ -5,3 +5,7 @@ uv = "latest"
 [tasks.festival-planner]
 run = "uv run festival-planner"
 description = "Run the festival planner"
+
+[tasks.test]
+run = "uv run pytest"
+description = "Run the test suite"

@@ -1,8 +1,27 @@
 """Pydantic models for festival planner data structures."""
 
 import datetime
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import Optional, ClassVar
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
+
+
+def build_normalization_map(cinema_aliases: dict[str, list[str]]) -> dict[str, str]:
+    """Build a normalization map from cinema aliases configuration.
+
+    Args:
+        cinema_aliases: Dict mapping canonical names to list of aliases
+
+    Returns:
+        Dict mapping all aliases (lowercase) to canonical names
+    """
+    normalization_map = {}
+    for canonical_name, aliases in cinema_aliases.items():
+        # Map each alias to the canonical name (case-insensitive)
+        for alias in aliases:
+            normalization_map[alias.lower().strip()] = canonical_name
+        # Also map the canonical name itself (case-insensitive)
+        normalization_map[canonical_name.lower().strip()] = canonical_name
+    return normalization_map
 
 
 class Film(BaseModel):
@@ -13,13 +32,64 @@ class Film(BaseModel):
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
-    auditorium: str = Field(..., description="Auditorium number or name")
+    auditorium: Optional[str] = Field(
+        None, description="Auditorium number or name (None if unknown)"
+    )
     special_notes: Optional[str] = Field(
         None, description="Special event information (Q&A, premiere, etc.)"
     )
     preference_weight: float = Field(
         1.0, description="Preference weight (positive or negative relative to default)"
     )
+
+    # Class variable to store valid cinemas for validation
+    _valid_cinemas: ClassVar[Optional[set[str]]] = None
+    _normalization_map: ClassVar[dict[str, str]] = {}
+
+    @classmethod
+    def set_valid_cinemas(cls, valid_cinemas: set[str]) -> None:
+        """Set the list of valid cinema names for validation.
+
+        Args:
+            valid_cinemas: Set of valid cinema names
+        """
+        cls._valid_cinemas = valid_cinemas
+
+    @classmethod
+    def set_normalization_map(cls, normalization_map: dict[str, str]) -> None:
+        """Set the cinema name normalization map.
+
+        Args:
+            normalization_map: Dict mapping aliases (lowercase) to canonical names
+        """
+        cls._normalization_map = normalization_map
+
+    @field_validator("cinema")
+    @classmethod
+    def validate_cinema(cls, v: str, info: ValidationInfo) -> str:
+        """Validate and normalize cinema name.
+
+        Args:
+            v: Cinema name
+            info: Validation info
+
+        Returns:
+            Normalized cinema name
+
+        Raises:
+            ValueError: If cinema is not in the valid list
+        """
+        # Normalize the cinema name using the normalization map
+        v_lower = v.lower().strip()
+        normalized = cls._normalization_map.get(v_lower, v)
+
+        # Validate against valid cinemas if set
+        if cls._valid_cinemas is not None and normalized not in cls._valid_cinemas:
+            raise ValueError(
+                f"Cinema '{v}' (normalized to '{normalized}') is not in the valid cinema list: {sorted(cls._valid_cinemas)}"
+            )
+
+        return normalized
 
     @property
     def date(self) -> datetime.date:
@@ -84,6 +154,10 @@ class SeenFilmList(BaseModel):
 class CinemaConfig(BaseModel):
     """Configuration for cinemas and travel times."""
 
+    cinema_aliases: dict[str, list[str]] = Field(
+        default_factory=dict,
+        description="Cinema name aliases mapping (canonical name -> list of aliases)",
+    )
     travel_times: list[TravelTime] = Field(
         default_factory=list, description="Travel times between cinemas"
     )
