@@ -9,3 +9,19 @@ buffer_time_minutes: 15
 # start_date: "2024-09-15"
 # end_date: "2024-09-22"
 
+# Weight adjustments based on film release year
+# Positive values increase priority, negative values decrease it
+# Examples:
+year_weights:
+  # Classic films from specific years
+  # 1960: 0.3   # Increase priority for 1960 films
+  # 1985: 0.2   # Increase priority for 1985 films
+  # Recent films
+  # 2024: -0.1  # Decrease priority for 2024 films (might have other chances to see)
+  # 2025: -0.2  # Decrease priority for 2025 films
+
+# Weight adjustment for films with special events
+# Positive values prioritize films with Q&As, director appearances, etc.
+# Negative values deprioritize special events if you prefer regular screenings
+special_notes_weight: 0.5  # Increase priority for special events
+

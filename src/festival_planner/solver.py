@@ -107,15 +107,41 @@ class FestivalScheduleSolver:
                     self.model.Add(self.attend_vars[i] + self.attend_vars[j] <= 1)
 
         # Objective: maximize total value of attended films
-        # Value = 1.0 (base weight) + preference_weight for each film
+        # Value = 1.0 (base weight) + preference_weight + dynamic adjustments
         objective_terms = []
         for i, film in enumerate(films):
+            # Calculate dynamic weight adjustments
+            dynamic_weight = self._calculate_film_weight(film)
+
             # Scale to integer (OR-Tools works with integers)
             # Multiply by 1000 to preserve precision
-            weight = int((1.0 + film.preference_weight) * 1000)
+            weight = int(dynamic_weight * 1000)
             objective_terms.append(self.attend_vars[i] * weight)
 
         self.model.Maximize(sum(objective_terms))
+
+    def _calculate_film_weight(self, film: Film) -> float:
+        """Calculate the total weight for a film including dynamic adjustments.
+
+        Args:
+            film: Film to calculate weight for
+
+        Returns:
+            Total weight (base + preference + year adjustment + special notes adjustment)
+        """
+        # Start with base weight and preference weight
+        weight = 1.0 + film.preference_weight
+
+        # Add year-based weight adjustment
+        if film.year and film.year in self.config.year_weights:
+            year_adjustment = self.config.year_weights[film.year]
+            weight += year_adjustment
+
+        # Add special notes weight adjustment
+        if film.special_notes:
+            weight += self.config.special_notes_weight
+
+        return weight
 
     def _films_conflict(self, film1: Film, film2: Film) -> bool:
         """Check if two films conflict (overlap with buffer and travel time).

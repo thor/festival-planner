@@ -133,6 +133,16 @@ class ScheduleConfig(BaseModel):
     buffer_time_minutes: int = 15
     start_date: Optional[datetime.date] = None
     end_date: Optional[datetime.date] = None
+    year_weights: dict[int, float] = Field(
+        default_factory=dict,
+        description="Weight adjustments for specific years. "
+        "Key is year, value is weight to add/subtract.",
+    )
+    special_notes_weight: float = Field(
+        0.0,
+        description="Weight adjustment for films with special notes/events. "
+        "Positive values increase priority, negative values decrease it.",
+    )
 
 
 class FilmList(BaseModel):
