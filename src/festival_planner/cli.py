@@ -87,7 +87,7 @@ def scrape(
     )
     film_list = scraper.scrape()
 
-    console.print(f"[green]Scraped {len(film_list.films)} film viewings[/green]")
+    console.print(f"[green]Scraped {len(film_list.films)} film screenings[/green]")
 
     # Save to file
     loader = ConfigLoader(config_dir, data_dir)
