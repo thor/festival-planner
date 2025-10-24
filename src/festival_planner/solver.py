@@ -37,7 +37,7 @@ class FestivalScheduleSolver:
         self.attend_vars = {}
         self.solver = cp_model.CpSolver()
 
-    def solve(self, time_limit_seconds: Optional[int] = 60) -> list[ScheduledFilm]:
+    def solve(self, *, time_limit_seconds: int = 60) -> list[ScheduledFilm]:
         """Solve the scheduling optimization problem.
 
         Args:
@@ -58,7 +58,7 @@ class FestivalScheduleSolver:
         # Build the optimization model
         self._build_model(filtered_films)
 
-        # Configure solver
+        # Configure solver maximum timeout (must be int)
         self.solver.parameters.max_time_in_seconds = time_limit_seconds
 
         # Solve
