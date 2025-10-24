@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 # Constants
 WEIGHT_PRECISION_MULTIPLIER = 1000  # Scale weights to integers for OR-Tools
 DEFAULT_TRAVEL_TIME_MINUTES = 30  # Default travel time when not specified in config
+BASE_WEIGHT = 0.0  # Base weight for all films
 
 
 class FestivalScheduleSolver:
@@ -143,7 +144,6 @@ class FestivalScheduleSolver:
             weight = int(dynamic_weight * WEIGHT_PRECISION_MULTIPLIER)
             objective_terms.append(self.attend_vars[i] * weight)
         
-        print(objective_terms)
         self.model.Maximize(sum(objective_terms))
 
     def _calculate_film_weight(self, film: Film) -> float:
@@ -156,7 +156,7 @@ class FestivalScheduleSolver:
             Total weight (base + preference + year adjustment + special notes adjustment)
         """
         # Start with base weight and preference weight
-        weight = 1.0 + film.preference_weight
+        weight = BASE_WEIGHT + film.preference_weight
 
         # Add year-based weight adjustment
         if film.year and film.year in self.config.year_weights:
@@ -240,10 +240,14 @@ class FestivalScheduleSolver:
                     minutes=self.config.buffer_time_minutes
                 )
 
+                # Calculate the weight including all dynamic adjustments
+                calculated_weight = self._calculate_film_weight(film)
+
                 scheduled_films.append(
                     ScheduledFilm(
                         film=film,
                         arrival_time=arrival_time,
+                        calculated_weight=calculated_weight,
                     )
                 )
 

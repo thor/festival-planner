@@ -180,3 +180,7 @@ class ScheduledFilm(BaseModel):
     arrival_time: datetime.datetime = Field(
         ..., description="Recommended arrival time (including buffer)"
     )
+    calculated_weight: float = Field(
+        ..., description="Calculated weight including all dynamic adjustments "
+        "(base + preference + year + special notes)"
+    )

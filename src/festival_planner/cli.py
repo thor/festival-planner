@@ -460,15 +460,16 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
         table.add_column("Weight", justify="right")
 
         for sf in by_date[film_date]:
+            year_str = f"{sf.film.year:4d}" if sf.film.year else "    "
             table.add_row(
                 sf.arrival_time.strftime("%H:%M"),
                 sf.film.start_time.strftime("%H:%M"),
                 sf.film.end_time.strftime("%H:%M"),
                 sf.film.title,
-                f"{sf.film.year:4d}",
+                year_str,
                 sf.film.cinema,
                 sf.film.country,
-                f"{sf.film.preference_weight:+.1f}",
+                f"{sf.calculated_weight:+.1f}",
             )
 
         console.print(table)
@@ -501,7 +502,7 @@ def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) 
                 f.write(f"- **Country**: {sf.film.country}\n")
                 if sf.film.special_notes:
                     f.write(f"- **Notes**: {sf.film.special_notes}\n")
-                f.write(f"- **Weight**: {sf.film.preference_weight:+.1f}\n")
+                f.write(f"- **Weight**: {sf.calculated_weight:+.1f}\n")
                 f.write("\n")
 
             f.write("\n")
