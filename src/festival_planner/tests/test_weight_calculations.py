@@ -2,7 +2,6 @@
 
 import datetime
 import pytest
-from pathlib import Path
 
 from festival_planner.models import Film, ScheduleConfig
 from festival_planner.solver import FestivalScheduleSolver
@@ -200,4 +199,3 @@ def test_film_without_year():
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-

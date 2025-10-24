@@ -130,7 +130,7 @@ def solve(
 
     # Load films
     film_list = loader.load_films()
-    console.print(f"[green]Loaded {len(film_list.films)} films[/green]")
+    console.print(f"[green]Loaded {len(film_list.films)} film screenings[/green]")
 
     # Load seen films and filter
     seen_list = loader.load_seen_films()
@@ -138,7 +138,9 @@ def solve(
     console.print(
         f"[yellow]{len(film_list.films) - len(unseen_films)} films already seen[/yellow]"
     )
-    console.print(f"[green]{len(unseen_films)} films available to schedule[/green]")
+    console.print(
+        f"[green]{len(unseen_films)} film screenings available to schedule[/green]"
+    )
 
     # Load cinema configuration
     cinema_config = loader.load_cinema_config()
@@ -156,6 +158,9 @@ def solve(
     console.print(f"Objective value: {stats['objective_value']:.2f}")
     console.print(f"Solve time: {stats['wall_time']:.2f}s")
     console.print(f"Films scheduled: {len(scheduled_films)}")
+
+    # Display comprehensive film overview
+    display_film_overview(unseen_films, scheduled_films)
 
     # Display schedule
     display_schedule(scheduled_films)
@@ -265,6 +270,92 @@ def validate(
         raise typer.Exit(1)
     else:
         console.print("\n[bold green]All validations passed![/bold green]")
+
+
+def display_film_overview(all_films: list, scheduled_films: list):
+    """Display overview of all unique films with scheduled status."""
+    # Get unique films by title
+    films_by_title = {}
+    for film in all_films:
+        if film.title not in films_by_title:
+            films_by_title[film.title] = []
+        films_by_title[film.title].append(film)
+
+    # Track which films are scheduled
+    scheduled_titles = {sf.film.title for sf in scheduled_films}
+    scheduled_by_title = {sf.film.title: sf for sf in scheduled_films}
+
+    # Count statistics
+    total_unique = len(films_by_title)
+    total_screenings = len(all_films)
+    scheduled_count = len(scheduled_titles)
+    missed_count = total_unique - scheduled_count
+
+    console.print("\n[bold]Festival Overview[/bold]")
+    console.print(f"Unique films: {total_unique}")
+    console.print(f"Total screenings: {total_screenings}")
+    console.print(f"Films scheduled: [green]{scheduled_count}[/green]")
+    console.print(f"Films missed: [red]{missed_count}[/red]")
+    console.print()
+
+    # Create table
+    table = Table(title="All Films in Festival")
+    table.add_column("Status", justify="center", style="bold", width=6)
+    table.add_column("Title", style="bold")
+    table.add_column("Year", justify="center")
+    table.add_column("Country", max_width=15, overflow="ellipsis", no_wrap=True)
+    table.add_column("Screenings", justify="center")
+    table.add_column("Date", style="cyan")
+    table.add_column("Time", style="green")
+    table.add_column("Cinema", style="yellow")
+    table.add_column("Special Notes", style="magenta")
+
+    # Sort by title and add rows with alternating styles
+    sorted_titles = sorted(films_by_title.keys())
+    for idx, title in enumerate(sorted_titles):
+        screenings = films_by_title[title]
+        num_screenings = len(screenings)
+
+        # Determine row style (every other row dimmed)
+        style = "dim" if idx % 2 == 1 else None
+
+        if title in scheduled_titles:
+            # Film is scheduled - show details
+            sf = scheduled_by_title[title]
+            film = sf.film
+            status = "✅"
+            date_str = film.start_time.strftime("%a %d/%m")
+            time_str = film.start_time.strftime("%H:%M")
+            cinema_str = f"{film.cinema}"
+            if film.auditorium:
+                cinema_str += f" {film.auditorium}"
+            special_str = film.special_notes if film.special_notes else ""
+        else:
+            # Film not scheduled - show minimal info
+            film = screenings[0]  # Use first screening for basic info
+            status = "❌"
+            date_str = ""
+            time_str = ""
+            cinema_str = ""
+            special_str = ""
+
+        year_str = str(film.year) if film.year else ""
+
+        table.add_row(
+            status,
+            title,
+            year_str,
+            film.country,
+            str(num_screenings),
+            date_str,
+            time_str,
+            cinema_str,
+            special_str,
+            style=style,
+        )
+
+    console.print(table)
+    console.print()
 
 
 def display_schedule(scheduled_films: list):

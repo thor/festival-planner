@@ -133,16 +133,21 @@ class ScheduleConfig(BaseModel):
     buffer_time_minutes: int = 15
     start_date: Optional[datetime.date] = None
     end_date: Optional[datetime.date] = None
-    year_weights: dict[int, float] = Field(
-        default_factory=dict,
+    year_weights: Optional[dict[int, float]] = Field(
+        None,
         description="Weight adjustments for specific years. "
         "Key is year, value is weight to add/subtract.",
     )
-    special_notes_weight: float = Field(
+    special_notes_weight: Optional[float] = Field(
         0.0,
         description="Weight adjustment for films with special notes/events. "
         "Positive values increase priority, negative values decrease it.",
     )
+
+    def model_post_init(self, __context):
+        """Ensure year_weights is never None."""
+        if self.year_weights is None:
+            self.year_weights = {}
 
 
 class FilmList(BaseModel):
