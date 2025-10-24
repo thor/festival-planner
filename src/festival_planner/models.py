@@ -2,7 +2,7 @@
 
 import datetime
 from typing import Optional, ClassVar
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
 
 
 def build_normalization_map(cinema_aliases: dict[str, list[str]]) -> dict[str, str]:
@@ -112,12 +112,11 @@ class Cinema(BaseModel):
 class TravelTime(BaseModel):
     """Represents travel time between two cinemas."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     from_cinema: str = Field(..., alias="from", description="Origin cinema name")
     to_cinema: str = Field(..., alias="to", description="Destination cinema name")
     minutes: int = Field(..., description="Travel time in minutes")
-
-    class Config:
-        populate_by_name = True
 
 
 class SeenFilm(BaseModel):
