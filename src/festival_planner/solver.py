@@ -5,6 +5,9 @@ from typing import Optional
 from ortools.sat.python import cp_model
 
 from .models import Film, ScheduledFilm, ScheduleConfig
+from ._logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class FestivalScheduleSolver:
@@ -60,7 +63,7 @@ class FestivalScheduleSolver:
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             return self._extract_schedule(filtered_films)
         else:
-            print(f"No solution found. Status: {status}")
+            logger.error("No solution found", status=status, status_name=self.solver.StatusName())
             return []
 
     def _filter_films_by_date(self) -> list[Film]:
