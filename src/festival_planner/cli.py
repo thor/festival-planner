@@ -152,9 +152,9 @@ def solve(
 
     # Load seen films and filter
     seen_list = loader.load_seen_films()
-    unseen_films = loader.filter_unseen_films(film_list.films, seen_list.seen)
+    unseen_films = loader.filter_relevant_films(film_list.films, seen_list.seen)
     console.print(
-        f"[yellow]{len(film_list.films) - len(unseen_films)} films already seen[/yellow]"
+        f"[yellow]{len(film_list.films) - len(unseen_films)} films not relevant (seen or ignored)[/yellow]"
     )
     console.print(
         f"[green]{len(unseen_films)} film screenings available to schedule[/green]"
@@ -454,8 +454,9 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
         table.add_column("Start", style="green")
         table.add_column("End", style="red")
         table.add_column("Film", style="bold")
+        table.add_column("Year", max_width=4, overflow="crop", no_wrap=True)
         table.add_column("Cinema", style="yellow")
-        table.add_column("Country")
+        table.add_column("Country", max_width=10, overflow="ellipsis", no_wrap=True)
         table.add_column("Weight", justify="right")
 
         for sf in by_date[film_date]:
@@ -464,6 +465,7 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
                 sf.film.start_time.strftime("%H:%M"),
                 sf.film.end_time.strftime("%H:%M"),
                 sf.film.title,
+                f"{sf.film.year:4d}",
                 sf.film.cinema,
                 sf.film.country,
                 f"{sf.film.preference_weight:+.1f}",

@@ -197,7 +197,7 @@ class ConfigLoader:
 
         return travel_matrix
 
-    def filter_unseen_films(
+    def filter_relevant_films(
         self, films: list[Film], seen_films: list[SeenFilm]
     ) -> list[Film]:
         """Filter out films that have been seen.
