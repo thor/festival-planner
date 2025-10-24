@@ -3,3 +3,4 @@
 **/.*_cache/
 .venv/
 .cursor/*.sqlite
+schedule.md
