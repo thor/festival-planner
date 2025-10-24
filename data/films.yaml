@@ -155,6 +155,15 @@ films:
 - title: Blå spor (The Blue Trail)
   country: Brasil, Mexico, Nederland, Chile
   year: 2025
+  start_time: '2025-11-06T18:00:00'
+  end_time: '2025-11-06T19:55:00'
+  cinema: Klingenberg
+  auditorium: '1'
+  special_notes: Åpningsfilm
+  preference_weight: 1.0
+- title: Blå spor (The Blue Trail)
+  country: Brasil, Mexico, Nederland, Chile
+  year: 2025
   start_time: '2025-11-07T17:45:00'
   end_time: '2025-11-07T19:40:00'
   cinema: Vega
