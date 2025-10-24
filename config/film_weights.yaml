@@ -2,3 +2,6 @@ weights:
 - title: SØRprise
   start_time: '2025-11-09T18:15:00'
   weight: 10.0
+- title: North South Man Woman
+  start_time: '2025-11-12T18:00:00'
+  weight: 2.0

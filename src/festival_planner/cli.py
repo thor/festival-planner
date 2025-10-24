@@ -245,6 +245,14 @@ def set_weight(
     # Load all films
     film_list = loader.load_films()
     
+    # Load existing custom weight overrides
+    weight_list = loader.load_film_weights()
+    
+    # Build lookup map for existing overrides: (title, start_time) -> weight
+    override_map = {
+        (w.title, w.start_time): w.weight for w in weight_list.weights
+    }
+    
     # Filter by search term if provided
     films = film_list.films
     if search:
@@ -269,8 +277,15 @@ def set_weight(
         if film.auditorium:
             cinema_str += f" {film.auditorium}"
         
+        # Check if this film has a custom weight override
+        key = (film.title, film.start_time)
+        if key in override_map:
+            weight_display = f"{override_map[key]:+.1f} [custom]"
+        else:
+            weight_display = f"{film.preference_weight:+.1f}"
+        
         # Create a formatted string for fzf display
-        formatted = f"{film.title:<60} │ {date_str} {time_str} │ {cinema_str:<25} │ Weight: {film.preference_weight:+.1f}"
+        formatted = f"{film.title:<60} │ {date_str} {time_str} │ {cinema_str:<25} │ Weight: {weight_display}"
         film_strings.append(formatted)
         film_map[formatted] = film
     
@@ -291,14 +306,16 @@ def set_weight(
     
     selected_film = film_map[selected]
     
+    # Get current weight (custom override or preference weight)
+    key = (selected_film.title, selected_film.start_time)
+    current_weight = override_map.get(key, selected_film.preference_weight)
+    weight_type = "custom" if key in override_map else "scraped"
+    
     # Ask for weight
     weight = typer.prompt(
-        f"\nEnter custom weight for '{selected_film.title}' (current: {selected_film.preference_weight:+.1f})",
+        f"\nEnter custom weight for '{selected_film.title}' (current: {current_weight:+.1f} [{weight_type}])",
         type=float,
     )
-    
-    # Load existing weights
-    weight_list = loader.load_film_weights()
     
     # Check if this screening already has an override
     existing_idx = None
