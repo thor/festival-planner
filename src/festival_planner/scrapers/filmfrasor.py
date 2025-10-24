@@ -45,7 +45,7 @@ class FilmfrasorScraper(BaseScraper):
         self.force_refresh = force_refresh
         self.config_dir = config_dir
         self.language = language
-        self.known_cinemas: set[Cinema] = set()  # Store known cinema names for parsing
+        self.known_cinemas: set[str] = set()  # Store known cinema names for parsing
 
         # Set up HTTP cache directory
         if cache_dir:
