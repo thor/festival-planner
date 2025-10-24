@@ -152,12 +152,12 @@ def solve(
 
     # Load seen films and filter
     seen_list = loader.load_seen_films()
-    unseen_films = loader.filter_relevant_films(film_list.films, seen_list.seen)
+    relevant_films = loader.filter_relevant_films(film_list.films, seen_list.seen)
     console.print(
-        f"[yellow]{len(film_list.films) - len(unseen_films)} films not relevant (seen or ignored)[/yellow]"
+        f"[yellow]{len(film_list.films) - len(relevant_films)} films not relevant (seen or ignored)[/yellow]"
     )
     console.print(
-        f"[green]{len(unseen_films)} film screenings available to schedule[/green]"
+        f"[green]{len(relevant_films)} film screenings available to schedule[/green]"
     )
 
     # Load cinema configuration
@@ -166,7 +166,7 @@ def solve(
 
     # Solve
     console.print("[bold blue]Solving optimization problem...[/bold blue]")
-    solver = FestivalScheduleSolver(unseen_films, travel_matrix, schedule_config)
+    solver = FestivalScheduleSolver(relevant_films, travel_matrix, schedule_config)
     scheduled_films = solver.solve(time_limit_seconds=time_limit)
 
     # Display results
@@ -178,7 +178,7 @@ def solve(
     console.print(f"Films scheduled: {len(scheduled_films)}")
 
     # Display comprehensive film overview
-    display_film_overview(unseen_films, scheduled_films)
+    display_film_overview(relevant_films, scheduled_films)
 
     # Display schedule
     display_schedule(scheduled_films)
