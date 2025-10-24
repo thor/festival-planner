@@ -13,6 +13,7 @@ class Film(BaseModel):
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
+    auditorium: str = Field(..., description="Auditorium number or name")
     special_notes: Optional[str] = Field(
         None, description="Special event information (Q&A, premiere, etc.)"
     )

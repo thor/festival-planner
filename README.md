@@ -10,6 +10,7 @@ A modular film festival scheduling optimizer that uses constraint programming to
 - **Preference Weighting**: Assign positive or negative weights to films you particularly want or want to avoid
 - **Seen Films Tracking**: Keep track of films you've already seen to avoid double-booking
 - **Web Scraping**: Built-in scraper for Filmfrasor.no (extensible for other festivals)
+- **HTTP Caching**: Uses [Hishel](https://github.com/karpetrosyan/hishel) to cache HTTP responses locally for faster subsequent scrapes
 - **Flexible Configuration**: YAML-based configuration for easy customization
 
 ## Installation
@@ -98,12 +99,27 @@ seen:
 ### 1. Scrape Film Data (Filmfrasor.no)
 
 ```bash
-mise exec -- festival-planner scrape
+mise festival-planner scrape
 ```
+
+The scraper uses **HTTP caching** powered by [Hishel](https://github.com/karpetrosyan/hishel) to store responses locally, making subsequent scrapes much faster and more respectful to the server.
 
 Options:
 - `--output`, `-o`: Custom output file path
 - `--year`, `-y`: Festival year (defaults to current year)
+- `--refresh`, `-r`: Force refresh - bypass HTTP cache and fetch fresh data
+
+Examples:
+```bash
+# First scrape - fetches from server and caches
+mise festival-planner scrape
+
+# Second scrape - uses cached data (instant!)
+mise festival-planner scrape
+
+# Force refresh when you need the latest data
+mise festival-planner scrape --refresh
+```
 
 ### 2. Solve the Schedule
 

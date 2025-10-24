@@ -11,9 +11,25 @@ from .config import ConfigLoader
 from .models import SeenFilm
 from .solver import FestivalScheduleSolver
 from .scrapers import FilmfrasorScraper
+from ._logging import configure_logging, get_logger
 
 app = typer.Typer(help="Festival Planner - Optimize your film festival schedule")
 console = Console()
+logger = get_logger(__name__)
+
+
+@app.callback()
+def main(
+    log_level: str = typer.Option(
+        "INFO",
+        "--log-level",
+        "-l",
+        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+        case_sensitive=False,
+    ),
+):
+    """Configure global settings for the festival planner."""
+    configure_logging(log_level)
 
 
 def get_default_paths():
@@ -36,22 +52,28 @@ def scrape(
         "-y",
         help="Festival year (default: current year)",
     ),
+    refresh: bool = typer.Option(
+        False,
+        "--refresh",
+        "-r",
+        help="Force refresh: bypass HTTP cache and fetch fresh data from server",
+    ),
 ):
     """Scrape the Filmfrasor.no programme and cache the results."""
     config_dir, data_dir = get_default_paths()
-
+    
     console.print("[bold blue]Scraping Filmfrasor.no...[/bold blue]")
-
-    scraper = FilmfrasorScraper(cache_dir=data_dir, year=year)
+    
+    scraper = FilmfrasorScraper(cache_dir=data_dir, year=year, force_refresh=refresh)
     film_list = scraper.scrape()
-
+    
     console.print(f"[green]Scraped {len(film_list.films)} films[/green]")
-
+    
     # Save to file
     loader = ConfigLoader(config_dir, data_dir)
     output_path = output or (data_dir / "films.yaml")
     loader.save_films(film_list, output_path)
-
+    
     console.print(f"[green]Saved to {output_path}[/green]")
 
 
