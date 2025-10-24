@@ -34,6 +34,3 @@ films:
     special_notes: "Opening night"
     preference_weight: 2.0
 
-# Note: To scrape real data from Filmfrasor.no, run:
-# mise exec -- festival-planner scrape
-
