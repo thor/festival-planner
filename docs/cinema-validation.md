@@ -32,11 +32,17 @@ All aliases are case-insensitive and automatically normalized to the canonical n
 
 ## Auditorium Parsing
 
-The scraper intelligently parses cinema and auditorium information:
+The scraper uses the cinema aliases from config to intelligently parse cinema and auditorium information:
 
-- `"Vika Kino 3"` → cinema: `"Vika"`, auditorium: `"3"`
+- `"Vika Kino 3"` → cinema: `"Vika Kino"`, auditorium: `"3"` (model normalizes "Vika Kino" → "Vika")
 - `"Cinemateket Lillebil"` → cinema: `"Cinemateket"`, auditorium: `"Lillebil"`
+- `"Vega 2"` → cinema: `"Vega"`, auditorium: `"2"`
 - `"Vega"` → cinema: `"Vega"`, auditorium: `None`
+
+**Key Design**:
+- The scraper extracts cinema + auditorium based on known cinema names from config
+- Cinema normalization happens in the Film model's Pydantic validator
+- This keeps the scraper simple and makes all normalization config-driven
 
 ## Adding New Cinemas or Aliases
 

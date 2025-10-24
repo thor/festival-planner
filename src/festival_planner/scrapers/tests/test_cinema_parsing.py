@@ -12,42 +12,30 @@ class TestCinemaAndAuditoriumParsing:
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Create a scraper instance for testing
-        self.scraper = FilmfrasorScraper()
-
-        # Load cinema config from actual config file for normalization testing
+        # Load cinema config from actual config file
         project_root = Path(__file__).parent.parent.parent.parent.parent
         config_dir = project_root / "config"
-        data_dir = project_root / "data"
-        loader = ConfigLoader(config_dir, data_dir)
-        cinema_config = loader.load_cinema_config()
+        
+        # Create a scraper instance with config_dir for cinema parsing
+        self.scraper = FilmfrasorScraper(config_dir=config_dir)
 
-        # Set up normalization map from config
-        if cinema_config.cinema_aliases:
-            normalization_map = build_normalization_map(cinema_config.cinema_aliases)
-            Film.set_normalization_map(normalization_map)
-
-        # Set up valid cinemas
-        valid_cinemas = loader.get_valid_cinemas(cinema_config)
-        Film.set_valid_cinemas(valid_cinemas)
-
-    # Test cases for Vika Kino normalization
+    # Test cases for Vika Kino parsing (normalization happens in Film model)
     def test_vika_kino_normalized_to_vika(self):
-        """Test that 'Vika Kino' is normalized to just 'Vika'."""
+        """Test that 'Vika Kino' is parsed correctly (model will normalize)."""
         cinema, auditorium = self.scraper._split_cinema_and_auditorium("Vika Kino")
-        assert cinema == "Vika"
+        assert cinema == "Vika Kino"  # Parser returns as-is, model normalizes
         assert auditorium is None
 
     def test_vika_kino_with_number(self):
-        """Test that 'Vika Kino 3' becomes cinema='Vika', auditorium='3'."""
+        """Test that 'Vika Kino 3' becomes cinema='Vika Kino', auditorium='3'."""
         cinema, auditorium = self.scraper._split_cinema_and_auditorium("Vika Kino 3")
-        assert cinema == "Vika"
+        assert cinema == "Vika Kino"  # Parser returns as-is, model normalizes
         assert auditorium == "3"
 
     def test_vika_kino_case_insensitive(self):
-        """Test that 'VIKA KINO' is normalized (case insensitive)."""
+        """Test that 'VIKA KINO' is parsed correctly (case insensitive matching)."""
         cinema, auditorium = self.scraper._split_cinema_and_auditorium("VIKA KINO")
-        assert cinema == "Vika"
+        assert cinema == "VIKA KINO"  # Preserves original case
         assert auditorium is None
 
     def test_vika_with_number(self):
@@ -94,9 +82,9 @@ class TestCinemaAndAuditoriumParsing:
         assert auditorium is None
 
     def test_cinemateket_case_insensitive(self):
-        """Test that 'cinemateket lillebil' works (case insensitive)."""
+        """Test that 'cinemateket lillebil' works (case insensitive matching)."""
         cinema, auditorium = self.scraper._split_cinema_and_auditorium("cinemateket lillebil")
-        assert cinema == "Cinemateket"
+        assert cinema == "cinemateket"  # Preserves original case
         assert auditorium == "lillebil"
 
     # Test cases for Vega
@@ -152,7 +140,7 @@ class TestCinemaAndAuditoriumParsing:
 
     def test_cinemateket_with_multi_word_auditorium(self):
         """Test Cinemateket with multi-word auditorium name."""
-        # Only takes first word after Cinemateket
+        # Takes all words after Cinemateket as auditorium
         cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket Store Sal")
         assert cinema == "Cinemateket"
         assert auditorium == "Store Sal"

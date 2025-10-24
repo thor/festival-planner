@@ -43,6 +43,7 @@ class FilmfrasorScraper(BaseScraper):
         self.year = year or datetime.now().year
         self.force_refresh = force_refresh
         self.config_dir = config_dir
+        self.known_cinemas = set()  # Store known cinema names for parsing
 
         # Set up HTTP cache directory
         if cache_dir:
@@ -97,6 +98,13 @@ class FilmfrasorScraper(BaseScraper):
             if cinema_config.cinema_aliases:
                 normalization_map = build_normalization_map(cinema_config.cinema_aliases)
                 Film.set_normalization_map(normalization_map)
+                
+                # Store known cinema names (canonical + aliases) for parsing
+                for canonical, aliases in cinema_config.cinema_aliases.items():
+                    self.known_cinemas.add(canonical.lower())
+                    for alias in aliases:
+                        self.known_cinemas.add(alias.lower())
+                
                 logger.info(
                     "Cinema normalization enabled",
                     canonical_names=sorted(cinema_config.cinema_aliases.keys()),
@@ -430,17 +438,17 @@ class FilmfrasorScraper(BaseScraper):
 
         return (start_time, end_time, cinema, auditorium, special_notes)
 
-    def _split_cinema_and_auditorium(self, cinema_text: str) -> tuple[str, str]:
+    def _split_cinema_and_auditorium(self, cinema_text: str) -> tuple[str, Optional[str]]:
         """Split cinema text into cinema name and auditorium.
+        
+        Uses config-based cinema names to intelligently parse the text.
+        Cinema normalization is handled by the Film model's validator.
 
-        Rules:
-        - "Vika Kino" -> cinema="Vika", auditorium=None
-        - "Vika Kino 3" -> cinema="Vika", auditorium="3"
-        - "Vika 3" -> cinema="Vika", auditorium="3"
-        - "Cinemateket Lillebil" -> cinema="Cinemateket", auditorium="Lillebil"
-        - "Cinemateket" -> cinema="Cinemateket", auditorium=None
-        - "Vega 2" -> cinema="Vega", auditorium="2"
-        - "Vega" -> cinema="Vega", auditorium=None
+        Examples:
+        - "Vika Kino 3" -> ("Vika Kino", "3")  # Model normalizes to "Vika"
+        - "Cinemateket Lillebil" -> ("Cinemateket", "Lillebil")
+        - "Vega 2" -> ("Vega", "2")
+        - "Vega" -> ("Vega", None)
 
         Args:
             cinema_text: Text like "Vika 3" or "Cinemateket Lillebil"
@@ -449,32 +457,32 @@ class FilmfrasorScraper(BaseScraper):
             Tuple of (cinema, auditorium) where auditorium may be None
         """
         cinema_text = cinema_text.strip()
-
-        # Special case: "Vika Kino" should be normalized to just "Vika"
-        if cinema_text.lower().startswith("vika kino"):
-            # Check if there's a number after "Vika Kino"
-            rest = cinema_text[len("vika kino"):].strip()
-            if rest and rest.isdigit():
-                return "Vika", rest
-            return "Vika", None
-
-        # Pattern: "Cinema Number" (e.g., "Vika 3", "Vega 2")
+        if not cinema_text:
+            return cinema_text, None
+        
+        cinema_text_lower = cinema_text.lower()
+        
+        # Try to match known cinema names (longest first to avoid partial matches)
+        if self.known_cinemas:
+            # Sort by length descending to match longest names first
+            sorted_cinemas = sorted(self.known_cinemas, key=len, reverse=True)
+            
+            for known_cinema in sorted_cinemas:
+                if cinema_text_lower.startswith(known_cinema):
+                    # Extract cinema name (preserve original case)
+                    cinema_name = cinema_text[:len(known_cinema)]
+                    # Extract rest as auditorium
+                    rest = cinema_text[len(known_cinema):].strip()
+                    
+                    return cinema_name, rest if rest else None
+        
+        # Fallback: Generic pattern matching for "Cinema Number"
         match = re.search(r"^(.+?)\s+(\d+)$", cinema_text)
         if match:
             cinema = match.group(1).strip()
             auditorium = match.group(2)
-            # Normalize "Vika Kino" to "Vika" in cinema part
-            if cinema.lower() == "vika kino":
-                cinema = "Vika"
             return cinema, auditorium
-
-        # Pattern: "Cinemateket Word" (e.g., "Cinemateket Lillebil")
-        if cinema_text.lower().startswith("cinemateket"):
-            parts = cinema_text.split(None, 1)  # Split on first whitespace
-            if len(parts) == 2:
-                return "Cinemateket", parts[1]
-            return "Cinemateket", None
-
+        
         # No auditorium found
         return cinema_text, None
 
