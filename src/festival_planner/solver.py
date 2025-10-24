@@ -9,6 +9,10 @@ from ._logging import get_logger
 
 logger = get_logger(__name__)
 
+# Constants
+WEIGHT_PRECISION_MULTIPLIER = 1000  # Scale weights to integers for OR-Tools
+DEFAULT_TRAVEL_TIME_MINUTES = 30  # Default travel time when not specified in config
+
 
 class FestivalScheduleSolver:
     """Solves the festival scheduling optimization problem using OR-Tools CP-SAT."""
@@ -63,7 +67,26 @@ class FestivalScheduleSolver:
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             return self._extract_schedule(filtered_films)
         else:
-            logger.error("No solution found", status=status, status_name=self.solver.StatusName())
+            # Provide helpful error message based on status
+            status_name = self.solver.StatusName()
+            if status == cp_model.INFEASIBLE:
+                logger.error(
+                    "No feasible solution found. Constraints are too strict - "
+                    "try reducing buffer time, expanding date range, or checking travel times.",
+                    status=status_name,
+                    num_films=len(filtered_films),
+                )
+            elif status == cp_model.MODEL_INVALID:
+                logger.error(
+                    "Model is invalid. This is likely a bug in the solver.",
+                    status=status_name,
+                )
+            else:
+                logger.error(
+                    "Solver did not find a solution",
+                    status=status_name,
+                    num_films=len(filtered_films),
+                )
             return []
 
     def _filter_films_by_date(self) -> list[Film]:
@@ -117,8 +140,7 @@ class FestivalScheduleSolver:
             dynamic_weight = self._calculate_film_weight(film)
 
             # Scale to integer (OR-Tools works with integers)
-            # Multiply by 1000 to preserve precision
-            weight = int(dynamic_weight * 1000)
+            weight = int(dynamic_weight * WEIGHT_PRECISION_MULTIPLIER)
             objective_terms.append(self.attend_vars[i] * weight)
 
         self.model.Maximize(sum(objective_terms))
@@ -196,8 +218,8 @@ class FestivalScheduleSolver:
         elif (to_cinema, from_cinema) in self.travel_time_matrix:
             return self.travel_time_matrix[(to_cinema, from_cinema)]
         else:
-            # If no travel time is specified, assume a default (30 minutes)
-            return 30
+            # If no travel time is specified, use default
+            return DEFAULT_TRAVEL_TIME_MINUTES
 
     def _extract_schedule(self, films: list[Film]) -> list[ScheduledFilm]:
         """Extract the schedule from the solved model.
@@ -235,11 +257,15 @@ class FestivalScheduleSolver:
         Returns:
             Dictionary with solver statistics
         """
+        # Get objective value, handling the case where it might be 0
+        obj_value = self.solver.ObjectiveValue()
+        scaled_obj_value = (
+            obj_value / WEIGHT_PRECISION_MULTIPLIER if obj_value is not None else 0.0
+        )
+        
         return {
             "status": self.solver.StatusName(),
-            "objective_value": self.solver.ObjectiveValue() / 1000.0
-            if self.solver.ObjectiveValue()
-            else 0,
+            "objective_value": scaled_obj_value,
             "wall_time": self.solver.WallTime(),
             "branches": self.solver.NumBranches(),
             "conflicts": self.solver.NumConflicts(),
