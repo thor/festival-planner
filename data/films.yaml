@@ -1,6 +1,6 @@
 films:
 - title: A Bright Future
-  country: Unknown
+  country: Uruguay, Argentina, Tyskland
   start_time: '2025-11-08T13:15:00'
   end_time: '2025-11-08T14:53:00'
   cinema: Vika
@@ -8,7 +8,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Bright Future
-  country: Unknown
+  country: Uruguay, Argentina, Tyskland
   start_time: '2025-11-12T20:45:00'
   end_time: '2025-11-12T22:23:00'
   cinema: Vika
@@ -16,7 +16,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Bright Future
-  country: Unknown
+  country: Uruguay, Argentina, Tyskland
   start_time: '2025-11-15T15:45:00'
   end_time: '2025-11-15T17:23:00'
   cinema: Vega
@@ -24,7 +24,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Poet
-  country: Unknown
+  country: Colombia, Tyskland, Sverige
   start_time: '2025-11-09T15:15:00'
   end_time: '2025-11-09T17:15:00'
   cinema: Cinemateket
@@ -32,7 +32,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Poet
-  country: Unknown
+  country: Colombia, Tyskland, Sverige
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T22:30:00'
   cinema: Vika
@@ -40,7 +40,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Poet
-  country: Unknown
+  country: Colombia, Tyskland, Sverige
   start_time: '2025-11-16T17:30:00'
   end_time: '2025-11-16T19:30:00'
   cinema: Vega
@@ -48,7 +48,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: A Warm Christmas
-  country: Unknown
+  country: Nigeria, Canada
   start_time: '2025-11-09T16:15:00'
   end_time: '2025-11-09T17:51:00'
   cinema: Vika
@@ -56,7 +56,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: A Warm Christmas
-  country: Unknown
+  country: Nigeria, Canada
   start_time: '2025-11-13T17:30:00'
   end_time: '2025-11-13T19:06:00'
   cinema: Vika
@@ -64,7 +64,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-10T20:45:00'
   end_time: '2025-11-10T22:30:00'
   cinema: Vika
@@ -72,7 +72,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-12T17:30:00'
   end_time: '2025-11-12T19:45:00'
   cinema: Vika
@@ -80,7 +80,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: At this Moment, in the Nation's Sky
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-14T15:30:00'
   end_time: '2025-11-14T17:15:00'
   cinema: Cinemateket
@@ -88,7 +88,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bare et uhell (It Was Just an Accident)
-  country: Unknown
+  country: Iran, Frankrike, Luxembourg
   start_time: '2025-11-08T20:00:00'
   end_time: '2025-11-08T21:45:00'
   cinema: Vika
@@ -96,7 +96,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bare et uhell (It Was Just an Accident)
-  country: Unknown
+  country: Iran, Frankrike, Luxembourg
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T22:15:00'
   cinema: Cinemateket
@@ -104,7 +104,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bare et uhell (It Was Just an Accident)
-  country: Unknown
+  country: Iran, Frankrike, Luxembourg
   start_time: '2025-11-14T08:00:00'
   end_time: '2025-11-14T09:45:00'
   cinema: Vega
@@ -112,7 +112,7 @@ films:
   special_notes: Frokostvisning
   preference_weight: 1.0
 - title: Bare et uhell (It Was Just an Accident)
-  country: Unknown
+  country: Iran, Frankrike, Luxembourg
   start_time: '2025-11-15T20:45:00'
   end_time: '2025-11-15T22:30:00'
   cinema: Vega
@@ -120,7 +120,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Blame
-  country: Unknown
+  country: Sveits
   start_time: '2025-11-11T17:00:00'
   end_time: '2025-11-11T19:42:00'
   cinema: Vika
@@ -128,7 +128,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Blame
-  country: Unknown
+  country: Sveits
   start_time: '2025-11-14T17:00:00'
   end_time: '2025-11-14T19:02:00'
   cinema: Vika
@@ -136,7 +136,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Blå spor (The Blue Trail)
-  country: Unknown
+  country: Brasil, Mexico, Nederland, Chile
   start_time: '2025-11-07T17:45:00'
   end_time: '2025-11-07T19:40:00'
   cinema: Vega
@@ -144,7 +144,7 @@ films:
   special_notes: Artist Talk
   preference_weight: 1.0
 - title: Blå spor (The Blue Trail)
-  country: Unknown
+  country: Brasil, Mexico, Nederland, Chile
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T19:25:00'
   cinema: Cinemateket
@@ -152,7 +152,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Blå spor (The Blue Trail)
-  country: Unknown
+  country: Brasil, Mexico, Nederland, Chile
   start_time: '2025-11-16T20:45:00'
   end_time: '2025-11-16T22:10:00'
   cinema: Vega
@@ -160,7 +160,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Boong
-  country: Unknown
+  country: India
   start_time: '2025-11-08T15:15:00'
   end_time: '2025-11-08T16:48:00'
   cinema: Cinemateket
@@ -168,7 +168,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Boong
-  country: Unknown
+  country: India
   start_time: '2025-11-11T13:00:00'
   end_time: '2025-11-11T14:33:00'
   cinema: Vega
@@ -176,7 +176,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Boong
-  country: Unknown
+  country: India
   start_time: '2025-11-15T13:15:00'
   end_time: '2025-11-15T14:48:00'
   cinema: Vika
@@ -184,7 +184,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Brasils hjerte
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-09T17:45:00'
   end_time: '2025-11-09T19:35:00'
   cinema: Cinemateket
@@ -192,7 +192,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Burning
-  country: Unknown
+  country: Sør-Korea, Japan
   start_time: '2025-11-09T20:30:00'
   end_time: '2025-11-09T22:58:00'
   cinema: Vega
@@ -200,7 +200,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Bury Us in a Lone Desert
-  country: Unknown
+  country: Vietnam
   start_time: '2025-11-08T13:15:00'
   end_time: '2025-11-08T14:17:00'
   cinema: Cinemateket
@@ -208,7 +208,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bury Us in a Lone Desert
-  country: Unknown
+  country: Vietnam
   start_time: '2025-11-13T18:45:00'
   end_time: '2025-11-13T19:47:00'
   cinema: Vika
@@ -216,7 +216,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bury Us in a Lone Desert
-  country: Unknown
+  country: Vietnam
   start_time: '2025-11-15T15:15:00'
   end_time: '2025-11-15T16:17:00'
   cinema: Vega
@@ -224,7 +224,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bury Your Dead
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-08T18:00:00'
   end_time: '2025-11-08T20:08:00'
   cinema: Vika
@@ -232,7 +232,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Bury Your Dead
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-10T15:30:00'
   end_time: '2025-11-10T17:38:00'
   cinema: Vega
@@ -240,7 +240,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Cielo
-  country: Unknown
+  country: Bolivia, Storbritannia
   start_time: '2025-11-09T17:45:00'
   end_time: '2025-11-09T19:54:00'
   cinema: Vika
@@ -248,7 +248,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Cielo
-  country: Unknown
+  country: Bolivia, Storbritannia
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T20:09:00'
   cinema: Vika
@@ -256,7 +256,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Cielo
-  country: Unknown
+  country: Bolivia, Storbritannia
   start_time: '2025-11-14T15:00:00'
   end_time: '2025-11-14T16:49:00'
   cinema: Vega
@@ -264,7 +264,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Comandante Fritz
-  country: Unknown
+  country: Tyskland, Spania, Cuba
   start_time: '2025-11-07T20:00:00'
   end_time: '2025-11-07T21:46:00'
   cinema: Vika
@@ -272,7 +272,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Comandante Fritz
-  country: Unknown
+  country: Tyskland, Spania, Cuba
   start_time: '2025-11-11T18:00:00'
   end_time: '2025-11-11T19:46:00'
   cinema: Vika
@@ -280,7 +280,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Comandante Fritz
-  country: Unknown
+  country: Tyskland, Spania, Cuba
   start_time: '2025-11-13T16:15:00'
   end_time: '2025-11-13T18:01:00'
   cinema: Vika
@@ -288,7 +288,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Corina
-  country: Unknown
+  country: Mexico
   start_time: '2025-11-15T18:15:00'
   end_time: '2025-11-15T20:11:00'
   cinema: Vega
@@ -296,7 +296,7 @@ films:
   special_notes: Samtale & Fest
   preference_weight: 1.0
 - title: Corina
-  country: Unknown
+  country: Mexico
   start_time: '2025-11-16T15:30:00'
   end_time: '2025-11-16T17:06:00'
   cinema: Vega
@@ -304,7 +304,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Creation of the Gods II: Demon Force'
-  country: Unknown
+  country: Kina
   start_time: '2025-11-10T20:00:00'
   end_time: '2025-11-10T22:25:00'
   cinema: Vika
@@ -312,7 +312,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Creation of the Gods II: Demon Force'
-  country: Unknown
+  country: Kina
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:55:00'
   cinema: Vega
@@ -320,7 +320,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Creation of the Gods II: Demon Force'
-  country: Unknown
+  country: Kina
   start_time: '2025-11-15T20:00:00'
   end_time: '2025-11-15T22:25:00'
   cinema: Cinemateket
@@ -328,7 +328,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Daibosatsu Pass
-  country: Unknown
+  country: Japan
   start_time: '2025-11-09T15:00:00'
   end_time: '2025-11-09T16:45:00'
   cinema: Cinemateket
@@ -336,7 +336,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: 'Daibosatsu Pass: The Final Chapter'
-  country: Unknown
+  country: Japan
   start_time: '2025-11-16T17:30:00'
   end_time: '2025-11-16T19:10:00'
   cinema: Cinemateket
@@ -344,7 +344,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Den første dagen
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-10T20:15:00'
   end_time: '2025-11-10T21:30:00'
   cinema: Cinemateket
@@ -352,7 +352,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Eagles of the Republic
-  country: Unknown
+  country: Egypt, Sverige, Danmark, Finland
   start_time: '2025-11-10T17:30:00'
   end_time: '2025-11-10T19:39:00'
   cinema: Vika
@@ -360,7 +360,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: El día que me quieras
-  country: Unknown
+  country: Argentina, USA
   start_time: '2025-11-14T18:00:00'
   end_time: '2025-11-14T19:22:00'
   cinema: Cinemateket
@@ -368,7 +368,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Everest Dark
-  country: Unknown
+  country: Canada, Nepal
   start_time: '2025-11-07T18:00:00'
   end_time: '2025-11-07T19:28:00'
   cinema: Vika
@@ -376,7 +376,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Everest Dark
-  country: Unknown
+  country: Canada, Nepal
   start_time: '2025-11-13T17:00:00'
   end_time: '2025-11-13T19:08:00'
   cinema: Vika
@@ -384,7 +384,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Everest Dark
-  country: Unknown
+  country: Canada, Nepal
   start_time: '2025-11-15T13:15:00'
   end_time: '2025-11-15T14:43:00'
   cinema: Vega
@@ -392,7 +392,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Film & Konsert // Urban Girl Comes to Get Married
-  country: Unknown
+  country: Nord-Korea
   start_time: '2025-11-15T19:00:00'
   end_time: '2025-11-15T20:13:00'
   cinema: Vega
@@ -400,7 +400,7 @@ films:
   special_notes: Film & Konsert
   preference_weight: 1.0
 - title: Frantz Fanon
-  country: Unknown
+  country: Algerie, Frankrike
   start_time: '2025-11-07T17:00:00'
   end_time: '2025-11-07T19:00:00'
   cinema: Vika
@@ -408,7 +408,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Frantz Fanon
-  country: Unknown
+  country: Algerie, Frankrike
   start_time: '2025-11-11T16:30:00'
   end_time: '2025-11-11T18:00:00'
   cinema: Vega
@@ -416,7 +416,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Frantz Fanon
-  country: Unknown
+  country: Algerie, Frankrike
   start_time: '2025-11-16T13:00:00'
   end_time: '2025-11-16T14:30:00'
   cinema: Vega
@@ -424,7 +424,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Fremdeles her (I'm Still Here)
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-11T17:00:00'
   end_time: '2025-11-11T19:47:00'
   cinema: Cinemateket
@@ -432,7 +432,7 @@ films:
   special_notes: Artist Talk
   preference_weight: 1.0
 - title: Fremdeles her (I'm Still Here)
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-12T20:00:00'
   end_time: '2025-11-12T22:17:00'
   cinema: Vika
@@ -440,7 +440,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Fremdeles her (I'm Still Here)
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-15T17:00:00'
   end_time: '2025-11-15T19:17:00'
   cinema: Vega
@@ -448,7 +448,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Fremmed land
-  country: Unknown
+  country: Brasil, Portugal
   start_time: '2025-11-08T17:30:00'
   end_time: '2025-11-08T19:20:00'
   cinema: Cinemateket
@@ -456,7 +456,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Girls on Wire
-  country: Unknown
+  country: Kina
   start_time: '2025-11-08T15:30:00'
   end_time: '2025-11-08T17:25:00'
   cinema: Vika
@@ -464,7 +464,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Girls on Wire
-  country: Unknown
+  country: Kina
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T22:25:00'
   cinema: Cinemateket
@@ -472,7 +472,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Girls on Wire
-  country: Unknown
+  country: Kina
   start_time: '2025-11-15T20:30:00'
   end_time: '2025-11-15T22:25:00'
   cinema: Vega
@@ -480,7 +480,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Gjenfødelse (Resurrection)
-  country: Unknown
+  country: Kina, Frankrike, USA
   start_time: '2025-11-09T20:00:00'
   end_time: '2025-11-09T22:40:00'
   cinema: Cinemateket
@@ -488,7 +488,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Gjenfødelse (Resurrection)
-  country: Unknown
+  country: Kina, Frankrike, USA
   start_time: '2025-11-15T20:00:00'
   end_time: '2025-11-15T22:40:00'
   cinema: Vika
@@ -496,7 +496,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
-  country: Unknown
+  country: Iran, Tyskland
   start_time: '2025-11-10T17:00:00'
   end_time: '2025-11-10T18:54:00'
   cinema: Vika
@@ -504,7 +504,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
-  country: Unknown
+  country: Iran, Tyskland
   start_time: '2025-11-11T20:45:00'
   end_time: '2025-11-11T22:39:00'
   cinema: Vega
@@ -512,7 +512,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Googoosh - Made of Fire
-  country: Unknown
+  country: Iran, Tyskland
   start_time: '2025-11-15T15:30:00'
   end_time: '2025-11-15T17:04:00'
   cinema: Vika
@@ -520,7 +520,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Happyend
-  country: Unknown
+  country: Japan, USA, Singapore, Storbritannia
   start_time: '2025-11-08T19:45:00'
   end_time: '2025-11-08T21:38:00'
   cinema: Cinemateket
@@ -528,7 +528,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Happyend
-  country: Unknown
+  country: Japan, USA, Singapore, Storbritannia
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T22:23:00'
   cinema: Vega
@@ -536,7 +536,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Happyend
-  country: Unknown
+  country: Japan, USA, Singapore, Storbritannia
   start_time: '2025-11-15T20:30:00'
   end_time: '2025-11-15T22:23:00'
   cinema: Vega
@@ -544,7 +544,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hard Boiled
-  country: Unknown
+  country: Hong Kong
   start_time: '2025-11-14T20:15:00'
   end_time: '2025-11-14T22:23:00'
   cinema: Cinemateket
@@ -552,7 +552,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Heart of Darkness
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-09T20:45:00'
   end_time: '2025-11-09T22:09:00'
   cinema: Vika
@@ -560,7 +560,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Heart of Darkness
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-13T15:45:00'
   end_time: '2025-11-13T17:09:00'
   cinema: Vega
@@ -568,7 +568,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Heart of Darkness
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-16T20:00:00'
   end_time: '2025-11-16T21:24:00'
   cinema: Cinemateket
@@ -576,7 +576,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hei Frida!
-  country: Unknown
+  country: Frankrike, Canada, Mexico
   start_time: '2025-11-08T13:00:00'
   end_time: '2025-11-08T14:22:00'
   cinema: Vika
@@ -584,7 +584,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hei Frida!
-  country: Unknown
+  country: Frankrike, Canada, Mexico
   start_time: '2025-11-09T13:15:00'
   end_time: '2025-11-09T14:37:00'
   cinema: Vika
@@ -592,7 +592,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hei Frida!
-  country: Unknown
+  country: Frankrike, Canada, Mexico
   start_time: '2025-11-16T13:00:00'
   end_time: '2025-11-16T14:22:00'
   cinema: Cinemateket
@@ -600,7 +600,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hind Rajabs stemme (The Voice of Hind Rajab)
-  country: Unknown
+  country: Tunisia, Frankrike, Palestina
   start_time: '2025-11-08T17:30:00'
   end_time: '2025-11-08T18:59:00'
   cinema: Vika
@@ -608,7 +608,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hind Rajabs stemme (The Voice of Hind Rajab)
-  country: Unknown
+  country: Tunisia, Frankrike, Palestina
   start_time: '2025-11-10T18:30:00'
   end_time: '2025-11-10T19:59:00'
   cinema: Vega
@@ -616,7 +616,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hind Rajabs stemme (The Voice of Hind Rajab)
-  country: Unknown
+  country: Tunisia, Frankrike, Palestina
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T21:59:00'
   cinema: Vika
@@ -624,7 +624,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hind Rajabs stemme (The Voice of Hind Rajab)
-  country: Unknown
+  country: Tunisia, Frankrike, Palestina
   start_time: '2025-11-15T16:15:00'
   end_time: '2025-11-15T17:44:00'
   cinema: Cinemateket
@@ -632,7 +632,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hotspring Sharkattack
-  country: Unknown
+  country: Japan
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:10:00'
   cinema: Cinemateket
@@ -640,7 +640,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Hotspring Sharkattack
-  country: Unknown
+  country: Japan
   start_time: '2025-11-11T21:00:00'
   end_time: '2025-11-11T22:10:00'
   cinema: Vega
@@ -648,7 +648,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Hotspring Sharkattack
-  country: Unknown
+  country: Japan
   start_time: '2025-11-13T21:00:00'
   end_time: '2025-11-13T22:10:00'
   cinema: Vega
@@ -656,7 +656,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Jeg er sangen (I, the Song)
-  country: Unknown
+  country: Bhutan, Norge, Italia, Frankrike
   start_time: '2025-11-09T16:00:00'
   end_time: '2025-11-09T17:53:00'
   cinema: Vika
@@ -664,7 +664,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Jeg er sangen (I, the Song)
-  country: Unknown
+  country: Bhutan, Norge, Italia, Frankrike
   start_time: '2025-11-12T15:30:00'
   end_time: '2025-11-12T17:23:00'
   cinema: Vika
@@ -672,7 +672,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Jeg er sangen (I, the Song)
-  country: Unknown
+  country: Bhutan, Norge, Italia, Frankrike
   start_time: '2025-11-15T15:00:00'
   end_time: '2025-11-15T16:53:00'
   cinema: Cinemateket
@@ -680,7 +680,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Jia Zhangke: A Guy from Fenyang'
-  country: Unknown
+  country: Brasil, Frankrike
   start_time: '2025-11-14T15:00:00'
   end_time: '2025-11-14T16:45:00'
   cinema: Cinemateket
@@ -688,7 +688,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Joint Security Area
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T21:15:00'
   end_time: '2025-11-09T23:03:00'
   cinema: Vega
@@ -696,7 +696,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Kill the Jockey
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-07T20:30:00'
   end_time: '2025-11-07T22:06:00'
   cinema: Vika
@@ -704,7 +704,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Kill the Jockey
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-11T20:00:00'
   end_time: '2025-11-11T21:36:00'
   cinema: Vika
@@ -712,7 +712,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Kill the Jockey
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-12T13:00:00'
   end_time: '2025-11-12T14:36:00'
   cinema: Vega
@@ -720,7 +720,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Kill the Jockey
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-12T20:45:00'
   end_time: '2025-11-12T22:21:00'
   cinema: Vega
@@ -728,7 +728,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Kill the Jockey
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-15T20:45:00'
   end_time: '2025-11-15T22:21:00'
   cinema: Cinemateket
@@ -736,7 +736,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Left-Handed Girl
-  country: Unknown
+  country: Taiwan, USA, Storbritannia, Frankrike
   start_time: '2025-11-10T20:45:00'
   end_time: '2025-11-10T22:33:00'
   cinema: Vega
@@ -744,7 +744,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Left-Handed Girl
-  country: Unknown
+  country: Taiwan, USA, Storbritannia, Frankrike
   start_time: '2025-11-14T17:30:00'
   end_time: '2025-11-14T19:18:00'
   cinema: Vika
@@ -752,7 +752,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Left-Handed Girl
-  country: Unknown
+  country: Taiwan, USA, Storbritannia, Frankrike
   start_time: '2025-11-16T17:00:00'
   end_time: '2025-11-16T18:48:00'
   cinema: Cinemateket
@@ -760,7 +760,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Lille Amelie
-  country: Unknown
+  country: Frankrike, Japan
   start_time: '2025-11-08T13:00:00'
   end_time: '2025-11-08T14:15:00'
   cinema: Cinemateket
@@ -768,7 +768,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Lille Amelie
-  country: Unknown
+  country: Frankrike, Japan
   start_time: '2025-11-09T13:00:00'
   end_time: '2025-11-09T14:15:00'
   cinema: Cinemateket
@@ -776,7 +776,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Livet på landet (Living the land)
-  country: Unknown
+  country: Kina
   start_time: '2025-11-08T18:00:00'
   end_time: '2025-11-08T20:12:00'
   cinema: Vika
@@ -784,7 +784,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Livet på landet (Living the land)
-  country: Unknown
+  country: Kina
   start_time: '2025-11-11T17:30:00'
   end_time: '2025-11-11T19:42:00'
   cinema: Cinemateket
@@ -792,7 +792,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Livet på landet (Living the land)
-  country: Unknown
+  country: Kina
   start_time: '2025-11-13T17:45:00'
   end_time: '2025-11-13T19:57:00'
   cinema: Vika
@@ -800,7 +800,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Los rusos & Bestefar
-  country: Unknown
+  country: Argentina, Norge
   start_time: '2025-11-09T13:15:00'
   end_time: '2025-11-09T15:28:00'
   cinema: Vika
@@ -808,7 +808,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Lust in the Rain
-  country: Unknown
+  country: Japan, Taiwan
   start_time: '2025-11-07T17:30:00'
   end_time: '2025-11-07T19:42:00'
   cinema: Cinemateket
@@ -816,7 +816,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Lust in the Rain
-  country: Unknown
+  country: Japan, Taiwan
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T22:42:00'
   cinema: Vega
@@ -824,7 +824,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Lust in the Rain
-  country: Unknown
+  country: Japan, Taiwan
   start_time: '2025-11-13T17:45:00'
   end_time: '2025-11-13T19:57:00'
   cinema: Vega
@@ -832,7 +832,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: MA - Cry of Silence
-  country: Unknown
+  country: Myanmar, Tyskland, Norge, Frankrike, Qatar, Italia, Sør-Korea, Singapore
   start_time: '2025-11-08T13:45:00'
   end_time: '2025-11-08T14:59:00'
   cinema: Vika
@@ -840,7 +840,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: MA - Cry of Silence
-  country: Unknown
+  country: Myanmar, Tyskland, Norge, Frankrike, Qatar, Italia, Sør-Korea, Singapore
   start_time: '2025-11-10T18:30:00'
   end_time: '2025-11-10T19:44:00'
   cinema: Vika
@@ -848,7 +848,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: MA - Cry of Silence
-  country: Unknown
+  country: Myanmar, Tyskland, Norge, Frankrike, Qatar, Italia, Sør-Korea, Singapore
   start_time: '2025-11-12T18:15:00'
   end_time: '2025-11-12T19:29:00'
   cinema: Vega
@@ -856,7 +856,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Magellan
-  country: Unknown
+  country: Filippinene, Spania, Portugal, Frankrike, Taiwan
   start_time: '2025-11-09T16:45:00'
   end_time: '2025-11-09T19:25:00'
   cinema: Vika
@@ -864,7 +864,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Magellan
-  country: Unknown
+  country: Filippinene, Spania, Portugal, Frankrike, Taiwan
   start_time: '2025-11-14T17:30:00'
   end_time: '2025-11-14T20:10:00'
   cinema: Vega
@@ -872,7 +872,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Magellan
-  country: Unknown
+  country: Filippinene, Spania, Portugal, Frankrike, Taiwan
   start_time: '2025-11-16T13:30:00'
   end_time: '2025-11-16T16:10:00'
   cinema: Cinemateket
@@ -880,7 +880,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Manas
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-09T18:30:00'
   end_time: '2025-11-09T20:11:00'
   cinema: Vika
@@ -888,7 +888,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Manas
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-11T17:30:00'
   end_time: '2025-11-11T19:11:00'
   cinema: Vega
@@ -896,7 +896,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Manas
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-14T17:30:00'
   end_time: '2025-11-14T19:11:00'
   cinema: Cinemateket
@@ -904,7 +904,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Mistura
-  country: Unknown
+  country: Peru
   start_time: '2025-11-08T14:45:00'
   end_time: '2025-11-08T16:26:00'
   cinema: Vika
@@ -912,7 +912,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Mistura
-  country: Unknown
+  country: Peru
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T22:11:00'
   cinema: Vega
@@ -920,7 +920,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Mistura
-  country: Unknown
+  country: Peru
   start_time: '2025-11-15T17:30:00'
   end_time: '2025-11-15T19:11:00'
   cinema: Vika
@@ -928,7 +928,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Miyazaki, Spirit of Nature
-  country: Unknown
+  country: Frankrike, Japan
   start_time: '2025-11-08T15:00:00'
   end_time: '2025-11-08T16:24:00'
   cinema: Cinemateket
@@ -936,7 +936,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Miyazaki, Spirit of Nature
-  country: Unknown
+  country: Frankrike, Japan
   start_time: '2025-11-11T20:30:00'
   end_time: '2025-11-11T21:54:00'
   cinema: Vika
@@ -944,7 +944,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Miyazaki, Spirit of Nature
-  country: Unknown
+  country: Frankrike, Japan
   start_time: '2025-11-15T16:15:00'
   end_time: '2025-11-15T17:39:00'
   cinema: Vega
@@ -952,7 +952,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Monster Island
-  country: Unknown
+  country: Singapore, Indonesia, Japan, Storbritannia
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:23:00'
   cinema: Vika
@@ -960,7 +960,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Monster Island
-  country: Unknown
+  country: Singapore, Indonesia, Japan, Storbritannia
   start_time: '2025-11-09T21:00:00'
   end_time: '2025-11-09T22:23:00'
   cinema: Vika
@@ -968,7 +968,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Monster Island
-  country: Unknown
+  country: Singapore, Indonesia, Japan, Storbritannia
   start_time: '2025-11-13T20:30:00'
   end_time: '2025-11-13T21:53:00'
   cinema: Vika
@@ -976,7 +976,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Motorsykkeldagbøkene
-  country: Unknown
+  country: Brasil, Argentina, Peru, Chile, Frankrike, Storbritannia, USA, Tyskland
   start_time: '2025-11-15T13:15:00'
   end_time: '2025-11-15T15:21:00'
   cinema: Cinemateket
@@ -984,7 +984,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: My Father's Scent
-  country: Unknown
+  country: Egypt, Norge, Frankrike, Sverige, Qatar, Saudi-Arabia
   start_time: '2025-11-09T18:30:00'
   end_time: '2025-11-09T20:03:00'
   cinema: Vika
@@ -992,7 +992,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: My Father's Scent
-  country: Unknown
+  country: Egypt, Norge, Frankrike, Sverige, Qatar, Saudi-Arabia
   start_time: '2025-11-12T15:15:00'
   end_time: '2025-11-12T16:48:00'
   cinema: Vega
@@ -1000,7 +1000,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: My Father's Shadow
-  country: Unknown
+  country: Nigeria, Storbritannia, Irland
   start_time: '2025-11-09T20:45:00'
   end_time: '2025-11-09T22:19:00'
   cinema: Vika
@@ -1008,7 +1008,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: My Father's Shadow
-  country: Unknown
+  country: Nigeria, Storbritannia, Irland
   start_time: '2025-11-11T20:45:00'
   end_time: '2025-11-11T22:19:00'
   cinema: Cinemateket
@@ -1016,7 +1016,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: My Father's Shadow
-  country: Unknown
+  country: Nigeria, Storbritannia, Irland
   start_time: '2025-11-14T18:30:00'
   end_time: '2025-11-14T20:04:00'
   cinema: Vega
@@ -1024,7 +1024,7 @@ films:
   special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Night Stage
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-08T20:45:00'
   end_time: '2025-11-08T22:42:00'
   cinema: Vika
@@ -1032,7 +1032,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Night Stage
-  country: Unknown
+  country: Brasil
   start_time: '2025-11-14T20:45:00'
   end_time: '2025-11-14T22:42:00'
   cinema: Vega
@@ -1040,7 +1040,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Noise
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T21:00:00'
   end_time: '2025-11-09T22:33:00'
   cinema: Vega
@@ -1048,7 +1048,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Noise
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-11T20:45:00'
   end_time: '2025-11-11T22:18:00'
   cinema: Vika
@@ -1056,7 +1056,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Noise
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:03:00'
   cinema: Cinemateket
@@ -1064,7 +1064,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: North South Man Woman
-  country: Unknown
+  country: Norge, Latvia, Sør-Korea
   start_time: '2025-11-08T18:15:00'
   end_time: '2025-11-08T20:09:00'
   cinema: Vika
@@ -1072,7 +1072,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: North South Man Woman
-  country: Unknown
+  country: Norge, Latvia, Sør-Korea
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T19:34:00'
   cinema: Vika
@@ -1080,7 +1080,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: North South Man Woman
-  country: Unknown
+  country: Norge, Latvia, Sør-Korea
   start_time: '2025-11-16T15:30:00'
   end_time: '2025-11-16T17:24:00'
   cinema: Vega
@@ -1088,7 +1088,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Nostalgia for the Light
-  country: Unknown
+  country: Chile, Tyskland, Frankrike, Spania
   start_time: '2025-11-07T18:00:00'
   end_time: '2025-11-07T19:30:00'
   cinema: Vika
@@ -1096,7 +1096,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Nostalgia for the Light
-  country: Unknown
+  country: Chile, Tyskland, Frankrike, Spania
   start_time: '2025-11-11T15:15:00'
   end_time: '2025-11-11T16:45:00'
   cinema: Vega
@@ -1104,7 +1104,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Noviembre
-  country: Unknown
+  country: Colombia, Norge, Mexico, Brasil
   start_time: '2025-11-07T16:00:00'
   end_time: '2025-11-07T17:18:00'
   cinema: Vika
@@ -1112,7 +1112,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Noviembre
-  country: Unknown
+  country: Colombia, Norge, Mexico, Brasil
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T21:48:00'
   cinema: Vika
@@ -1120,7 +1120,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Noviembre
-  country: Unknown
+  country: Colombia, Norge, Mexico, Brasil
   start_time: '2025-11-12T16:00:00'
   end_time: '2025-11-12T17:18:00'
   cinema: Vega
@@ -1128,7 +1128,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Oceania: Journey to the Center'
-  country: Unknown
+  country: USA, Kiribati
   start_time: '2025-11-08T15:45:00'
   end_time: '2025-11-08T16:59:00'
   cinema: Vika
@@ -1136,7 +1136,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Oceania: Journey to the Center'
-  country: Unknown
+  country: USA, Kiribati
   start_time: '2025-11-10T18:15:00'
   end_time: '2025-11-10T19:49:00'
   cinema: Vega
@@ -1144,7 +1144,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: 'Oceania: Journey to the Center'
-  country: Unknown
+  country: USA, Kiribati
   start_time: '2025-11-13T13:30:00'
   end_time: '2025-11-13T14:44:00'
   cinema: Vega
@@ -1152,7 +1152,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Oldboy
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T15:45:00'
   end_time: '2025-11-09T17:44:00'
   cinema: Vega
@@ -1160,7 +1160,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: On Becoming a Guinea Fowl
-  country: Unknown
+  country: Zambia, Storbritannia, Irland, USA
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T22:09:00'
   cinema: Cinemateket
@@ -1168,7 +1168,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: On Becoming a Guinea Fowl
-  country: Unknown
+  country: Zambia, Storbritannia, Irland, USA
   start_time: '2025-11-13T15:30:00'
   end_time: '2025-11-13T17:09:00'
   cinema: Vega
@@ -1176,7 +1176,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: On Becoming a Guinea Fowl
-  country: Unknown
+  country: Zambia, Storbritannia, Irland, USA
   start_time: '2025-11-16T20:45:00'
   end_time: '2025-11-16T22:24:00'
   cinema: Vega
@@ -1184,7 +1184,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: 'Orwell: 2+2=5'
-  country: Unknown
+  country: USA, Frankrike
   start_time: '2025-11-10T18:15:00'
   end_time: '2025-11-10T20:14:00'
   cinema: Vega
@@ -1192,7 +1192,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Osamede
-  country: Unknown
+  country: Nigeria
   start_time: '2025-11-14T17:00:00'
   end_time: '2025-11-14T18:52:00'
   cinema: Vega
@@ -1200,7 +1200,7 @@ films:
   special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Outcry
-  country: Unknown
+  country: Iran
   start_time: '2025-11-12T17:00:00'
   end_time: '2025-11-12T19:04:00'
   cinema: Vika
@@ -1208,7 +1208,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Outcry
-  country: Unknown
+  country: Iran
   start_time: '2025-11-13T18:15:00'
   end_time: '2025-11-13T20:19:00'
   cinema: Vega
@@ -1216,7 +1216,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: Outcry
-  country: Unknown
+  country: Iran
   start_time: '2025-11-16T15:45:00'
   end_time: '2025-11-16T17:29:00'
   cinema: Vika
@@ -1224,7 +1224,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Palestine 36
-  country: Unknown
+  country: Palestina, Norge, Storbritannia, Frankrike, Qatar, Saudi-Arabia
   start_time: '2025-11-07T17:30:00'
   end_time: '2025-11-07T19:58:00'
   cinema: Vika
@@ -1232,7 +1232,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Palestine 36
-  country: Unknown
+  country: Palestina, Norge, Storbritannia, Frankrike, Qatar, Saudi-Arabia
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:28:00'
   cinema: Vega
@@ -1240,7 +1240,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Past Lives
-  country: Unknown
+  country: Sør-Korea, USA
   start_time: '2025-11-09T15:30:00'
   end_time: '2025-11-09T17:16:00'
   cinema: Vega
@@ -1248,7 +1248,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Phoenix Fury
-  country: Unknown
+  country: Nigeria, Ghana
   start_time: '2025-11-14T20:30:00'
   end_time: '2025-11-14T22:40:00'
   cinema: Vega
@@ -1256,7 +1256,7 @@ films:
   special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Prinsesse Mononoke
-  country: Unknown
+  country: Japan
   start_time: '2025-11-15T13:00:00'
   end_time: '2025-11-15T15:14:00'
   cinema: Vega
@@ -1264,7 +1264,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Prinsesse i røde sko
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T13:30:00'
   end_time: '2025-11-09T15:02:00'
   cinema: Vega
@@ -1272,7 +1272,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Prinsesse i røde sko
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-15T13:00:00'
   end_time: '2025-11-15T14:32:00'
   cinema: Cinemateket
@@ -1280,7 +1280,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Promised Sky
-  country: Unknown
+  country: Tunisia, Frankrike
   start_time: '2025-11-09T14:15:00'
   end_time: '2025-11-09T15:47:00'
   cinema: Vika
@@ -1288,7 +1288,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Promised Sky
-  country: Unknown
+  country: Tunisia, Frankrike
   start_time: '2025-11-13T18:15:00'
   end_time: '2025-11-13T19:47:00'
   cinema: Cinemateket
@@ -1296,7 +1296,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Promised Sky
-  country: Unknown
+  country: Tunisia, Frankrike
   start_time: '2025-11-15T13:30:00'
   end_time: '2025-11-15T15:02:00'
   cinema: Vega
@@ -1304,7 +1304,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Renoir
-  country: Unknown
+  country: Japan, Frankrike, Filippinene, Singapore, Indonesia
   start_time: '2025-11-07T20:30:00'
   end_time: '2025-11-07T22:30:00'
   cinema: Cinemateket
@@ -1312,7 +1312,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Return to Seoul
-  country: Unknown
+  country: Sør-Korea, Frankrike, Tyskland, Belgia, Romania
   start_time: '2025-11-09T13:00:00'
   end_time: '2025-11-09T14:56:00'
   cinema: Vega
@@ -1320,7 +1320,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Ringu
-  country: Unknown
+  country: Japan
   start_time: '2025-11-08T17:00:00'
   end_time: '2025-11-08T18:36:00'
   cinema: Cinemateket
@@ -1328,7 +1328,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Rita
-  country: Unknown
+  country: Guatemala
   start_time: '2025-11-07T21:00:00'
   end_time: '2025-11-07T22:47:00'
   cinema: Vika
@@ -1336,7 +1336,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Rita
-  country: Unknown
+  country: Guatemala
   start_time: '2025-11-12T18:00:00'
   end_time: '2025-11-12T19:47:00'
   cinema: Vega
@@ -1344,7 +1344,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Rita
-  country: Unknown
+  country: Guatemala
   start_time: '2025-11-16T13:00:00'
   end_time: '2025-11-16T14:47:00'
   cinema: Vega
@@ -1352,7 +1352,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Scarlet
-  country: Unknown
+  country: Japan
   start_time: '2025-11-07T17:00:00'
   end_time: '2025-11-07T18:52:00'
   cinema: Cinemateket
@@ -1360,7 +1360,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: Scarlet
-  country: Unknown
+  country: Japan
   start_time: '2025-11-09T20:00:00'
   end_time: '2025-11-09T21:52:00'
   cinema: Vika
@@ -1368,7 +1368,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Scarlet
-  country: Unknown
+  country: Japan
   start_time: '2025-11-13T18:00:00'
   end_time: '2025-11-13T19:52:00'
   cinema: Vega
@@ -1376,7 +1376,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silent City Driver
-  country: Unknown
+  country: Mongolia
   start_time: '2025-11-10T20:30:00'
   end_time: '2025-11-10T22:48:00'
   cinema: Vika
@@ -1384,7 +1384,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silent City Driver
-  country: Unknown
+  country: Mongolia
   start_time: '2025-11-12T20:15:00'
   end_time: '2025-11-12T22:33:00'
   cinema: Cinemateket
@@ -1392,7 +1392,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silent City Driver
-  country: Unknown
+  country: Mongolia
   start_time: '2025-11-16T17:45:00'
   end_time: '2025-11-16T20:03:00'
   cinema: Vega
@@ -1400,7 +1400,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silver
-  country: Unknown
+  country: Bolivia, Polen, Finland, Norge
   start_time: '2025-11-10T21:00:00'
   end_time: '2025-11-10T22:19:00'
   cinema: Vega
@@ -1408,7 +1408,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silver
-  country: Unknown
+  country: Bolivia, Polen, Finland, Norge
   start_time: '2025-11-12T18:15:00'
   end_time: '2025-11-12T19:34:00'
   cinema: Cinemateket
@@ -1416,7 +1416,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Silver
-  country: Unknown
+  country: Bolivia, Polen, Finland, Norge
   start_time: '2025-11-14T15:00:00'
   end_time: '2025-11-14T16:19:00'
   cinema: Vika
@@ -1424,7 +1424,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Sword-Cut
-  country: Unknown
+  country: Japan
   start_time: '2025-11-09T20:15:00'
   end_time: '2025-11-09T21:26:00'
   cinema: Cinemateket
@@ -1438,9 +1438,9 @@ films:
   cinema: Vega
   auditorium: '1'
   special_notes: null
-  preference_weight: 100.0
+  preference_weight: 1.0
 - title: The Conspiracy of the Yagyu Clan
-  country: Unknown
+  country: Japan
   start_time: '2025-11-08T20:30:00'
   end_time: '2025-11-08T22:40:00'
   cinema: Cinemateket
@@ -1448,7 +1448,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: The Dating Game
-  country: Unknown
+  country: Kina, USA, Norge
   start_time: '2025-11-07T15:45:00'
   end_time: '2025-11-07T17:17:00'
   cinema: Vika
@@ -1456,7 +1456,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Dating Game
-  country: Unknown
+  country: Kina, USA, Norge
   start_time: '2025-11-12T20:30:00'
   end_time: '2025-11-12T22:02:00'
   cinema: Vika
@@ -1464,7 +1464,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Dating Game
-  country: Unknown
+  country: Kina, USA, Norge
   start_time: '2025-11-14T14:45:00'
   end_time: '2025-11-14T16:17:00'
   cinema: Vega
@@ -1472,7 +1472,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Dragon God of Daibosatsu Pass
-  country: Unknown
+  country: Japan
   start_time: '2025-11-09T17:30:00'
   end_time: '2025-11-09T19:00:00'
   cinema: Cinemateket
@@ -1480,7 +1480,7 @@ films:
   special_notes: Japansk Helg
   preference_weight: 1.0
 - title: The Message
-  country: Unknown
+  country: Argentina, Uruguay, Spania
   start_time: '2025-11-09T13:00:00'
   end_time: '2025-11-09T14:31:00'
   cinema: Cinemateket
@@ -1488,7 +1488,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Message
-  country: Unknown
+  country: Argentina, Uruguay, Spania
   start_time: '2025-11-11T18:45:00'
   end_time: '2025-11-11T20:16:00'
   cinema: Vega
@@ -1496,7 +1496,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Message
-  country: Unknown
+  country: Argentina, Uruguay, Spania
   start_time: '2025-11-16T20:30:00'
   end_time: '2025-11-16T22:01:00'
   cinema: Vega
@@ -1504,7 +1504,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Nature of Invisible Things
-  country: Unknown
+  country: Brasil, Chile
   start_time: '2025-11-08T15:45:00'
   end_time: '2025-11-08T17:15:00'
   cinema: Vika
@@ -1512,7 +1512,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Nature of Invisible Things
-  country: Unknown
+  country: Brasil, Chile
   start_time: '2025-11-13T18:30:00'
   end_time: '2025-11-13T20:00:00'
   cinema: Cinemateket
@@ -1520,7 +1520,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Nature of Invisible Things
-  country: Unknown
+  country: Brasil, Chile
   start_time: '2025-11-16T18:30:00'
   end_time: '2025-11-16T20:00:00'
   cinema: Vega
@@ -1528,7 +1528,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Official Story
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-10T17:45:00'
   end_time: '2025-11-10T19:37:00'
   cinema: Vika
@@ -1536,7 +1536,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Official Story
-  country: Unknown
+  country: Argentina
   start_time: '2025-11-13T13:30:00'
   end_time: '2025-11-13T15:22:00'
   cinema: Vega
@@ -1544,7 +1544,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Secret Agent
-  country: Unknown
+  country: Brasil, Frankrike, Tyskland, Nederland
   start_time: '2025-11-16T13:30:00'
   end_time: '2025-11-16T16:08:00'
   cinema: Vega
@@ -1552,7 +1552,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Secret Agent
-  country: Unknown
+  country: Brasil, Frankrike, Tyskland, Nederland
   start_time: '2025-11-16T16:30:00'
   end_time: '2025-11-16T19:08:00'
   cinema: Vika
@@ -1560,7 +1560,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Secret Agent
-  country: Unknown
+  country: Brasil, Frankrike, Tyskland, Nederland
   start_time: '2025-11-16T19:30:00'
   end_time: '2025-11-16T22:08:00'
   cinema: Cinemateket
@@ -1568,7 +1568,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Shadow Scholars
-  country: Unknown
+  country: Kenya, Storbritannia
   start_time: '2025-11-10T17:30:00'
   end_time: '2025-11-10T19:47:00'
   cinema: Cinemateket
@@ -1576,7 +1576,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: The Shadow Scholars
-  country: Unknown
+  country: Kenya, Storbritannia
   start_time: '2025-11-11T18:00:00'
   end_time: '2025-11-11T19:57:00'
   cinema: Vega
@@ -1584,7 +1584,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: The Things You Kill
-  country: Unknown
+  country: Tyrkia, Frankrike
   start_time: '2025-11-10T17:45:00'
   end_time: '2025-11-10T19:39:00'
   cinema: Cinemateket
@@ -1592,7 +1592,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Things You Kill
-  country: Unknown
+  country: Tyrkia, Frankrike
   start_time: '2025-11-13T20:45:00'
   end_time: '2025-11-13T22:39:00'
   cinema: Vega
@@ -1600,7 +1600,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Things You Kill
-  country: Unknown
+  country: Tyrkia, Frankrike
   start_time: '2025-11-15T18:00:00'
   end_time: '2025-11-15T19:54:00'
   cinema: Vega
@@ -1608,7 +1608,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Weekend
-  country: Unknown
+  country: Nigeria
   start_time: '2025-11-12T20:45:00'
   end_time: '2025-11-12T22:42:00'
   cinema: Vika
@@ -1616,7 +1616,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: The Weekend
-  country: Unknown
+  country: Nigeria
   start_time: '2025-11-14T20:45:00'
   end_time: '2025-11-14T22:42:00'
   cinema: Vega
@@ -1624,7 +1624,7 @@ films:
   special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: The Weekend
-  country: Unknown
+  country: Nigeria
   start_time: '2025-11-15T17:30:00'
   end_time: '2025-11-15T19:27:00'
   cinema: Cinemateket
@@ -1632,7 +1632,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: This City is a Battlefield
-  country: Unknown
+  country: Indonesia, Frankrike, Norge, Filippinene, Singapore, Kambodsja, Nederland
   start_time: '2025-11-11T16:30:00'
   end_time: '2025-11-11T18:49:00'
   cinema: Vika
@@ -1640,7 +1640,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: This City is a Battlefield
-  country: Unknown
+  country: Indonesia, Frankrike, Norge, Filippinene, Singapore, Kambodsja, Nederland
   start_time: '2025-11-12T17:30:00'
   end_time: '2025-11-12T19:49:00'
   cinema: Vega
@@ -1648,7 +1648,7 @@ films:
   special_notes: Møt regissøren
   preference_weight: 1.0
 - title: This City is a Battlefield
-  country: Unknown
+  country: Indonesia, Frankrike, Norge, Filippinene, Singapore, Kambodsja, Nederland
   start_time: '2025-11-14T20:30:00'
   end_time: '2025-11-14T22:29:00'
   cinema: Cinemateket
@@ -1656,7 +1656,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Train to Busan
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T18:30:00'
   end_time: '2025-11-09T20:28:00'
   cinema: Vega
@@ -1664,7 +1664,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Under the Flags, the Sun
-  country: Unknown
+  country: Paraguay, Argentina, USA, Frankrike, Tyskland
   start_time: '2025-11-09T13:45:00'
   end_time: '2025-11-09T15:15:00'
   cinema: Vika
@@ -1672,7 +1672,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Under the Flags, the Sun
-  country: Unknown
+  country: Paraguay, Argentina, USA, Frankrike, Tyskland
   start_time: '2025-11-11T18:30:00'
   end_time: '2025-11-11T20:00:00'
   cinema: Vika
@@ -1680,7 +1680,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Under the Flags, the Sun
-  country: Unknown
+  country: Paraguay, Argentina, USA, Frankrike, Tyskland
   start_time: '2025-11-13T16:15:00'
   end_time: '2025-11-13T17:45:00'
   cinema: Cinemateket
@@ -1688,7 +1688,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: What Does That Nature Say To You
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-09T15:45:00'
   end_time: '2025-11-09T17:33:00'
   cinema: Vega
@@ -1696,7 +1696,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: What Does That Nature Say To You
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-13T20:45:00'
   end_time: '2025-11-13T22:33:00'
   cinema: Vika
@@ -1704,7 +1704,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: What Does That Nature Say To You
-  country: Unknown
+  country: Sør-Korea
   start_time: '2025-11-15T18:30:00'
   end_time: '2025-11-15T20:18:00'
   cinema: Cinemateket
@@ -1712,7 +1712,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: What We Wanted To Be
-  country: Unknown
+  country: Argentina, Frankrike
   start_time: '2025-11-08T20:45:00'
   end_time: '2025-11-08T22:09:00'
   cinema: Vika
@@ -1720,7 +1720,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: What We Wanted To Be
-  country: Unknown
+  country: Argentina, Frankrike
   start_time: '2025-11-13T20:00:00'
   end_time: '2025-11-13T21:24:00'
   cinema: Vika
@@ -1728,7 +1728,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: What We Wanted To Be
-  country: Unknown
+  country: Argentina, Frankrike
   start_time: '2025-11-16T13:30:00'
   end_time: '2025-11-16T14:54:00'
   cinema: Vika
@@ -1736,7 +1736,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: When Nigeria Happens
-  country: Unknown
+  country: Nigeria
   start_time: '2025-11-14T15:45:00'
   end_time: '2025-11-14T17:45:00'
   cinema: Vega
@@ -1744,7 +1744,7 @@ films:
   special_notes: Nollywood-kveld
   preference_weight: 1.0
 - title: Winter in Sokcho
-  country: Unknown
+  country: Sør-Korea, Frankrike
   start_time: '2025-11-09T13:15:00'
   end_time: '2025-11-09T14:59:00'
   cinema: Vega
@@ -1752,7 +1752,7 @@ films:
   special_notes: Koreansk kulturdag
   preference_weight: 1.0
 - title: Winter in Sokcho
-  country: Unknown
+  country: Sør-Korea, Frankrike
   start_time: '2025-11-14T20:00:00'
   end_time: '2025-11-14T21:44:00'
   cinema: Vika
@@ -1760,7 +1760,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Winter in Sokcho
-  country: Unknown
+  country: Sør-Korea, Frankrike
   start_time: '2025-11-16T15:00:00'
   end_time: '2025-11-16T16:44:00'
   cinema: Cinemateket
@@ -1768,7 +1768,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Yanuni
-  country: Unknown
+  country: Østerrike, Brasil
   start_time: '2025-11-08T17:30:00'
   end_time: '2025-11-08T19:52:00'
   cinema: Vega
@@ -1776,7 +1776,7 @@ films:
   special_notes: Film & Samtale
   preference_weight: 1.0
 - title: Yanuni
-  country: Unknown
+  country: Østerrike, Brasil
   start_time: '2025-11-09T15:15:00'
   end_time: '2025-11-09T17:07:00'
   cinema: Vika
@@ -1784,7 +1784,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Yanuni
-  country: Unknown
+  country: Østerrike, Brasil
   start_time: '2025-11-13T20:45:00'
   end_time: '2025-11-13T22:37:00'
   cinema: Cinemateket
@@ -1792,7 +1792,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Zafari
-  country: Unknown
+  country: Venezuela
   start_time: '2025-11-08T21:00:00'
   end_time: '2025-11-08T22:30:00'
   cinema: Vika
@@ -1800,7 +1800,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Zafari
-  country: Unknown
+  country: Venezuela
   start_time: '2025-11-10T16:00:00'
   end_time: '2025-11-10T17:30:00'
   cinema: Vega
@@ -1808,7 +1808,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Zafari
-  country: Unknown
+  country: Venezuela
   start_time: '2025-11-13T16:00:00'
   end_time: '2025-11-13T17:30:00'
   cinema: Vega
@@ -1816,7 +1816,7 @@ films:
   special_notes: null
   preference_weight: 1.0
 - title: Åpning // Koreansk Kulturdag
-  country: Unknown
+  country: Sør-Korea, Norge
   start_time: '2025-11-09T12:00:00'
   end_time: '2025-11-09T13:00:00'
   cinema: Vega

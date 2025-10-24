@@ -7,20 +7,20 @@ import structlog
 
 def configure_logging(level: str = "INFO") -> None:
     """Configure structured logging for the application.
-    
+
     Args:
         level: Log level as string (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     """
     # Convert string level to logging level
     numeric_level = getattr(logging, level.upper(), logging.INFO)
-    
+
     # Configure standard library logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=numeric_level,
     )
-    
+
     # Disable info-level logging for hishel and httpx (too verbose)
     # These libraries log too much detail about HTTP requests/responses
     for verbose_logger in [
@@ -33,7 +33,7 @@ def configure_logging(level: str = "INFO") -> None:
         "httpcore.http11",
     ]:
         logging.getLogger(verbose_logger).setLevel(logging.WARNING)
-    
+
     # Configure structlog
     structlog.configure(
         processors=[
@@ -56,12 +56,11 @@ def configure_logging(level: str = "INFO") -> None:
 
 def get_logger(name: str) -> structlog.BoundLogger:
     """Get a logger instance for a module.
-    
+
     Args:
         name: Logger name (typically __name__)
-        
+
     Returns:
         Configured structlog logger
     """
     return structlog.get_logger(name)
-

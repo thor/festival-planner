@@ -15,7 +15,7 @@ class TestCinemaAndAuditoriumParsing:
         # Load cinema config from actual config file
         project_root = Path(__file__).parent.parent.parent.parent.parent
         config_dir = project_root / "config"
-        
+
         # Create a scraper instance with config_dir for cinema parsing
         self.scraper = FilmfrasorScraper(config_dir=config_dir)
 
@@ -53,25 +53,33 @@ class TestCinemaAndAuditoriumParsing:
     # Test cases for Cinemateket auditorium parsing
     def test_cinemateket_with_named_auditorium(self):
         """Test that 'Cinemateket Lillebil' becomes cinema='Cinemateket', auditorium='Lillebil'."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket Lillebil")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Cinemateket Lillebil"
+        )
         assert cinema == "Cinemateket"
         assert auditorium == "Lillebil"
 
     def test_cinemateket_with_tancred(self):
         """Test that 'Cinemateket Tancred' becomes cinema='Cinemateket', auditorium='Tancred'."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket Tancred")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Cinemateket Tancred"
+        )
         assert cinema == "Cinemateket"
         assert auditorium == "Tancred"
 
     def test_cinemateket_with_usf(self):
         """Test that 'Cinemateket USF' becomes cinema='Cinemateket', auditorium='USF'."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket USF")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Cinemateket USF"
+        )
         assert cinema == "Cinemateket"
         assert auditorium == "USF"
 
     def test_cinemateket_with_main(self):
         """Test that 'Cinemateket Main' becomes cinema='Cinemateket', auditorium='Main'."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket Main")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Cinemateket Main"
+        )
         assert cinema == "Cinemateket"
         assert auditorium == "Main"
 
@@ -83,7 +91,9 @@ class TestCinemaAndAuditoriumParsing:
 
     def test_cinemateket_case_insensitive(self):
         """Test that 'cinemateket lillebil' works (case insensitive matching)."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("cinemateket lillebil")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "cinemateket lillebil"
+        )
         assert cinema == "cinemateket"  # Preserves original case
         assert auditorium == "lillebil"
 
@@ -128,7 +138,9 @@ class TestCinemaAndAuditoriumParsing:
     # Edge cases
     def test_cinema_with_multiple_words_and_number(self):
         """Test cinema name with multiple words followed by number."""
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Some Long Cinema Name 5")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Some Long Cinema Name 5"
+        )
         assert cinema == "Some Long Cinema Name"
         assert auditorium == "5"
 
@@ -141,7 +153,9 @@ class TestCinemaAndAuditoriumParsing:
     def test_cinemateket_with_multi_word_auditorium(self):
         """Test Cinemateket with multi-word auditorium name."""
         # Takes all words after Cinemateket as auditorium
-        cinema, auditorium = self.scraper._split_cinema_and_auditorium("Cinemateket Store Sal")
+        cinema, auditorium = self.scraper._split_cinema_and_auditorium(
+            "Cinemateket Store Sal"
+        )
         assert cinema == "Cinemateket"
         assert auditorium == "Store Sal"
 
@@ -149,4 +163,3 @@ class TestCinemaAndAuditoriumParsing:
 if __name__ == "__main__":
     # Run tests
     pytest.main([__file__, "-v"])
-

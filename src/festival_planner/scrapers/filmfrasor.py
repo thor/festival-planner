@@ -327,24 +327,35 @@ class FilmfrasorScraper(BaseScraper):
         return None
 
     def _extract_country(self, soup: BeautifulSoup) -> str:
-        """Extract country information from the page."""
-        # Look for common patterns for country information
-        country_keywords = [
-            "land:",
-            "country:",
-            "produksjonsland:",
-            "production country:",
-        ]
+        """Extract country information from the page.
 
-        for text in soup.find_all(string=True):
-            text_lower = text.lower().strip()
-            for keyword in country_keywords:
-                if keyword in text_lower:
-                    # Extract the country after the keyword
-                    country = text.split(":", 1)[-1].strip()
-                    if country:
-                        return country
+        Country is in: .entry-info > .extra > span
+        Year is also in .extra but after the span and before the link.
+        """
+        # Find the entry-info container
+        entry_info = soup.find(class_="entry-info")
+        if not entry_info:
+            logger.debug("No element with class 'entry-info' found")
+            return "Unknown"
 
+        # Find the extra div within entry-info
+        extra_div = entry_info.find(class_="extra")
+        if not extra_div:
+            logger.debug("No element with class 'extra' found within entry-info")
+            return "Unknown"
+
+        # Find the span within extra - this contains the country
+        country_span = extra_div.find("span")
+        if not country_span:
+            logger.debug("No span found within extra div")
+            return "Unknown"
+
+        country = country_span.get_text(strip=True)
+        if country:
+            logger.debug("Found country", country=country)
+            return country
+
+        logger.debug("Country span was empty")
         return "Unknown"
 
     def _find_screening_elements(self, soup: BeautifulSoup) -> list:
@@ -359,11 +370,6 @@ class FilmfrasorScraper(BaseScraper):
         """
         # Look for all divs with class "show-item"
         screening_elements = soup.find_all("div", attrs={"class": "show-item"})
-        
-        logger.info(
-            "Found screening elements with class 'show-item'",
-            count=len(screening_elements)
-        )
 
         if not screening_elements:
             # Log diagnostic information if no elements found
@@ -391,9 +397,9 @@ class FilmfrasorScraper(BaseScraper):
         if not date_elem:
             logger.debug("No date element found in show-item")
             return None
-        
+
         date_text = date_elem.get_text(strip=True)
-        
+
         # Parse date: "lør. 08.11" -> day 08, month 11
         date_match = re.search(r"(\d{1,2})\.(\d{1,2})", date_text)
         if not date_match:
@@ -408,9 +414,9 @@ class FilmfrasorScraper(BaseScraper):
         if not time_elem:
             logger.debug("No time element found in show-item")
             return None
-        
+
         time_text = time_elem.get_text(strip=True)
-        
+
         # Parse time range: "13:15 - 14:53"
         time_match = re.search(r"(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})", time_text)
         if not time_match:
@@ -437,9 +443,9 @@ class FilmfrasorScraper(BaseScraper):
         if not location_elem:
             logger.debug("No location element found in show-item")
             return None
-        
+
         cinema_text = location_elem.get_text(strip=True)
-        
+
         # Extract cinema name and auditorium
         # Pattern: "Vika 3" -> cinema="Vika", auditorium="3"
         cinema, auditorium = self._split_cinema_and_auditorium(cinema_text)

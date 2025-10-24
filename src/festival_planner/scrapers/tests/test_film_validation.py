@@ -120,7 +120,7 @@ class TestFilmCinemaValidation:
                 cinema="Unknown Cinema",
                 auditorium="1",
             )
-        
+
         error = exc_info.value
         assert "not in the valid cinema list" in str(error)
 
@@ -171,16 +171,16 @@ class TestNormalizationMapBuilding:
             "Cinemateket": ["cinemateket"],
             "Vega": ["vega", "vega scene"],
         }
-        
+
         norm_map = build_normalization_map(aliases)
-        
+
         # Check that all aliases map to canonical names
         assert norm_map["vika kino"] == "Vika"
         assert norm_map["vika"] == "Vika"
         assert norm_map["cinemateket"] == "Cinemateket"
         assert norm_map["vega"] == "Vega"
         assert norm_map["vega scene"] == "Vega"
-        
+
         # Check that canonical names map to themselves
         assert norm_map["vika"] == "Vika"  # Already lowercase
         assert norm_map["cinemateket"] == "Cinemateket"
@@ -191,9 +191,9 @@ class TestNormalizationMapBuilding:
         aliases = {
             "Vika": ["Vika Kino"],
         }
-        
+
         norm_map = build_normalization_map(aliases)
-        
+
         # All should be lowercase keys
         assert "vika kino" in norm_map
         assert "VIKA KINO" not in norm_map
@@ -208,4 +208,3 @@ class TestNormalizationMapBuilding:
 if __name__ == "__main__":
     # Run tests
     pytest.main([__file__, "-v"])
-

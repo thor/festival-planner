@@ -62,14 +62,14 @@ def scrape(
     """Scrape the Filmfrasor.no programme and cache the results."""
     config_dir, data_dir = get_default_paths()
 
-    console.print("[bold blue]Scraping Filmfrasor.no...[/bold blue]")
+    console.print("[bold blue]Scraping filmfrasor.no...[/bold blue]")
 
     scraper = FilmfrasorScraper(
         cache_dir=data_dir, year=year, force_refresh=refresh, config_dir=config_dir
     )
     film_list = scraper.scrape()
 
-    console.print(f"[green]Scraped {len(film_list.films)} films[/green]")
+    console.print(f"[green]Scraped {len(film_list.films)} film viewings[/green]")
 
     # Save to file
     loader = ConfigLoader(config_dir, data_dir)
