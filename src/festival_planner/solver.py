@@ -34,7 +34,7 @@ class FestivalScheduleSolver:
         self.travel_time_matrix = travel_time_matrix
         self.config = config
         self.model = cp_model.CpModel()
-        self.attend_vars = {}
+        self.attend_vars: dict[int, cp_model.IntVar] = {}
         self.solver = cp_model.CpSolver()
 
     def solve(self, *, time_limit_seconds: int = 60) -> list[ScheduledFilm]:
@@ -142,7 +142,8 @@ class FestivalScheduleSolver:
             # Scale to integer (OR-Tools works with integers)
             weight = int(dynamic_weight * WEIGHT_PRECISION_MULTIPLIER)
             objective_terms.append(self.attend_vars[i] * weight)
-
+        
+        print(objective_terms)
         self.model.Maximize(sum(objective_terms))
 
     def _calculate_film_weight(self, film: Film) -> float:
