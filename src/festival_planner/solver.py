@@ -126,8 +126,15 @@ class FestivalScheduleSolver:
             films: List of films to include in the model
         """
         # Create decision variables: attend[i] = 1 if we attend film i, 0 otherwise
+        titles_to_vars: dict[str, list[cp_model.IntVar]] = {f.title: [] for f in films}
         for i, film in enumerate(films):
-            self.attend_vars[i] = self.model.NewBoolVar(f"attend_film_{i}")
+            self.attend_vars[i] = self.model.NewBoolVar(f"attend_screening_{i}")
+            titles_to_vars[film.title].append(self.attend_vars[i])
+        
+        # Add a max one occurrence constraint for each film.
+        # Makes no sense to attend the same film multiple times.
+        for _, screening_option_vars in titles_to_vars.items():
+            self.model.add_at_most_one(screening_option_vars)
 
         # Add constraints for overlapping films
         for i, film_i in enumerate(films):
