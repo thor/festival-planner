@@ -3,14 +3,15 @@
 import datetime
 import pytest
 
-from festival_planner.models import Film, ScheduleConfig
+from festival_planner.config import Config
+from festival_planner.models import Film, PriorityConfig, ScheduleConfig
 from festival_planner.solver import FestivalScheduleSolver
 
 
 def test_base_weight():
     """Test that base weight is correctly applied."""
-    config = ScheduleConfig(buffer_time_minutes=15)
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    config = Config(schedule=ScheduleConfig(buffer_time_minutes=15))
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     film = Film(
         title="Test Film",
@@ -29,8 +30,8 @@ def test_base_weight():
 
 def test_preference_weight():
     """Test that preference weight is correctly applied."""
-    config = ScheduleConfig(buffer_time_minutes=15)
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    config = Config(schedule=ScheduleConfig(buffer_time_minutes=15))
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     film = Film(
         title="Test Film",
@@ -49,11 +50,13 @@ def test_preference_weight():
 
 def test_year_weight_adjustment():
     """Test that year-based weight adjustment is correctly applied."""
-    config = ScheduleConfig(
-        buffer_time_minutes=15,
-        year_weights={1960: 0.3, 1985: 0.2},
+    config = Config(
+        schedule=ScheduleConfig(
+            buffer_time_minutes=15,
+        ),
+        priority=PriorityConfig(year_weights={1960: 0.3, 1985: 0.2}),
     )
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     # Film from 1960 should get +0.3 boost
     film_1960 = Film(
@@ -86,11 +89,13 @@ def test_year_weight_adjustment():
 
 def test_special_notes_weight():
     """Test that special notes weight adjustment is correctly applied."""
-    config = ScheduleConfig(
-        buffer_time_minutes=15,
-        special_notes_weight=0.5,
+    config = Config(
+        schedule=ScheduleConfig(
+            buffer_time_minutes=15,
+        ),
+        priority=PriorityConfig(special_notes_weight=0.5),
     )
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     # Film with special notes should get +0.5 boost
     film_special = Film(
@@ -125,12 +130,15 @@ def test_special_notes_weight():
 
 def test_combined_weights():
     """Test that all weight adjustments combine correctly."""
-    config = ScheduleConfig(
-        buffer_time_minutes=15,
-        year_weights={1960: 0.3, 1985: 0.2},
-        special_notes_weight=0.5,
+    config = Config(
+        schedule=ScheduleConfig(
+            buffer_time_minutes=15,
+        ),
+        priority=PriorityConfig(
+            year_weights={1960: 0.3, 1985: 0.2}, special_notes_weight=0.5
+        ),
     )
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     # Film with everything: preference + year + special notes
     film = Film(
@@ -151,12 +159,13 @@ def test_combined_weights():
 
 def test_negative_weights():
     """Test that negative weight adjustments work correctly."""
-    config = ScheduleConfig(
-        buffer_time_minutes=15,
-        year_weights={2025: -0.2},  # Decrease priority for recent films
-        special_notes_weight=-0.1,  # Decrease priority for special events
+    config = Config(
+        schedule=ScheduleConfig(
+            buffer_time_minutes=15,
+        ),
+        priority=PriorityConfig(year_weights={2025: -0.2}, special_notes_weight=-0.1),
     )
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     film = Film(
         title="Recent Special Event",
@@ -176,11 +185,11 @@ def test_negative_weights():
 
 def test_film_without_year():
     """Test that films without year information are handled correctly."""
-    config = ScheduleConfig(
-        buffer_time_minutes=15,
-        year_weights={1960: 0.3},
+    config = Config(
+        schedule=ScheduleConfig(buffer_time_minutes=15),
+        priority=PriorityConfig(year_weights={1960: 0.3}),
     )
-    solver = FestivalScheduleSolver(films=[], travel_time_matrix={}, config=config)
+    solver = FestivalScheduleSolver(films=[], config=config)
 
     film = Film(
         title="Film Without Year",

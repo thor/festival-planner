@@ -18,7 +18,7 @@ class TestFilmCinemaValidation:
         config_dir = project_root / "config"
         data_dir = project_root / "data"
         loader = ConfigLoader(config_dir, data_dir)
-        cinema_config = loader.load_cinema_config()
+        cinema_config = loader.load_config().cinemas
 
         # Set up normalization map from config
         if cinema_config.cinema_aliases:
@@ -26,138 +26,149 @@ class TestFilmCinemaValidation:
             Film.set_normalization_map(normalization_map)
 
         # Set up valid cinemas
-        valid_cinemas = loader.get_valid_cinemas(cinema_config)
+        valid_cinemas = cinema_config.get_valid_cinemas()
         Film.set_valid_cinemas(valid_cinemas)
 
     def test_vika_kino_normalized_in_film_model(self):
         """Test that 'Vika Kino' in Film is normalized to 'Vika'."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="Vika Kino",
-            auditorium="3",
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "Vika Kino",
+            "auditorium": "3",
+        }
+        film = Film(**input)
         assert film.cinema == "Vika"
 
     def test_vika_lowercase_normalized(self):
         """Test that 'vika' (lowercase) is normalized to 'Vika'."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="vika",
-            auditorium="2",
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "vika",
+            "auditorium": "2",
+        }
+        film = Film(**input)
         assert film.cinema == "Vika"
 
     def test_cinemateket_lowercase_normalized(self):
         """Test that 'cinemateket' (lowercase) is normalized to 'Cinemateket'."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="cinemateket",
-            auditorium="Main",
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "cinemateket",
+            "auditorium": "Main",
+        }
+        film = Film(**input)
         assert film.cinema == "Cinemateket"
 
     def test_vega_scene_normalized(self):
         """Test that 'Vega Scene' is normalized to 'Vega'."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="Vega Scene",
-            auditorium=None,
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "Vega Scene",
+            "auditorium": None,
+        }
+        film = Film(**input)
         assert film.cinema == "Vega"
 
     def test_canonical_name_accepted(self):
         """Test that canonical names (Vika, Vega, Cinemateket) are accepted."""
-        film1 = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="Vika",
-            auditorium="1",
-        )
+        input1 = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "Vika",
+            "auditorium": "1",
+        }
+        film1 = Film(**input1)
         assert film1.cinema == "Vika"
 
-        film2 = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 19, 0),
-            end_time=datetime(2025, 11, 8, 21, 0),
-            cinema="Vega",
-            auditorium="2",
-        )
+        input2 = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 19, 0),
+            "end_time": datetime(2025, 11, 8, 21, 0),
+            "cinema": "Vega",
+            "auditorium": "2",
+        }
+        film2 = Film(**input2)
         assert film2.cinema == "Vega"
 
-        film3 = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 20, 0),
-            end_time=datetime(2025, 11, 8, 22, 0),
-            cinema="Cinemateket",
-            auditorium=None,
-        )
+        input3 = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 20, 0),
+            "end_time": datetime(2025, 11, 8, 22, 0),
+            "cinema": "Cinemateket",
+            "auditorium": None,
+        }
+        film3 = Film(**input3)
         assert film3.cinema == "Cinemateket"
 
     def test_invalid_cinema_rejected(self):
         """Test that invalid cinema names are rejected."""
         with pytest.raises(ValidationError) as exc_info:
-            Film(
-                title="Test Film",
-                country="Norway",
-                start_time=datetime(2025, 11, 8, 18, 0),
-                end_time=datetime(2025, 11, 8, 20, 0),
-                cinema="Unknown Cinema",
-                auditorium="1",
-            )
+            input = {
+                "title": "Test Film",
+                "country": "Norway",
+                "start_time": datetime(2025, 11, 8, 18, 0),
+                "end_time": datetime(2025, 11, 8, 20, 0),
+                "cinema": "Unknown Cinema",
+                "auditorium": "1",
+            }
+            Film(**input)
 
         error = exc_info.value
         assert "not in the valid cinema list" in str(error)
 
     def test_auditorium_can_be_none(self):
         """Test that auditorium can be None."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="Vika",
-            auditorium=None,
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "Vika",
+            "auditorium": None,
+        }
+        film = Film(**input)
         assert film.auditorium is None
 
     def test_auditorium_with_string(self):
         """Test that auditorium can be a string."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="Cinemateket",
-            auditorium="Lillebil",
-        )
-        assert film.auditorium == "Lillebil"
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "Cinemateket",
+            "auditorium": "Lillebil",
+        }
+        film = Film(**input)
+        assert film.auditorium == "Lillebil" 
 
     def test_mixed_case_alias_normalized(self):
         """Test that mixed case aliases work properly."""
-        film = Film(
-            title="Test Film",
-            country="Norway",
-            start_time=datetime(2025, 11, 8, 18, 0),
-            end_time=datetime(2025, 11, 8, 20, 0),
-            cinema="VIKA KINO",  # All caps
-            auditorium="3",
-        )
+        input = {
+            "title": "Test Film",
+            "country": "Norway",
+            "start_time": datetime(2025, 11, 8, 18, 0),
+            "end_time": datetime(2025, 11, 8, 20, 0),
+            "cinema": "VIKA KINO",  # All caps
+            "auditorium": "3",
+        }
+        film = Film(**input)
         assert film.cinema == "Vika"
 
 

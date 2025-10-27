@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from hishel import Controller, SQLiteStorage, CacheClient
 from pydantic import ValidationError
 
-from ..models import Cinema, Film, FilmList, build_normalization_map
+from ..models import Film, FilmList, build_normalization_map
 from ..config import ConfigLoader
 from .base import BaseScraper
 from .._logging import get_logger
@@ -92,9 +92,8 @@ class FilmfrasorScraper(BaseScraper):
         """
         try:
             # Load cinema config
-            data_dir = config_dir.parent / "data"  # Dummy data_dir, not used here
-            loader = ConfigLoader(config_dir, data_dir)
-            cinema_config = loader.load_cinema_config()
+            loader = ConfigLoader(config_dir)
+            cinema_config = loader.load_config().cinemas
 
             # Build and set normalization map from cinema aliases
             if cinema_config.cinema_aliases:
@@ -222,6 +221,9 @@ class FilmfrasorScraper(BaseScraper):
         # Filmfrasor.no film pages typically have URLs like /no/film/film-title
         for link in soup.find_all("a", href=True):
             href = link["href"]
+            if not isinstance(href, str):
+                logger.warning("Invalid href type", href=href, href_type=type(href))
+                continue
 
             # Check if this looks like a film page link
             if f"/{self.language}/film/" in href:

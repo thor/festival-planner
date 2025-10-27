@@ -29,18 +29,18 @@ class Film(BaseModel):
 
     title: str = Field(..., description="Film title")
     country: str = Field(..., description="Country of origin")
-    year: Optional[int] = Field(None, description="Year of release")
+    year: Optional[int] = Field(default=None, description="Year of release")
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
     auditorium: Optional[str] = Field(
-        None, description="Auditorium number or name (None if unknown)"
+        default=None, description="Auditorium number or name (None if unknown)"
     )
     special_notes: Optional[str] = Field(
-        None, description="Special event information (Q&A, premiere, etc.)"
+        default=None, description="Special event information (Q&A, premiere, etc.)"
     )
     preference_weight: float = Field(
-        1.0, description="Preference weight (positive or negative relative to default)"
+        default=1.0, description="Preference weight (positive or negative relative to default)"
     )
 
     # Class variable to store valid cinemas for validation
@@ -129,7 +129,7 @@ class SeenFilm(BaseModel):
 
 class FilmWeight(BaseModel):
     """Represents a custom weight override for a film or specific screening.
-    
+
     If start_time is None, the weight applies to all screenings of the film.
     If start_time is provided, it applies only to that specific screening.
     """
@@ -147,13 +147,18 @@ class ScheduleConfig(BaseModel):
     buffer_time_minutes: int = 15
     start_date: Optional[datetime.date] = None
     end_date: Optional[datetime.date] = None
+
+
+class PriorityConfig(BaseModel):
+    """Priority for the solver to impact priorities."""
+
     year_weights: dict[int, float] = Field(
         default_factory=dict,
         description="Weight adjustments for specific years. "
         "Key is year, value is weight to add/subtract.",
     )
     special_notes_weight: float = Field(
-        0.0,
+        default=0.0,
         description="Weight adjustment for films with special notes/events. "
         "Positive values increase priority, negative values decrease it.",
     )
@@ -194,6 +199,46 @@ class CinemaConfig(BaseModel):
         default_factory=list, description="Travel times between cinemas"
     )
 
+    def build_travel_time_matrix(self) -> dict[tuple[str, str], int]:
+        """Build a travel time matrix from cinema configuration.
+
+        Args:
+            cinema_config: CinemaConfig containing travel times
+
+        Returns:
+            Dictionary mapping (from_cinema, to_cinema) tuples to travel time in minutes
+        """
+        travel_matrix = {}
+
+        # Add all defined travel times
+        for travel_time in self.travel_times:
+            travel_matrix[(travel_time.from_cinema, travel_time.to_cinema)] = (
+                travel_time.minutes
+            )
+
+        # Add zero travel time for same cinema
+        cinemas = self.get_valid_cinemas()
+
+        for cinema in cinemas:
+            travel_matrix[(cinema, cinema)] = 0
+
+        return travel_matrix
+
+    def get_valid_cinemas(self) -> set[str]:
+        """Extract valid cinema names from cinema configuration.
+
+        Args:
+            cinema_config: CinemaConfig containing travel times
+
+        Returns:
+            Set of valid cinema names
+        """
+        cinemas = set()
+        for travel_time in self.travel_times:
+            cinemas.add(travel_time.from_cinema)
+            cinemas.add(travel_time.to_cinema)
+        return cinemas
+
 
 class ScheduledFilm(BaseModel):
     """Represents a film in an optimized schedule."""
@@ -203,6 +248,7 @@ class ScheduledFilm(BaseModel):
         ..., description="Recommended arrival time (including buffer)"
     )
     calculated_weight: float = Field(
-        ..., description="Calculated weight including all dynamic adjustments "
-        "(base + preference + year + special notes)"
+        ...,
+        description="Calculated weight including all dynamic adjustments "
+        "(base + preference + year + special notes)",
     )

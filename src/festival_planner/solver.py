@@ -1,10 +1,11 @@
 """OR-Tools based schedule optimizer for film festivals."""
 
 from datetime import timedelta
-from typing import Optional
 from ortools.sat.python import cp_model
 
-from .models import Film, ScheduledFilm, ScheduleConfig
+from festival_planner.config import Config
+
+from .models import Film, ScheduledFilm
 from ._logging import get_logger
 
 logger = get_logger(__name__)
@@ -21,8 +22,7 @@ class FestivalScheduleSolver:
     def __init__(
         self,
         films: list[Film],
-        travel_time_matrix: dict[tuple[str, str], int],
-        config: ScheduleConfig,
+        config: Config,
     ):
         """Initialize the solver.
 
@@ -32,8 +32,9 @@ class FestivalScheduleSolver:
             config: Schedule configuration with buffer time and date filters
         """
         self.films = films
-        self.travel_time_matrix = travel_time_matrix
-        self.config = config
+        self.travel_time_matrix = config.cinemas.build_travel_time_matrix()
+        self.schedule_config = config.schedule
+        self.priority_config = config.priority
         self.model = cp_model.CpModel()
         self.attend_vars: dict[int, cp_model.IntVar] = {}
         self.solver = cp_model.CpSolver()
@@ -96,16 +97,22 @@ class FestivalScheduleSolver:
         Returns:
             List of films within the specified date range
         """
-        if not self.config.start_date and not self.config.end_date:
+        if not self.schedule_config.start_date and not self.schedule_config.end_date:
             return self.films
 
         filtered = []
         for film in self.films:
             film_date = film.date
 
-            if self.config.start_date and film_date < self.config.start_date:
+            if (
+                self.schedule_config.start_date
+                and film_date < self.schedule_config.start_date
+            ):
                 continue
-            if self.config.end_date and film_date > self.config.end_date:
+            if (
+                self.schedule_config.end_date
+                and film_date > self.schedule_config.end_date
+            ):
                 continue
 
             filtered.append(film)
@@ -143,7 +150,7 @@ class FestivalScheduleSolver:
             # Scale to integer (OR-Tools works with integers)
             weight = int(dynamic_weight * WEIGHT_PRECISION_MULTIPLIER)
             objective_terms.append(self.attend_vars[i] * weight)
-        
+
         self.model.Maximize(sum(objective_terms))
 
     def _calculate_film_weight(self, film: Film) -> float:
@@ -159,13 +166,13 @@ class FestivalScheduleSolver:
         weight = BASE_WEIGHT + film.preference_weight
 
         # Add year-based weight adjustment
-        if film.year and film.year in self.config.year_weights:
-            year_adjustment = self.config.year_weights[film.year]
+        if film.year and film.year in self.priority_config.year_weights:
+            year_adjustment = self.priority_config.year_weights[film.year]
             weight += year_adjustment
 
         # Add special notes weight adjustment
         if film.special_notes:
-            weight += self.config.special_notes_weight
+            weight += self.priority_config.special_notes_weight
 
         return weight
 
@@ -187,7 +194,7 @@ class FestivalScheduleSolver:
         travel_time = self._get_travel_time(film1.cinema, film2.cinema)
 
         # Calculate required time between films (buffer + travel)
-        required_gap_minutes = self.config.buffer_time_minutes + travel_time
+        required_gap_minutes = self.schedule_config.buffer_time_minutes + travel_time
 
         # Check if film1 ends in time to attend film2
         gap1_to_2 = (film2.start_time - film1.end_time).total_seconds() / 60
@@ -237,7 +244,7 @@ class FestivalScheduleSolver:
             if self.solver.Value(self.attend_vars[i]) == 1:
                 # Calculate arrival time (start time - buffer)
                 arrival_time = film.start_time - timedelta(
-                    minutes=self.config.buffer_time_minutes
+                    minutes=self.schedule_config.buffer_time_minutes
                 )
 
                 # Calculate the weight including all dynamic adjustments
@@ -267,7 +274,7 @@ class FestivalScheduleSolver:
         scaled_obj_value = (
             obj_value / WEIGHT_PRECISION_MULTIPLIER if obj_value is not None else 0.0
         )
-        
+
         return {
             "status": self.solver.StatusName(),
             "objective_value": scaled_obj_value,
