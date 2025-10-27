@@ -6,6 +6,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
+from rich.prompt import Prompt
 from iterfzf import iterfzf
 
 from .config import ConfigLoader
@@ -238,7 +239,7 @@ def set_weight(
         help="Initial search term to filter films (you can further filter in fzf)",
     ),
 ):
-    """Set a custom weight for a specific film screening using interactive fuzzy finder."""
+    """Set a custom weight for a film or specific screening using interactive fuzzy finder."""
     config_dir, data_dir = get_default_paths()
     loader = ConfigLoader(config_dir, data_dir)
 
@@ -248,9 +249,17 @@ def set_weight(
     # Load existing custom weight overrides
     weight_list = loader.load_film_weights()
     
-    # Build lookup map for existing overrides: (title, start_time) -> weight
-    override_map = {
-        (w.title, w.start_time): w.weight for w in weight_list.weights
+    # Build lookup maps for existing overrides
+    # Screening-level: (title, start_time) -> weight
+    screening_override_map = {
+        (w.title, w.start_time): w.weight
+        for w in weight_list.weights
+        if w.start_time is not None
+    }
+    
+    # Film-level: title -> weight
+    film_override_map = {
+        w.title: w.weight for w in weight_list.weights if w.start_time is None
     }
     
     # Filter by search term if provided
@@ -277,10 +286,12 @@ def set_weight(
         if film.auditorium:
             cinema_str += f" {film.auditorium}"
         
-        # Check if this film has a custom weight override
-        key = (film.title, film.start_time)
-        if key in override_map:
-            weight_display = f"{override_map[key]:+.1f} [custom]"
+        # Check if this screening has a custom weight override
+        screening_key = (film.title, film.start_time)
+        if screening_key in screening_override_map:
+            weight_display = f"{screening_override_map[screening_key]:+.1f} [custom screening]"
+        elif film.title in film_override_map:
+            weight_display = f"{film_override_map[film.title]:+.1f} [custom film]"
         else:
             weight_display = f"{film.preference_weight:+.1f}"
         
@@ -306,43 +317,79 @@ def set_weight(
     
     selected_film = film_map[selected]
     
-    # Get current weight (custom override or preference weight)
-    key = (selected_film.title, selected_film.start_time)
-    current_weight = override_map.get(key, selected_film.preference_weight)
-    weight_type = "custom" if key in override_map else "scraped"
+    # Ask user if they want to set weight for screening or film
+    console.print()
+    level_choice = Prompt.ask(
+        "Set weight for",
+        choices=["screening", "film"],
+        default="screening",
+    )
+    
+    is_film_level = level_choice == "film"
+    
+    # Get current weight based on level
+    if is_film_level:
+        # Film-level weight
+        current_weight = film_override_map.get(
+            selected_film.title, selected_film.preference_weight
+        )
+        weight_type = "custom film" if selected_film.title in film_override_map else "scraped"
+    else:
+        # Screening-level weight
+        screening_key = (selected_film.title, selected_film.start_time)
+        if screening_key in screening_override_map:
+            current_weight = screening_override_map[screening_key]
+            weight_type = "custom screening"
+        elif selected_film.title in film_override_map:
+            current_weight = film_override_map[selected_film.title]
+            weight_type = "custom film"
+        else:
+            current_weight = selected_film.preference_weight
+            weight_type = "scraped"
     
     # Ask for weight
     weight = typer.prompt(
-        f"\nEnter custom weight for '{selected_film.title}' (current: {current_weight:+.1f} [{weight_type}])",
+        f"Enter custom weight for '{selected_film.title}' (current: {current_weight:+.1f} [{weight_type}])",
         type=float,
     )
     
-    # Check if this screening already has an override
+    # Find existing override to update
     existing_idx = None
     for i, w in enumerate(weight_list.weights):
-        if w.title == selected_film.title and w.start_time == selected_film.start_time:
-            existing_idx = i
-            break
+        if is_film_level:
+            # For film-level, match by title only and no start_time
+            if w.title == selected_film.title and w.start_time is None:
+                existing_idx = i
+                break
+        else:
+            # For screening-level, match by title and start_time
+            if w.title == selected_film.title and w.start_time == selected_film.start_time:
+                existing_idx = i
+                break
     
-    # Add or update weight
+    # Create weight override
     film_weight = FilmWeight(
         title=selected_film.title,
-        start_time=selected_film.start_time,
+        start_time=None if is_film_level else selected_film.start_time,
         weight=weight,
     )
     
+    # Update or add
     if existing_idx is not None:
         weight_list.weights[existing_idx] = film_weight
-        console.print(f"[green]Updated weight for '{selected_film.title}' to {weight:+.1f}[/green]")
+        level_str = "all screenings" if is_film_level else "this screening"
+        console.print(f"[green]Updated weight for '{selected_film.title}' ({level_str}) to {weight:+.1f}[/green]")
     else:
         weight_list.weights.append(film_weight)
-        console.print(f"[green]Set weight for '{selected_film.title}' to {weight:+.1f}[/green]")
+        level_str = "all screenings" if is_film_level else "this screening"
+        console.print(f"[green]Set weight for '{selected_film.title}' ({level_str}) to {weight:+.1f}[/green]")
     
     # Save
     loader.save_film_weights(weight_list)
     
-    date_str = selected_film.start_time.strftime("%a %d/%m at %H:%M")
-    console.print(f"[dim]({date_str} at {selected_film.cinema})[/dim]")
+    if not is_film_level:
+        date_str = selected_film.start_time.strftime("%a %d/%m at %H:%M")
+        console.print(f"[dim]({date_str} at {selected_film.cinema})[/dim]")
 
 
 @app.command()

@@ -128,10 +128,16 @@ class SeenFilm(BaseModel):
 
 
 class FilmWeight(BaseModel):
-    """Represents a custom weight override for a specific film screening."""
+    """Represents a custom weight override for a film or specific screening.
+    
+    If start_time is None, the weight applies to all screenings of the film.
+    If start_time is provided, it applies only to that specific screening.
+    """
 
     title: str = Field(..., description="Film title")
-    start_time: datetime.datetime = Field(..., description="Screening start time")
+    start_time: Optional[datetime.datetime] = Field(
+        None, description="Screening start time (None for film-level weight)"
+    )
     weight: float = Field(..., description="Custom weight override")
 
 

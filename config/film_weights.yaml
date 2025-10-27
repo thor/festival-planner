@@ -5,3 +5,6 @@ weights:
 - title: North South Man Woman
   start_time: '2025-11-12T18:00:00'
   weight: 1.5
+- title: Joint Security Area
+  start_time: null
+  weight: 5.0

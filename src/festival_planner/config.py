@@ -283,6 +283,9 @@ class ConfigLoader:
         self, films: list[Film], weight_overrides: list[FilmWeight]
     ) -> list[Film]:
         """Apply custom weight overrides to films.
+        
+        Supports both film-level (all screenings) and screening-level (specific) overrides.
+        Screening-level overrides take precedence over film-level overrides.
 
         Args:
             films: List of films to modify
@@ -291,19 +294,34 @@ class ConfigLoader:
         Returns:
             List of films with overridden weights applied
         """
-        # Build lookup map: (title, start_time) -> weight
-        override_map = {
-            (w.title, w.start_time): w.weight for w in weight_overrides
+        # Build lookup maps
+        # Screening-level: (title, start_time) -> weight
+        screening_override_map = {
+            (w.title, w.start_time): w.weight
+            for w in weight_overrides
+            if w.start_time is not None
+        }
+        
+        # Film-level: title -> weight
+        film_override_map = {
+            w.title: w.weight for w in weight_overrides if w.start_time is None
         }
 
-        # Apply overrides
+        # Apply overrides (screening-level takes precedence)
         modified_films = []
         for film in films:
-            key = (film.title, film.start_time)
-            if key in override_map:
-                # Create a copy with the overridden weight
+            screening_key = (film.title, film.start_time)
+            
+            # Check screening-level override first
+            if screening_key in screening_override_map:
                 film_dict = film.model_dump()
-                film_dict['preference_weight'] = override_map[key]
+                film_dict['preference_weight'] = screening_override_map[screening_key]
+                modified_film = Film(**film_dict)
+                modified_films.append(modified_film)
+            # Then check film-level override
+            elif film.title in film_override_map:
+                film_dict = film.model_dump()
+                film_dict['preference_weight'] = film_override_map[film.title]
                 modified_film = Film(**film_dict)
                 modified_films.append(modified_film)
             else:
