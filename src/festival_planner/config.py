@@ -16,6 +16,12 @@ from .models import (
     FilmWeight,
 )
 
+CINEMAS_FILE = "cinemas.yaml"
+SEEN_FILMS_FILE = "seen_films.yaml"
+FILM_WEIGHTS_FILE = "film_weights.yaml"
+PREFERENCES_FILE = "preferences.yaml"
+FILMS_FILE = "films.yaml"
+
 T = TypeVar('T', bound=BaseModel)
 
 
@@ -31,6 +37,11 @@ class ConfigLoader:
         """
         self.config_dir = config_dir
         self.data_dir = data_dir
+        self.cinemas_path = self.config_dir / CINEMAS_FILE
+        self.seen_films_path = self.config_dir / SEEN_FILMS_FILE
+        self.film_weights_path = self.config_dir / FILM_WEIGHTS_FILE
+        self.preferences_path = self.config_dir / PREFERENCES_FILE
+        self.films_path = self.data_dir / FILMS_FILE
 
     def _load_yaml_model(
         self,
@@ -71,7 +82,7 @@ class ConfigLoader:
             FilmList containing all films
         """
         return self._load_yaml_model(
-            FilmList, self.data_dir / "films.yaml", filepath
+            FilmList, self.films_path, filepath
         )
 
     def load_seen_films(self, filepath: Optional[Path] = None) -> SeenFilmList:
@@ -84,7 +95,7 @@ class ConfigLoader:
             SeenFilmList containing all seen films
         """
         return self._load_yaml_model(
-            SeenFilmList, self.config_dir / "seen_films.yaml", filepath
+            SeenFilmList, self.seen_films_path, filepath
         )
 
     def load_cinema_config(self, filepath: Optional[Path] = None) -> CinemaConfig:
@@ -97,7 +108,7 @@ class ConfigLoader:
             CinemaConfig containing travel times
         """
         return self._load_yaml_model(
-            CinemaConfig, self.config_dir / "cinemas.yaml", filepath
+            CinemaConfig, self.cinemas_path, filepath
         )
 
     def load_schedule_config(self, filepath: Optional[Path] = None) -> ScheduleConfig:
@@ -110,7 +121,7 @@ class ConfigLoader:
             ScheduleConfig with optimization preferences
         """
         return self._load_yaml_model(
-            ScheduleConfig, self.config_dir / "preferences.yaml", filepath
+            ScheduleConfig, self.preferences_path, filepath
         )
 
     def load_film_weights(self, filepath: Optional[Path] = None) -> FilmWeightList:
@@ -123,7 +134,7 @@ class ConfigLoader:
             FilmWeightList containing all custom weight overrides
         """
         return self._load_yaml_model(
-            FilmWeightList, self.config_dir / "film_weights.yaml", filepath
+            FilmWeightList, self.film_weights_path, filepath
         )
 
     def save_films(self, film_list: FilmList, filepath: Optional[Path] = None) -> None:
@@ -134,7 +145,7 @@ class ConfigLoader:
             filepath: Optional custom filepath, defaults to data/films.yaml
         """
         if filepath is None:
-            filepath = self.data_dir / "films.yaml"
+            filepath = self.films_path
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -157,7 +168,7 @@ class ConfigLoader:
             filepath: Optional custom filepath, defaults to config/seen_films.yaml
         """
         if filepath is None:
-            filepath = self.config_dir / "seen_films.yaml"
+            filepath = self.seen_films_path
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -180,7 +191,7 @@ class ConfigLoader:
             filepath: Optional custom filepath, defaults to config/film_weights.yaml
         """
         if filepath is None:
-            filepath = self.config_dir / "film_weights.yaml"
+            filepath = self.film_weights_path
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
