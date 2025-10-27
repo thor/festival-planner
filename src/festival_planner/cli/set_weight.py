@@ -22,7 +22,7 @@ def set_weight(
         None,
         "--search",
         "-s",
-        help="Initial search term to filter films (you can further filter in fzf)",
+        help="Initial search term to filter films",
     ),
 ):
     """Set a custom weight for a film or specific screening using interactive fuzzy finder."""

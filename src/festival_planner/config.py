@@ -72,7 +72,7 @@ class FilmPreferences(BaseModel):
 class Config(BaseModel):
     films: FilmPreferences = Field(
         default_factory=FilmPreferences,
-        json_schema_extra={"source_file": PREFERENCES_FILE},
+        json_schema_extra={"source_file": PREFERENCES_FILE, "source_key": False},
     )
     cinemas: CinemaConfig = Field(
         default_factory=CinemaConfig,
@@ -80,15 +80,11 @@ class Config(BaseModel):
     )
     schedule: ScheduleConfig = Field(
         default_factory=ScheduleConfig,
-        json_schema_extra={
-            "source_file": CONFIG_FILE,
-        },
+        json_schema_extra={"source_file": CONFIG_FILE},
     )
     priority: PriorityConfig = Field(
         default_factory=PriorityConfig,
-        json_schema_extra={
-            "source_file": CONFIG_FILE,
-        },
+        json_schema_extra={"source_file": CONFIG_FILE},
     )
 
 
@@ -119,18 +115,11 @@ class ConfigLoader:
         self.preferences_path = self.config_dir / PREFERENCES_FILE
         self.films_path = self.data_dir / FILMS_FILE
 
-    def load_config(self, filepath: Optional[Path] = None) -> Config:
-        """Load configuration from YAML file.
-
-        Args:
-            filepath: Optional custom filepath, defaults to config/config.yaml
-
-        Returns:
-            Config containing all configuration
-        """
+    def load_config(self) -> Config:
+        """Load configuration from YAML file."""
         return self.load_composite_config()
 
-    def load_composite_config(self) -> Config:
+    def load_composite_config(self, filepath: Optional[Path] = None) -> Config:
         """Load configuration from multiple files based on model field metadata.
 
         Reads field metadata from the Config model to determine which file each field
@@ -181,28 +170,39 @@ class ConfigLoader:
                 # Default to config.yaml if no metadata
                 field_sources[field_name] = (self.config_path, None)
 
-        # Load data from each unique file (cache to avoid duplicate reads)
+        # Cache to avoid multiple reads of the same file, again and again
         file_data_cache: dict[Path, dict] = {}
         for filepath, _ in field_sources.values():
-            if filepath not in file_data_cache:
-                if filepath.exists():
-                    with open(filepath, "r") as f:
-                        yaml_loader = YAML()
-                        print(filepath)
-                        file_data_cache[filepath] = yaml_loader.load(f) or {}
-                else:
-                    file_data_cache[filepath] = {}
+            if filepath in file_data_cache:
+                continue
 
+            if not filepath.exists():
+                file_data_cache[filepath] = {}
+                continue
+
+            with open(filepath, "r") as f:
+                yaml_loader = YAML()
+                file_data_cache[filepath] = yaml_loader.load(f) or {}
+
+        # Get the unique combinations as we won't load the same data twice
         # Extract relevant fields from loaded data
         config_data = {}
+        sourced = set()
         for field_name, (filepath, source_key) in field_sources.items():
             file_data = file_data_cache[filepath]
 
             # Use source_key if specified, otherwise use field_name
             yaml_key = source_key if source_key else field_name
+            if (filepath, yaml_key) in sourced:
+                print("skipping duplicate", filepath, source_key)
+                continue
 
+            sourced.add((filepath, yaml_key))
             if yaml_key in file_data:
                 config_data[field_name] = file_data[yaml_key]
+                continue
+
+            config_data[field_name] = file_data
 
         return Config(**config_data)
 
