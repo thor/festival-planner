@@ -6,6 +6,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
 
 from ..config import ConfigLoader, get_default_paths
 from ..models import ScheduledFilm, Film
@@ -15,6 +16,21 @@ from .._logging import get_logger
 console = Console()
 logger = get_logger(__name__)
 app = typer.Typer()
+
+
+def _format_clickable_title(title: str, url: Optional[str]) -> Text:
+    """Format a film title as a clickable link if URL is available.
+
+    Args:
+        title: Film title to display
+        url: Optional URL to link to
+
+    Returns:
+        Rich Text object with hyperlink if URL provided, plain text otherwise
+    """
+    if url:
+        return Text(title, style=f"link {url}")
+    return Text(title)
 
 
 def _group_films_by_date(
@@ -231,10 +247,11 @@ def _build_film_overview_table(
             special_str = ""
 
         year_str = str(film.year) if film.year else ""
+        title_link = _format_clickable_title(title, film.url)
 
         table.add_row(
             status,
-            title,
+            title_link,
             year_str,
             film.country,
             str(num_screenings),
@@ -311,11 +328,12 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
 
         for sf in by_date[film_date]:
             year_str = f"{sf.film.year:4d}" if sf.film.year else "    "
+            title_link = _format_clickable_title(sf.film.title, sf.film.url)
             table.add_row(
                 sf.arrival_time.strftime("%H:%M"),
                 sf.film.start_time.strftime("%H:%M"),
                 sf.film.end_time.strftime("%H:%M"),
-                sf.film.title,
+                title_link,
                 year_str,
                 sf.film.cinema,
                 sf.film.country,
@@ -344,7 +362,13 @@ def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) 
             f.write(f"## {film_date}\n\n")
 
             for sf in by_date[film_date]:
-                f.write(f"### {sf.film.title}\n")
+                # Format title with markdown link if URL available
+                if sf.film.url:
+                    title_md = f"[{sf.film.title}]({sf.film.url})"
+                else:
+                    title_md = sf.film.title
+                
+                f.write(f"### {title_md}\n")
                 f.write(f"- **Arrival**: {sf.arrival_time.strftime('%H:%M')}\n")
                 f.write(f"- **Start**: {sf.film.start_time.strftime('%H:%M')}\n")
                 f.write(f"- **End**: {sf.film.end_time.strftime('%H:%M')}\n")

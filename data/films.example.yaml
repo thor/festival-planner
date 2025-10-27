@@ -4,6 +4,8 @@
 films:
   - title: "Example Film 1"
     country: "Norway"
+    year: 2024
+    url: "https://www.filmfrasor.no/no/film/example-film-1"
     start_time: "2024-09-15T18:00:00"
     end_time: "2024-09-15T20:15:00"
     cinema: "Cinemateket"
@@ -12,6 +14,8 @@ films:
   
   - title: "Example Film 2"
     country: "Sweden"
+    year: 2023
+    url: "https://www.filmfrasor.no/no/film/example-film-2"
     start_time: "2024-09-15T20:45:00"
     end_time: "2024-09-15T22:30:00"
     cinema: "Vika Kino"
@@ -20,6 +24,8 @@ films:
   
   - title: "Example Film 3"
     country: "Denmark"
+    year: 2024
+    url: null  # URL is optional
     start_time: "2024-09-16T16:00:00"
     end_time: "2024-09-16T17:45:00"
     cinema: "Cinemateket"
@@ -28,6 +34,8 @@ films:
   
   - title: "Example Film 4"
     country: "Finland"
+    year: 2023
+    url: "https://www.filmfrasor.no/no/film/example-film-4"
     start_time: "2024-09-16T18:30:00"
     end_time: "2024-09-16T20:15:00"
     cinema: "Colosseum"

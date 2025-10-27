@@ -278,6 +278,7 @@ class FilmfrasorScraper(BaseScraper):
                                 title=title,
                                 country=country,
                                 year=year,
+                                url=url,
                                 start_time=start_time,
                                 end_time=end_time,
                                 cinema=cinema,

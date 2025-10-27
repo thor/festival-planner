@@ -63,12 +63,14 @@ buffer_time_minutes: 15
 
 ### Film Data (`data/films.yaml`)
 
-Film screenings with optional preference weights:
+Film screenings with optional preference weights and URLs:
 
 ```yaml
 films:
   - title: "Film Title"
     country: "Norway"
+    year: 2024  # Optional
+    url: "https://www.filmfrasor.no/no/film/film-title"  # Optional, makes titles clickable in terminal
     start_time: "2024-09-15T18:00:00"
     end_time: "2024-09-15T20:15:00"
     cinema: "Cinemateket"
