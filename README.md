@@ -228,7 +228,7 @@ mise exec -- ruff check src/
 
 ## Requirements
 
-- Python >= 3.11
+- Python >= 3.13
 - Dependencies managed by `uv` (see `pyproject.toml`)
 
 ## License
