@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from ..config import ConfigLoader, get_default_paths
+from ..config import ConfigLoader
 from ..models import ScheduledFilm, Film
 from ..solver import FestivalScheduleSolver
 from .._logging import get_logger
@@ -96,8 +96,7 @@ def solve(
     ),
 ) -> None:
     """Solve the scheduling optimization problem."""
-    config_dir, data_dir = get_default_paths()
-    loader = ConfigLoader(config_dir, data_dir)
+    loader = ConfigLoader()
 
     # Load configuration
     console.print("[bold blue]Loading configuration...[/bold blue]")

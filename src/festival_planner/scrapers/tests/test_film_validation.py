@@ -17,7 +17,7 @@ class TestFilmCinemaValidation:
         project_root = Path(__file__).parent.parent.parent.parent.parent
         config_dir = project_root / "config"
         data_dir = project_root / "data"
-        loader = ConfigLoader(config_dir, data_dir)
+        loader = ConfigLoader(config_dir=config_dir, data_dir=data_dir)
         cinema_config = loader.load_config().cinemas
 
         # Set up normalization map from config

@@ -92,7 +92,7 @@ class FilmfrasorScraper(BaseScraper):
         """
         try:
             # Load cinema config
-            loader = ConfigLoader(config_dir)
+            loader = ConfigLoader(config_dir=config_dir)
             cinema_config = loader.load_config().cinemas
 
             # Build and set normalization map from cinema aliases

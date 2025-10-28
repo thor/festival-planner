@@ -5,7 +5,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 
-from ..config import ConfigLoader, get_default_paths
+from ..config import ConfigLoader
 from ..scrapers import FilmfrasorScraper
 from .._logging import get_logger
 
@@ -38,20 +38,22 @@ def scrape(
     ),
 ) -> None:
     """Scrape the Filmfrasor.no programme and cache the results."""
-    config_dir, data_dir = get_default_paths()
-
+    loader = ConfigLoader()
+    
     console.print("[bold blue]Scraping filmfrasor.no...[/bold blue]")
 
     scraper = FilmfrasorScraper(
-        cache_dir=data_dir, year=year, force_refresh=refresh, config_dir=config_dir
+        cache_dir=loader.path_provider.get_cache_home(),
+        year=year,
+        force_refresh=refresh,
+        config_dir=loader.config_write_dir,
     )
     film_list = scraper.scrape()
 
     console.print(f"[green]Scraped {len(film_list.films)} film screenings[/green]")
 
     # Save to file
-    loader = ConfigLoader(config_dir, data_dir)
-    output_path = output or (data_dir / "films.yaml")
+    output_path = output or (loader.data_write_dir / "films.yaml")
     loader.save_films(film_list, output_path)
 
     console.print(f"[green]Saved to {output_path}[/green]")
