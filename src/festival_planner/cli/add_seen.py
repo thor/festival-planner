@@ -36,7 +36,7 @@ def add_seen(
         "-d",
         help="Specific screening date (YYYY-MM-DD) - omit to ignore all screenings",
     ),
-):
+) -> None:
     """Mark a film as seen or to be ignored."""
 
     # Load existing seen films

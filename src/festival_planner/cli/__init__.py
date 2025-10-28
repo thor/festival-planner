@@ -31,7 +31,7 @@ def main(
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
         case_sensitive=False,
     ),
-):
+) -> None:
     """Configure global settings for the festival planner."""
     configure_logging(log_level)
 

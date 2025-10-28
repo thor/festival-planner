@@ -94,7 +94,7 @@ def solve(
         "-b",
         help="Buffer time before each film in minutes",
     ),
-):
+) -> None:
     """Solve the scheduling optimization problem."""
     config_dir, data_dir = get_default_paths()
     loader = ConfigLoader(config_dir, data_dir)

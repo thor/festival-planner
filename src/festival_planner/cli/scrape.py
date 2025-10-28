@@ -36,7 +36,7 @@ def scrape(
         "-r",
         help="Force refresh: bypass HTTP cache and fetch fresh data from server",
     ),
-):
+) -> None:
     """Scrape the Filmfrasor.no programme and cache the results."""
     config_dir, data_dir = get_default_paths()
 

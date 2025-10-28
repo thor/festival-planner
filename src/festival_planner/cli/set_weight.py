@@ -24,7 +24,7 @@ def set_weight(
         "-s",
         help="Initial search term to filter films",
     ),
-):
+) -> None:
     """Set a custom weight for a film or specific screening using interactive fuzzy finder."""
     loader = ConfigLoader()
 

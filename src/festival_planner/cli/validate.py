@@ -17,7 +17,7 @@ def validate(
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="Show detailed validation info"
     ),
-):
+) -> None:
     """Validate all configuration and data files."""
     loader = ConfigLoader()
 
