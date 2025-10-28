@@ -56,4 +56,10 @@ def validate(
     except Exception as e:
         errors.append(f"Films validation failed: {e}")
         console.print(f"[red]✗ Films: {e}[/red]")
-    console.print("\n[bold green]All validations passed![/bold green]")
+
+    # Report final status
+    if errors:
+        console.print(f"\n[bold red]Validation failed with {len(errors)} error(s)![/bold red]")
+        raise typer.Exit(code=1)
+    else:
+        console.print("\n[bold green]All validations passed![/bold green]")
