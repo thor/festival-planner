@@ -1,4 +1,4 @@
-"""Command-line interface for the festival planner."""
+"""CLI commands for scraping film festival programme data."""
 
 from pathlib import Path
 from typing import Optional

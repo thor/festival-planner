@@ -1,4 +1,4 @@
-"""Command-line interface for the festival planner."""
+"""CLI commands for validating configuration and data files."""
 
 import typer
 from rich.console import Console

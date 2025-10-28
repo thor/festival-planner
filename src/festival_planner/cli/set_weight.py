@@ -1,4 +1,4 @@
-"""Command-line interface for the festival planner."""
+"""CLI commands for setting custom preference weights on films."""
 
 from typing import Optional
 import typer

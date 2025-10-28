@@ -1,4 +1,4 @@
-"""Command-line interface for the festival planner."""
+"""CLI commands for marking films as seen or to be ignored."""
 
 import datetime
 from typing import Optional

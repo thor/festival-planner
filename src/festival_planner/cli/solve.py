@@ -1,4 +1,4 @@
-"""Command-line interface for the festival planner."""
+"""CLI commands for solving the festival scheduling optimization problem."""
 
 from pathlib import Path
 from datetime import date
