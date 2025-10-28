@@ -130,7 +130,7 @@ class FestivalScheduleSolver:
         for i, film in enumerate(films):
             self.attend_vars[i] = self.model.NewBoolVar(f"attend_screening_{i}")
             titles_to_vars[film.title].append(self.attend_vars[i])
-        
+
         # Add a max one occurrence constraint for each film.
         # Makes no sense to attend the same film multiple times.
         for _, screening_option_vars in titles_to_vars.items():

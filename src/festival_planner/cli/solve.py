@@ -3,6 +3,7 @@
 from pathlib import Path
 from datetime import date
 from typing import Optional
+from rich import box
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -31,6 +32,20 @@ def _format_clickable_title(title: str, url: Optional[str]) -> Text:
     if url:
         return Text(title, style=f"link {url}")
     return Text(title)
+
+
+def _format_clickable_status(film: Film, scheduled: bool) -> Text:
+    """Format a film status as a clickable link if URL is available.
+
+    Args:
+        film: Film to format
+        scheduled: Whether the film is scheduled
+    """
+
+    status = "❌" if not scheduled else "✅"
+    web = Text("🎬", style=f"link {film.url}")
+    ticket = Text("🎫", style=f"link {film.ticket_url}")
+    return Text.assemble(status, " ", web, " ", ticket)
 
 
 def _group_films_by_date(
@@ -120,12 +135,8 @@ def solve(
     # Load and apply weight overrides
     weights = config.films.weights
     if weights:
-        relevant_films = loader.apply_weight_overrides(
-            relevant_films, weights
-        )
-        console.print(
-            f"[blue]Applied {len(weights)} custom weight override(s)[/blue]"
-        )
+        relevant_films = loader.apply_weight_overrides(relevant_films, weights)
+        console.print(f"[blue]Applied {len(weights)} custom weight override(s)[/blue]")
 
     # Solve
     console.print("[bold blue]Solving optimization problem...[/bold blue]")
@@ -206,8 +217,8 @@ def _build_film_overview_table(
     Returns:
         Formatted Rich Table
     """
-    table = Table(title="All Films in Festival")
-    table.add_column("Status", justify="center", style="bold", width=6)
+    table = Table(title="All Films in Festival", box=box.MINIMAL)
+    table.add_column("Status", justify="center", style="bold", width=8, no_wrap=True)
     table.add_column("Title", style="bold")
     table.add_column("Year", justify="center")
     table.add_column("Country", max_width=15, overflow="ellipsis", no_wrap=True)
@@ -230,7 +241,6 @@ def _build_film_overview_table(
             # Film is scheduled - show details
             sf = scheduled_by_title[title]
             film = sf.film
-            status = "✅"
             date_str = film.start_time.strftime("%a %d/%m")
             time_str = film.start_time.strftime("%H:%M")
             cinema_str = f"{film.cinema}"
@@ -240,7 +250,6 @@ def _build_film_overview_table(
         else:
             # Film not scheduled - show minimal info
             film = screenings[0]  # Use first screening for basic info
-            status = "❌"
             date_str = ""
             time_str = ""
             cinema_str = ""
@@ -248,6 +257,7 @@ def _build_film_overview_table(
 
         year_str = str(film.year) if film.year else ""
         title_link = _format_clickable_title(title, film.url)
+        status = _format_clickable_status(film, title in scheduled_titles)
 
         table.add_row(
             status,
@@ -311,16 +321,18 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
         console.print("[yellow]No films in schedule[/yellow]")
         return
 
+    max_title_length = max(len(sf.film.title) for sf in scheduled_films)
+
     # Group by date
     by_date = _group_films_by_date(scheduled_films)
 
     # Display each day
     for film_date in sorted(by_date.keys()):
-        table = Table(title=f"Schedule for {film_date}")
-        table.add_column("Arrival", style="cyan")
+        table = Table(title=f"Schedule for {film_date}", box=box.MINIMAL)
+        table.add_column("Arrive", style="cyan")
         table.add_column("Start", style="green")
         table.add_column("End", style="red")
-        table.add_column("Film", style="bold")
+        table.add_column("Film", style="bold", min_width=max_title_length)
         table.add_column("Year", max_width=4, overflow="crop", no_wrap=True)
         table.add_column("Cinema", style="yellow")
         table.add_column("Country", max_width=10, overflow="ellipsis", no_wrap=True)
@@ -328,13 +340,16 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
 
         for sf in by_date[film_date]:
             year_str = f"{sf.film.year:4d}" if sf.film.year else "    "
-            title_link = _format_clickable_title(sf.film.title, sf.film.url)
+            start_time = _format_clickable_title(
+                sf.film.start_time.strftime("%H:%M"), sf.film.ticket_url
+            )
+            year_link = _format_clickable_title(year_str, sf.film.url)
             table.add_row(
                 sf.arrival_time.strftime("%H:%M"),
-                sf.film.start_time.strftime("%H:%M"),
+                start_time,
                 sf.film.end_time.strftime("%H:%M"),
-                title_link,
-                year_str,
+                sf.film.title,
+                year_link,
                 sf.film.cinema,
                 sf.film.country,
                 f"{sf.calculated_weight:+.1f}",
@@ -367,9 +382,9 @@ def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) 
                     title_md = f"[{sf.film.title}]({sf.film.url})"
                 else:
                     title_md = sf.film.title
-                
+
                 f.write(f"### {title_md}\n")
-                f.write(f"- **Arrival**: {sf.arrival_time.strftime('%H:%M')}\n")
+                f.write(f"- **Arrive**: {sf.arrival_time.strftime('%H:%M')}\n")
                 f.write(f"- **Start**: {sf.film.start_time.strftime('%H:%M')}\n")
                 f.write(f"- **End**: {sf.film.end_time.strftime('%H:%M')}\n")
                 f.write(f"- **Cinema**: {sf.film.cinema}\n")

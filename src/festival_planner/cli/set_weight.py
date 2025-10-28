@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.prompt import Prompt
 from iterfzf import iterfzf
 
-from ..config import ConfigLoader, get_default_paths
+from ..config import ConfigLoader
 from ..models import FilmWeight
 from .._logging import get_logger
 
@@ -38,15 +38,11 @@ def set_weight(
     # Build lookup maps for existing overrides
     # Screening-level: (title, start_time) -> weight
     screening_override_map = {
-        (w.title, w.start_time): w.weight
-        for w in weights
-        if w.start_time is not None
+        (w.title, w.start_time): w.weight for w in weights if w.start_time is not None
     }
 
     # Film-level: title -> weight
-    film_override_map = {
-        w.title: w.weight for w in weights if w.start_time is None
-    }
+    film_override_map = {w.title: w.weight for w in weights if w.start_time is None}
 
     # Filter by search term if provided
     films = film_list.films

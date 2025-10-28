@@ -270,9 +270,14 @@ class FilmfrasorScraper(BaseScraper):
                     if not screening_info:
                         continue
 
-                    start_time, end_time, cinema, auditorium, special_notes, ticket_url = (
-                        screening_info
-                    )
+                    (
+                        start_time,
+                        end_time,
+                        cinema,
+                        auditorium,
+                        special_notes,
+                        ticket_url,
+                    ) = screening_info
 
                     try:
                         screening = Film(
@@ -280,6 +285,7 @@ class FilmfrasorScraper(BaseScraper):
                             country=country,
                             year=year,
                             url=url,
+                            ticket_url=ticket_url,
                             start_time=start_time,
                             end_time=end_time,
                             cinema=cinema,
@@ -484,7 +490,7 @@ class FilmfrasorScraper(BaseScraper):
         # Extract special notes from element with class "special" (if present)
         special_elem = element.find(class_="special")
         special_notes = special_elem.get_text(strip=True) if special_elem else None
-        
+
         # Extract ticket URL
         ticket_url_elem = element.find(class_="event-item billett")
         if not ticket_url_elem or ticket_url_elem.get("href") is None:

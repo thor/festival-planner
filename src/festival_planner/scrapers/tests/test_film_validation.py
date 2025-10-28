@@ -156,7 +156,7 @@ class TestFilmCinemaValidation:
             "auditorium": "Lillebil",
         }
         film = Film(**input)
-        assert film.auditorium == "Lillebil" 
+        assert film.auditorium == "Lillebil"
 
     def test_mixed_case_alias_normalized(self):
         """Test that mixed case aliases work properly."""

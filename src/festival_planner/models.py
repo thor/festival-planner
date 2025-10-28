@@ -33,6 +33,10 @@ class Film(BaseModel):
     url: Optional[str] = Field(
         default=None, description="URL to the film's page on the festival website"
     )
+    ticket_url: Optional[str] = Field(
+        default=None,
+        description="URL to the film's ticket page on the festival website",
+    )
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
@@ -43,7 +47,8 @@ class Film(BaseModel):
         default=None, description="Special event information (Q&A, premiere, etc.)"
     )
     preference_weight: float = Field(
-        default=1.0, description="Preference weight (positive or negative relative to default)"
+        default=1.0,
+        description="Preference weight (positive or negative relative to default)",
     )
 
     # Class variable to store valid cinemas for validation

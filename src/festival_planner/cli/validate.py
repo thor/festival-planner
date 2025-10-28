@@ -3,7 +3,7 @@
 import typer
 from rich.console import Console
 
-from ..config import ConfigLoader, get_default_paths
+from ..config import ConfigLoader
 from .._logging import get_logger
 
 
