@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from hishel import Controller, SQLiteStorage, CacheClient
 from pydantic import ValidationError
 
@@ -270,7 +270,7 @@ class FilmfrasorScraper(BaseScraper):
                     if not screening_info:
                         continue
 
-                    start_time, end_time, cinema, auditorium, special_notes = (
+                    start_time, end_time, cinema, auditorium, special_notes, ticket_url = (
                         screening_info
                     )
 
@@ -411,7 +411,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return screening_elements
 
-    def _parse_screening_element(self, element) -> Optional[tuple]:
+    def _parse_screening_element(self, element: Tag) -> Optional[tuple]:
         """Parse a screening element to extract time, cinema, etc.
 
         The element is a div with class "show-item" containing:
@@ -421,7 +421,7 @@ class FilmfrasorScraper(BaseScraper):
         - class "special": Special notes (optional)
 
         Returns:
-            Tuple of (start_time, end_time, cinema, auditorium, special_notes) or None
+            Tuple of (start_time, end_time, cinema, auditorium, special_notes, ticket_url) or None
         """
         # Extract date from element with class "date"
         date_elem = element.find(class_="date")
@@ -484,8 +484,16 @@ class FilmfrasorScraper(BaseScraper):
         # Extract special notes from element with class "special" (if present)
         special_elem = element.find(class_="special")
         special_notes = special_elem.get_text(strip=True) if special_elem else None
+        
+        # Extract ticket URL
+        ticket_url_elem = element.find(class_="event-item billett")
+        if not ticket_url_elem or ticket_url_elem.get("href") is None:
+            logger.debug("No ticket URL element found in show-item")
+            ticket_url = None
+        else:
+            ticket_url = ticket_url_elem.get("href")
 
-        return (start_time, end_time, cinema, auditorium, special_notes)
+        return (start_time, end_time, cinema, auditorium, special_notes, ticket_url)
 
     def _split_cinema_and_auditorium(
         self, cinema_text: str
