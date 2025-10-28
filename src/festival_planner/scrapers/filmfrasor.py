@@ -117,7 +117,7 @@ class FilmfrasorScraper(BaseScraper):
                 logger.warning("No cinema aliases found in config")
 
             # Extract valid cinemas
-            valid_cinemas = loader.get_valid_cinemas(cinema_config)
+            valid_cinemas = cinema_config.get_valid_cinemas()
 
             if valid_cinemas:
                 # Set valid cinemas on Film model for validation

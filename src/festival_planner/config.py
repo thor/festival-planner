@@ -1,8 +1,7 @@
 """Configuration management for loading and validating YAML files."""
 
 from pathlib import Path
-from typing import Optional, TypeVar, Type
-from warnings import deprecated
+from typing import Optional, TypeVar
 from ruamel.yaml import YAML
 import yaml
 from pydantic import BaseModel, Field
@@ -263,16 +262,6 @@ class ConfigLoader:
                 sort_keys=False,
                 allow_unicode=True,
             )
-
-    @deprecated("Use CinemaConfig.get_valid_cinemas() instead")
-    def get_valid_cinemas(self, cinema_config: CinemaConfig) -> set[str]:
-        return cinema_config.get_valid_cinemas()
-
-    @deprecated("Use CinemaConfig.build_travel_time_matrix() instead")
-    def build_travel_time_matrix(
-        self, cinema_config: CinemaConfig
-    ) -> dict[tuple[str, str], int]:
-        return cinema_config.build_travel_time_matrix()
 
     def filter_relevant_films(
         self, films: list[Film], seen_films: list[SeenFilm]
