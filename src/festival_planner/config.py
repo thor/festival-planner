@@ -16,6 +16,7 @@ from .models import (
     SeenFilm,
     FilmWeight,
 )
+from ._logging import get_logger
 
 # Configuration file
 CONFIG_FILE = "config.yaml"
@@ -28,6 +29,8 @@ FILMS_FILE = "films.yaml"
 """Scraped data file."""
 
 T = TypeVar("T", bound=BaseModel)
+
+logger = get_logger(__name__)
 
 
 def _load_yaml_model(
@@ -194,7 +197,7 @@ class ConfigLoader:
             # Use source_key if specified, otherwise use field_name
             yaml_key = source_key if source_key else field_name
             if (filepath, yaml_key) in sourced:
-                print("skipping duplicate", filepath, source_key)
+                logger.debug("Skipping duplicate config key", filepath=str(filepath), yaml_key=yaml_key)
                 continue
 
             sourced.add((filepath, yaml_key))
