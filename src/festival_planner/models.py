@@ -111,13 +111,6 @@ class Film(BaseModel):
         return int((self.end_time - self.start_time).total_seconds() / 60)
 
 
-class Cinema(BaseModel):
-    """Represents a cinema/venue."""
-
-    name: str = Field(..., description="Cinema name")
-    location: Optional[str] = Field(None, description="Location identifier or address")
-
-
 class TravelTime(BaseModel):
     """Represents travel time between two cinemas."""
 

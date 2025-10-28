@@ -1,7 +1,7 @@
 """Configuration management for loading and validating YAML files."""
 
 from pathlib import Path
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Type
 from ruamel.yaml import YAML
 from pydantic import BaseModel, Field
 
