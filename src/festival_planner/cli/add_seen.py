@@ -70,14 +70,16 @@ def add_seen(
 def _save_seen_film(
     loader: ConfigLoader, config: Config, title: str, date: str | None = None
 ) -> None:
+    # Convert date string to datetime.date for proper comparison
+    film_date = datetime.date.fromisoformat(date) if date else None
+    
     seen_map = {(f.title, f.date): f for f in config.films.seen}
-    if (title, date) in seen_map:
+    if (title, film_date) in seen_map:
         console.print(
             f"[yellow]Film '{title}' ({f'on {date}' if date else 'all screenings'}) already marked as seen.[/yellow]"
         )
         return
 
-    film_date = datetime.date.fromisoformat(date) if date else None
     seen_film = SeenFilm(title=title, date=film_date)
     config.films.seen.append(seen_film)
     loader.save_preferences(config.films)
