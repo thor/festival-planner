@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Optional, TypeVar
 from ruamel.yaml import YAML
-import yaml
 from pydantic import BaseModel, Field
 
 from .models import (
@@ -231,14 +230,13 @@ class ConfigLoader:
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
+        yaml_dumper = YAML()
+        yaml_dumper.default_flow_style = False
+        yaml_dumper.sort_keys = False
+        yaml_dumper.allow_unicode = True
+        
         with open(filepath, "w") as f:
-            yaml.dump(
-                film_list.model_dump(mode="json"),
-                f,
-                default_flow_style=False,
-                sort_keys=False,
-                allow_unicode=True,
-            )
+            yaml_dumper.dump(film_list.model_dump(mode="json"), f)
 
     def save_preferences(
         self, preferences: FilmPreferences, filepath: Optional[Path] = None
@@ -254,14 +252,13 @@ class ConfigLoader:
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
+        yaml_dumper = YAML()
+        yaml_dumper.default_flow_style = False
+        yaml_dumper.sort_keys = False
+        yaml_dumper.allow_unicode = True
+        
         with open(filepath, "w") as f:
-            yaml.dump(
-                preferences.model_dump(mode="json"),
-                f,
-                default_flow_style=False,
-                sort_keys=False,
-                allow_unicode=True,
-            )
+            yaml_dumper.dump(preferences.model_dump(mode="json"), f)
 
     def filter_relevant_films(
         self, films: list[Film], seen_films: list[SeenFilm]
