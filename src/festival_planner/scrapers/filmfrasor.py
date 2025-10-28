@@ -267,36 +267,37 @@ class FilmfrasorScraper(BaseScraper):
             for screening_elem in screening_elements:
                 try:
                     screening_info = self._parse_screening_element(screening_elem)
+                    if not screening_info:
+                        continue
 
-                    if screening_info:
-                        start_time, end_time, cinema, auditorium, special_notes = (
-                            screening_info
+                    start_time, end_time, cinema, auditorium, special_notes = (
+                        screening_info
+                    )
+
+                    try:
+                        screening = Film(
+                            title=title,
+                            country=country,
+                            year=year,
+                            url=url,
+                            start_time=start_time,
+                            end_time=end_time,
+                            cinema=cinema,
+                            auditorium=auditorium,
+                            special_notes=special_notes,
                         )
-
-                        try:
-                            screening = Film(
-                                title=title,
-                                country=country,
-                                year=year,
-                                url=url,
-                                start_time=start_time,
-                                end_time=end_time,
-                                cinema=cinema,
-                                auditorium=auditorium,
-                                special_notes=special_notes,
-                            )
-                            screenings.append(screening)
-                            logger.debug("Added screening", **screening.dict())
-                        except ValidationError as e:
-                            # Log validation error as warning and continue
-                            logger.warning(
-                                "Invalid film screening - skipping",
-                                title=title,
-                                cinema=cinema,
-                                start_time=start_time,
-                                error=str(e),
-                            )
-                            continue
+                        screenings.append(screening)
+                        logger.debug("Added screening", **screening.model_dump())
+                    except ValidationError as e:
+                        # Log validation error as warning and continue
+                        logger.warning(
+                            "Invalid film screening - skipping",
+                            title=title,
+                            cinema=cinema,
+                            start_time=start_time,
+                            error=str(e),
+                        )
+                        continue
 
                 except Exception as e:
                     logger.warning(
