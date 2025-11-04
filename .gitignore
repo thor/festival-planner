@@ -4,5 +4,5 @@
 **/*.sqlite
 **/*.db
 .venv/
-schedule.md
+schedule*.md
 .cursor/screenshots/
