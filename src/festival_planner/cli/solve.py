@@ -225,7 +225,7 @@ def _build_film_overview_table(
     table.add_column("Date", style="cyan")
     table.add_column("Time", style="green")
     table.add_column("Cinema", style="yellow")
-    table.add_column("Special Notes", style="magenta")
+    table.add_column("Special Notes", style="dim")
 
     # Sort by title and add rows with alternating styles
     sorted_titles = sorted(films_by_title.keys())
@@ -242,9 +242,9 @@ def _build_film_overview_table(
             film = sf.film
             date_str = film.start_time.strftime("%a %d/%m")
             time_str = film.start_time.strftime("%H:%M")
-            cinema_str = f"{film.cinema}"
-            if film.auditorium:
-                cinema_str += f" {film.auditorium}"
+            cinema_str = film.cinema + (
+                " " + film.auditorium if film.auditorium else ""
+            )
             special_str = film.special_notes if film.special_notes else ""
         else:
             # Film not scheduled - show minimal info
@@ -334,6 +334,7 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
         table.add_column("Film", style="bold", min_width=max_title_length)
         table.add_column("Year", max_width=4, overflow="crop", no_wrap=True)
         table.add_column("Cinema", style="yellow")
+        table.add_column("Auditorium", style="magenta", no_wrap=True)
         table.add_column("Country", max_width=10, overflow="ellipsis", no_wrap=True)
         table.add_column("Weight", justify="right")
 
@@ -343,6 +344,7 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
                 sf.film.start_time.strftime("%H:%M"), sf.film.ticket_url
             )
             year_link = _format_clickable_title(year_str, sf.film.url)
+            auditorium_str = sf.film.auditorium if sf.film.auditorium else ""
             table.add_row(
                 sf.arrival_time.strftime("%H:%M"),
                 start_time,
@@ -350,6 +352,7 @@ def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
                 sf.film.title,
                 year_link,
                 sf.film.cinema,
+                auditorium_str,
                 sf.film.country,
                 f"{sf.calculated_weight:+.1f}",
             )
@@ -387,6 +390,8 @@ def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) 
                 f.write(f"- **Start**: {sf.film.start_time.strftime('%H:%M')}\n")
                 f.write(f"- **End**: {sf.film.end_time.strftime('%H:%M')}\n")
                 f.write(f"- **Cinema**: {sf.film.cinema}\n")
+                if sf.film.auditorium:
+                    f.write(f"- **Auditorium**: {sf.film.auditorium}\n")
                 f.write(f"- **Country**: {sf.film.country}\n")
                 if sf.film.special_notes:
                     f.write(f"- **Notes**: {sf.film.special_notes}\n")
