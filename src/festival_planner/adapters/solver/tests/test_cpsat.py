@@ -107,3 +107,14 @@ def test_arrival_time_uses_earlier_event_when_attending_events():
         )
     )
     assert result.scheduled[0].arrival_time == at("13:15")
+
+
+def test_unknown_commitment_is_infeasible_with_a_reason():
+    result = solver.solve(
+        request(
+            screening("a", "14:00", "16:00"),
+            screening_commitments=frozenset({"missing"}),
+        )
+    )
+    assert result.status == SolveStatus.INFEASIBLE
+    assert "'missing'" in result.reasons[0]

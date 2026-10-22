@@ -129,9 +129,19 @@ def formulate(request: SolveRequest) -> Formulation:
     - Two Screenings conflict when neither can be reached from the other in
       time, given travel and the arrival buffer.
     """
+    _validate(request)
     preferences = request.preferences
     entries = {e.id: e for e in request.programme_entries}
-    unsatisfiable: list[str] = []
+    unsatisfiable: list[str] = [
+        f"Committed screening {screening_id!r} does not exist"
+        for screening_id in sorted(
+            request.screening_commitments - {s.id for s in request.screenings}
+        )
+    ]
+    unsatisfiable += [
+        f"Committed programme entry {entry_id!r} does not exist"
+        for entry_id in sorted(request.film_commitments - entries.keys())
+    ]
     candidates: list[Screening] = []
     required: set[ScreeningId] = set()
     fixed: set[ScreeningId] = set()
@@ -173,6 +183,8 @@ def formulate(request: SolveRequest) -> Formulation:
 
     exactly_one: list[frozenset[ScreeningId]] = []
     for entry_id in sorted(request.film_commitments):
+        if entry_id not in entries:
+            continue
         options = by_entry.get(entry_id)
         if not options:
             unsatisfiable.append(
@@ -193,6 +205,31 @@ def formulate(request: SolveRequest) -> Formulation:
         conflicts=_conflicts(candidates, fixed, request.routes, preferences),
         unsatisfiable=tuple(unsatisfiable),
     )
+
+
+def _validate(request: SolveRequest) -> None:
+    """Reject requests whose ids are duplicated or refer to nothing."""
+    for kind, items in (
+        ("screening", request.screenings),
+        ("programme entry", request.programme_entries),
+        ("venue", request.venues),
+    ):
+        ids = [item.id for item in items]
+        for duplicate in sorted({i for i in ids if ids.count(i) > 1}):
+            raise ValueError(f"Duplicate {kind} id {duplicate!r}")
+    entry_ids = {e.id for e in request.programme_entries}
+    venue_ids = {v.id for v in request.venues}
+    for screening in request.screenings:
+        if screening.programme_entry_id not in entry_ids:
+            raise ValueError(
+                f"Screening {screening.id!r} references unknown programme entry "
+                f"{screening.programme_entry_id!r}"
+            )
+        if screening.venue_id not in venue_ids:
+            raise ValueError(
+                f"Screening {screening.id!r} references unknown venue "
+                f"{screening.venue_id!r}"
+            )
 
 
 def _conflicts(

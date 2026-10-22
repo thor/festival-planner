@@ -1,4 +1,7 @@
 import datetime
+from dataclasses import replace
+
+import pytest
 
 from festival_planner.domain.planning import Preferences
 from festival_planner.domain.programme import Event
@@ -242,3 +245,69 @@ class TestConflicts:
         after_midnight = screening("early", "00:10", "02:00", day=next_day)
         req = request(late, after_midnight, preferences=Preferences(buffer_minutes=15))
         assert conflicts(req) == {frozenset({"late", "early"})}
+
+
+class TestValidation:
+    def test_duplicate_screening_ids_are_rejected(self):
+        req = request(
+            screening("a", "14:00", "16:00"),
+            screening("a", "18:00", "20:00"),
+            entries=(entry("a"),),
+        )
+        with pytest.raises(ValueError, match="'a'"):
+            formulate(req)
+
+    def test_duplicate_programme_entry_ids_are_rejected(self):
+        req = request(
+            screening("a", "14:00", "16:00"), entries=(entry("a"), entry("a"))
+        )
+        with pytest.raises(ValueError, match="'a'"):
+            formulate(req)
+
+    def test_duplicate_venue_ids_are_rejected(self):
+        req = request(screening("a", "14:00", "16:00"))
+        req = replace(req, venues=req.venues * 2)
+        with pytest.raises(ValueError, match="'A'"):
+            formulate(req)
+
+    def test_unknown_programme_entry_is_rejected_naming_both_ids(self):
+        req = request(
+            screening("a", "14:00", "16:00", entry_id="e"), entries=(entry("other"),)
+        )
+        with pytest.raises(ValueError, match="'a'.*'e'"):
+            formulate(req)
+
+    def test_unknown_venue_is_rejected_naming_both_ids(self):
+        req = request(screening("a", "14:00", "16:00"))
+        req = replace(req, venues=())
+        with pytest.raises(ValueError, match="'a'.*'A'"):
+            formulate(req)
+
+    def test_unknown_screening_commitment_is_unsatisfiable(self):
+        req = request(
+            screening("a", "14:00", "16:00"),
+            screening_commitments=frozenset({"x"}),
+        )
+        assert formulate(req).unsatisfiable == (
+            "Committed screening 'x' does not exist",
+        )
+
+    def test_unknown_film_commitment_is_unsatisfiable(self):
+        req = request(
+            screening("a", "14:00", "16:00"), film_commitments=frozenset({"x"})
+        )
+        assert formulate(req).unsatisfiable == (
+            "Committed programme entry 'x' does not exist",
+        )
+
+    def test_unknown_ids_elsewhere_are_ignored(self):
+        req = request(
+            screening("a", "14:00", "16:00"),
+            active_schedule=frozenset({"x"}),
+            excluded_screenings=frozenset({"x"}),
+            excluded_programme_entries=frozenset({"x"}),
+            seen_films=frozenset({"x"}),
+        )
+        formulation = formulate(req)
+        assert {s.id for s in formulation.candidates} == {"a"}
+        assert not formulation.unsatisfiable

@@ -10,7 +10,7 @@ from ...config import Config
 from ...domain.planning import Preferences
 from ...domain.programme import Event, ProgrammeEntry, Screening, Venue
 from ...domain.solving import SolveRequest
-from ...domain.travel import Route, RouteTable
+from ...domain.travel import DEFAULT_TRANSPORT_MODE, Route, RouteTable
 from ...models import Film
 
 LEGACY_DEFAULT_TRAVEL_MINUTES = 30
@@ -22,7 +22,14 @@ def screening_id(film: Film) -> str:
 
 
 def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
-    """Translate legacy YAML inputs into a self-contained SolveRequest."""
+    """Translate legacy YAML inputs into a self-contained SolveRequest.
+
+    Exact duplicate film rows (same Screening id) are dropped, keeping the first.
+    """
+    first_rows: dict[str, Film] = {}
+    for film in films:
+        first_rows.setdefault(screening_id(film), film)
+    films = list(first_rows.values())
     entries: dict[str, ProgrammeEntry] = {}
     for film in films:
         entries.setdefault(
@@ -78,10 +85,9 @@ def _route_table(config: Config, venue_ids: list[str]) -> RouteTable:
         minutes.setdefault((b, a), m)
     for a, b in itertools.permutations(venue_ids, 2):
         minutes.setdefault((a, b), LEGACY_DEFAULT_TRAVEL_MINUTES)
-    table = RouteTable()
     return RouteTable(
         routes=tuple(
-            Route(a, b, table.default_mode, m)
+            Route(a, b, DEFAULT_TRANSPORT_MODE, m)
             for (a, b), m in minutes.items()
             if a != b
         )

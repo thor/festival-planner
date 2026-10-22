@@ -106,3 +106,12 @@ def test_travel_times_are_symmetric_and_missing_pairs_get_default():
     assert routes.minutes("Vika", "Vega", None) == 15
     assert routes.minutes("Vega", "Vika", None) == 15
     assert routes.minutes("Vika", "Cinemateket", None) == LEGACY_DEFAULT_TRAVEL_MINUTES
+
+
+def test_duplicate_film_rows_are_dropped_keeping_the_first():
+    a = film("A", 12)
+    request = build_solve_request([a, a.model_copy(), film("A", 18)], Config())
+    assert [s.id for s in request.screenings] == [
+        screening_id(a),
+        screening_id(film("A", 18)),
+    ]
