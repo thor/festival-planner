@@ -7,7 +7,7 @@ Planning which film festival screenings to attend, given travel between venues, 
 ### Programme
 
 **Festival**:
-A single edition of a film festival, with its own dates and programme.
+A single edition of a film festival, with its own dates, time zone and programme.
 _Avoid_: Edition, event
 
 **Festival Series**:
@@ -25,6 +25,10 @@ _Avoid_: Listing, festival film, catalogue entry
 **Screening**:
 A single showing of a Programme Entry at a given time and Venue.
 _Avoid_: Showing, show, event, film (when meaning a showing)
+
+**Withdrawn**:
+A Screening that a Festival's programme no longer lists. It is kept, never offered for scheduling, so anything that referred to it can be flagged. A moved Screening is one Withdrawn Screening plus a new one.
+_Avoid_: Cancelled, deleted, removed
 
 **Event**:
 Something belonging to a Screening beyond the film itself (e.g. a director talk, an industry debate, an award ceremony), either within the Screening's time or timed on its own. Its kind is free-form, not a fixed category.

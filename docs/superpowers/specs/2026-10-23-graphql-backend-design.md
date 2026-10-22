@@ -50,6 +50,42 @@ providers).
 - **Enrichment**: source-tagged extra data on a Film, shown alongside but never
   replacing festival information; fetched as a job after ingestion.
 
+## Persistence and ingestion
+
+- Times are timezone-aware, stored as UTC; a Festival has an IANA time zone
+  and its dates are local dates
+  ([ADR-0005](../../adr/0005-aware-datetimes-with-festival-time-zone.md)).
+- A Festival has a unique human-readable slug (e.g.
+  `films-from-the-south-2026`), name, local start and end dates, time zone and
+  an optional Festival Series (slug, name). The `ProgrammeSource` describes the
+  Festival it scrapes; ingestion creates or updates it.
+- Ids are opaque strings, random UUIDs assigned on first sight and found again
+  by natural keys:
+  - Programme Entry: (Festival, source key). The source key is supplied by the
+    `ProgrammeSource` (for Filmfrasor, the film page's URL path); re-ingestion
+    updates title, year etc. in place.
+  - Screening: (Programme Entry, Venue, start time). Screenings missing from a
+    re-scrape become **Withdrawn**, never deleted; Withdrawn Screenings are
+    not offered to the solver. Auditorium, ticket URL and Events update in
+    place.
+- Film resolution: reuse a Film with the same normalised title and year,
+  else create one; an unknown year always creates a new Film. No fuzzy
+  matching or merging yet: duplicates are the safe failure.
+- Venues are global and carry aliases; ingestion resolves a source's raw venue
+  names through them. An unknown venue name aborts the whole ingestion (one
+  transaction) and reports every unknown name. This retires the legacy
+  class-level cinema validation.
+- A `RouteProvider` (first adapter: the existing YAML travel times) replaces
+  the global Route set; the default Transport Mode must cover every ordered
+  pair of Venues.
+- Ingestion runs synchronously from the CLI, idempotently, one transaction per
+  run. Repositories and SQLAlchemy are synchronous.
+- The adapter has its own SQLAlchemy declarative models and explicit mappers
+  to and from domain models.
+- The database defaults to `$XDG_DATA_HOME/festival-planner/festival-planner.db`,
+  overridable by `FESTIVAL_PLANNER_DATABASE_URL` or `--database`. Tests run
+  the Alembic migrations, not `create_all`.
+
 ## Planning
 
 - One **Active Schedule** per (User, Festival); previously accepted Schedules
@@ -131,13 +167,12 @@ Each step is its own plan and leaves working, tested software:
 
 1. **Domain core and solver boundary**: domain values, scheduling rules,
    CP-SAT adapter, CLI on the solve request (JSON export/replay).
-2. **Persistence**: Festival, Film, Venue, Organization entities; SQLAlchemy
-   repositories; Alembic; ingesting a `ProgrammeSource` (the Filmfrasor
-   scraper) and Routes into the database.
-   Must decide the time-zone policy first (festival-local naive vs. aware
-   datetimes plus a Festival time zone, with date ranges on local dates),
-   add domain invariants (end ≥ start, non-negative Route minutes) and keep
-   Screening ids stable across re-ingestion.
+2. **Persistence**: Festival, Festival Series, Film, Programme Entry,
+   Screening, Event, Venue and Route; SQLAlchemy repositories; Alembic;
+   ingesting a `ProgrammeSource` (the Filmfrasor scraper) and Routes into the
+   database. Decided 2026-10-23 (see *Persistence and ingestion* above and
+   [ADR-0005](../../adr/0005-aware-datetimes-with-festival-time-zone.md)).
+   Organization moves to step 5 and Film external ids to step 6.
 3. **Planning use-cases**: Drafts as change sets, accept, Stale, diff,
    Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
    Also: deterministic solving (CP-SAT seed and tie-break, so Draft diffs
