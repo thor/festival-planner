@@ -9,7 +9,7 @@ the plans in `docs/superpowers/plans/` record how it gets built.
 
 - Hexagonal ([ADR-0001](../../adr/0001-hexagonal-architecture.md)): a domain
   core of plain Python entities and use-cases with no Strawberry, SQLAlchemy,
-  OR-Tools or httpx imports.
+  OR-Tools or httpx imports. Pydantic is allowed in the domain if need be.
 - Driving adapters: Strawberry GraphQL and the Typer CLI.
 - Driven ports: `ProgrammeSource` (festival scrapers), `EnrichmentProvider`,
   `WatchHistoryProvider` (Letterboxd RSS/CSV, Manual), `RouteProvider`,
@@ -137,7 +137,12 @@ Each step is its own plan and leaves working, tested software:
 3. **Planning use-cases**: Drafts as change sets, accept, Stale, diff,
    Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
 4. **GraphQL API and auth**: Strawberry schema over the use-cases,
-   `TokenVerifier` adapters, local token issuer, SDL export.
+   `TokenVerifier` adapters, local token issuer, SDL export. Evaluate
+   Strawberry's Pydantic integration
+   (<https://strawberry.rocks/docs/integrations/pydantic>) for deriving
+   GraphQL types and inputs. Pydantic is approved in the domain if need be
+   (ADR-0001), so domain models may become Pydantic models where that lets
+   Strawberry derive types directly.
 5. **Curation**: Organizations, Memberships, Admin, Curations, Curator Notes,
    Suggested Schedules (signed in and anonymous).
 6. **Watch history and Enrichment**: Letterboxd RSS/CSV import, enrichment

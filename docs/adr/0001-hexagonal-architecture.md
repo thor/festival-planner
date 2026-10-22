@@ -7,3 +7,5 @@ The backend is built as ports and adapters: a domain core of plain Python entiti
 GraphQL types are a mapping layer over domain entities, not the entities themselves, so schema changes and domain changes are deliberately decoupled at the cost of some duplication.
 
 The `ScheduleSolver` port takes a self-contained solve request (Screenings, Routes, commitments, exclusions, Seen, Preferences) as plain domain values. The CLI builds it from local files and the server builds it from the database, so solver experimentation never needs the server, database or auth.
+
+Pydantic is allowed in the domain when it earns its place (validation, serialisation); not everything has to be pushed into adapters. The framework ban covers Strawberry, SQLAlchemy, HTTP clients and solver libraries.
