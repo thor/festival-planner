@@ -10,9 +10,8 @@ class TestCinemaAndAuditoriumParsing:
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Load cinema config from actual config file
-        project_root = Path(__file__).parent.parent.parent.parent.parent
-        config_dir = project_root / "config"
+        # Load cinema config from the test fixtures
+        config_dir = Path(__file__).parents[2] / "tests" / "fixtures" / "config"
 
         # Create a scraper instance with config_dir for cinema parsing
         self.scraper = FilmfrasorScraper(config_dir=config_dir)

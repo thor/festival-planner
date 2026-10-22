@@ -13,10 +13,10 @@ class TestFilmCinemaValidation:
 
     def setup_method(self):
         """Set up test fixtures by loading actual config."""
-        # Load cinema config from actual config file
-        project_root = Path(__file__).parent.parent.parent.parent.parent
-        config_dir = project_root / "config"
-        data_dir = project_root / "data"
+        # Load cinema config from the test fixtures
+        fixtures_dir = Path(__file__).parents[2] / "tests" / "fixtures"
+        config_dir = fixtures_dir / "config"
+        data_dir = fixtures_dir / "data"
         loader = ConfigLoader(config_dir=config_dir, data_dir=data_dir)
         cinema_config = loader.load_config().cinemas
 

@@ -1,0 +1,40 @@
+# Self-contained cinema configuration for tests.
+cinemas:
+  cinema_aliases:
+    Vika:
+      - "Vika Kino"
+      - "vika"
+      - "vika kino"
+    Cinemateket:
+      - "cinemateket"
+    Vega:
+      - "vega"
+      - "vega scene"
+    Klingenberg:
+      - "klingenberg"
+
+  travel_times:
+    - from: "Cinemateket"
+      to: "Vika"
+      minutes: 20
+    - from: "Vika"
+      to: "Cinemateket"
+      minutes: 20
+    - from: "Cinemateket"
+      to: "Vega"
+      minutes: 20
+    - from: "Vega"
+      to: "Cinemateket"
+      minutes: 20
+    - from: "Vika"
+      to: "Vega"
+      minutes: 15
+    - from: "Vega"
+      to: "Vika"
+      minutes: 15
+    - from: "Klingenberg"
+      to: "Klingenberg"
+      minutes: 0
+
+schedule:
+  buffer_time_minutes: 15
