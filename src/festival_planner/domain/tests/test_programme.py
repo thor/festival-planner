@@ -38,3 +38,14 @@ def test_separately_timed_events_extend_the_screening_when_included():
     panel = Event("Panel", at("16:15"), at("17:00"))
     assert screening(panel).ends_at(include_events=True) == at("17:00")
     assert screening(Event("Q&A")).ends_at(include_events=True) == at("16:00")
+
+
+def test_screening_starts_at_its_start_time_by_default():
+    ceremony = Event("Ceremony", at("13:30"), at("13:55"))
+    assert screening(ceremony).starts_at(include_events=False) == at("14:00")
+
+
+def test_earlier_separately_timed_events_start_the_screening_when_included():
+    ceremony = Event("Ceremony", at("13:30"), at("13:55"))
+    assert screening(ceremony).starts_at(include_events=True) == at("13:30")
+    assert screening(Event("Q&A")).starts_at(include_events=True) == at("14:00")

@@ -226,6 +226,16 @@ class TestConflicts:
         )
         assert conflicts(attending) == {frozenset({"a", "b"})}
 
+    def test_separately_timed_event_before_screening_blocks_time_when_attending(self):
+        ceremony = Event("Ceremony", at("17:30"), at("18:00"))
+        a = screening("a", "16:00", "17:45")
+        b = screening("b", "18:00", "20:00", events=(ceremony,))
+        assert conflicts(request(a, b)) == set()
+        attending = request(
+            a, b, preferences=Preferences(buffer_minutes=0, attend_events=True)
+        )
+        assert conflicts(attending) == {frozenset({"a", "b"})}
+
     def test_screenings_across_midnight_still_conflict(self):
         next_day = DAY + datetime.timedelta(days=1)
         late = screening("late", "23:00", "23:59")

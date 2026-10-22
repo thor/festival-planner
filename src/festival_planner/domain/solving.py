@@ -223,4 +223,5 @@ def _reachable(
         minutes=travel + preferences.buffer_for(second.venue_id)
     )
     leaves = first.ends_at(include_events=preferences.attend_events)
-    return leaves + needed <= second.start_time
+    arrives_by = second.starts_at(include_events=preferences.attend_events)
+    return leaves + needed <= arrives_by

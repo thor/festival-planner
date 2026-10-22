@@ -63,6 +63,13 @@ class Screening:
     ticket_url: str | None = None
     events: tuple[Event, ...] = ()
 
+    def starts_at(self, *, include_events: bool) -> datetime.datetime:
+        """When the Screening starts, optionally including separately timed Events."""
+        if not include_events:
+            return self.start_time
+        event_starts = [e.start_time for e in self.events if e.start_time is not None]
+        return min([self.start_time, *event_starts])
+
     def ends_at(self, *, include_events: bool) -> datetime.datetime:
         """When the Screening ends, optionally including separately timed Events."""
         if not include_events:

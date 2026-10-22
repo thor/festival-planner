@@ -70,7 +70,7 @@ class CpSatScheduleSolver:
         scheduled = tuple(
             ScheduledScreening(
                 screening_id=s.id,
-                arrival_time=s.start_time
+                arrival_time=s.starts_at(include_events=preferences.attend_events)
                 - datetime.timedelta(minutes=preferences.buffer_for(s.venue_id)),
                 weight=formulation.weights[s.id],
             )

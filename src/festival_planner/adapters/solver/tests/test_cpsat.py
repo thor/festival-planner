@@ -1,5 +1,6 @@
 from festival_planner.adapters.solver.cpsat import CpSatScheduleSolver
 from festival_planner.domain.planning import Preferences
+from festival_planner.domain.programme import Event
 from festival_planner.domain.solving import ScheduleSolver, SolveStatus
 from festival_planner.domain.tests.builders import at, request, screening
 
@@ -95,3 +96,14 @@ def test_arrival_time_uses_venue_buffer():
         )
     )
     assert result.scheduled[0].arrival_time == at("13:35")
+
+
+def test_arrival_time_uses_earlier_event_when_attending_events():
+    ceremony = Event("Ceremony", at("13:30"), at("13:55"))
+    result = solver.solve(
+        request(
+            screening("a", "14:00", "16:00", events=(ceremony,)),
+            preferences=Preferences(buffer_minutes=15, attend_events=True),
+        )
+    )
+    assert result.scheduled[0].arrival_time == at("13:15")
