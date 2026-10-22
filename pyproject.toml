@@ -15,6 +15,8 @@ dependencies = [
     "structlog>=25.4.0",
     "iterfzf>=1.0.0",
     "ruamel-yaml>=0.18.16",
+    "sqlalchemy>=2.0.40",
+    "alembic>=1.16",
 ]
 
 [project.scripts]
