@@ -117,7 +117,8 @@ def formulate(request: SolveRequest) -> Formulation:
 
     Rules, in order of precedence:
     - Screenings that started before `now` are fixed: kept and required if in
-      the Active Schedule, dropped otherwise.
+      the Active Schedule, dropped otherwise. Fixed Screenings never conflict
+      with each other.
     - Screening Commitments are required, regardless of exclusions, Seen or
       the date range.
     - Excluded Screenings and Programme Entries are dropped.
@@ -133,6 +134,7 @@ def formulate(request: SolveRequest) -> Formulation:
     unsatisfiable: list[str] = []
     candidates: list[Screening] = []
     required: set[ScreeningId] = set()
+    fixed: set[ScreeningId] = set()
 
     for screening in request.screenings:
         entry = entries[screening.programme_entry_id]
@@ -141,6 +143,7 @@ def formulate(request: SolveRequest) -> Formulation:
             if screening.id in request.active_schedule:
                 candidates.append(screening)
                 required.add(screening.id)
+                fixed.add(screening.id)
             elif committed:
                 unsatisfiable.append(
                     f"Committed screening {screening.id!r} has already started"
@@ -187,16 +190,22 @@ def formulate(request: SolveRequest) -> Formulation:
         required=frozenset(required),
         exactly_one=tuple(exactly_one),
         at_most_one=tuple(frozenset(ids) for ids in by_entry.values() if len(ids) > 1),
-        conflicts=_conflicts(candidates, request.routes, preferences),
+        conflicts=_conflicts(candidates, fixed, request.routes, preferences),
         unsatisfiable=tuple(unsatisfiable),
     )
 
 
 def _conflicts(
-    screenings: list[Screening], routes: RouteTable, preferences: Preferences
+    screenings: list[Screening],
+    fixed: set[ScreeningId],
+    routes: RouteTable,
+    preferences: Preferences,
 ) -> frozenset[tuple[ScreeningId, ScreeningId]]:
+    """Conflicting pairs; fixed Screenings are history and never conflict."""
     conflicts = set()
     for a, b in itertools.combinations(screenings, 2):
+        if a.id in fixed and b.id in fixed:
+            continue
         if not (
             _reachable(a, b, routes, preferences)
             or _reachable(b, a, routes, preferences)

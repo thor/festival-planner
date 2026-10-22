@@ -79,6 +79,7 @@ class TestStartedScreenings:
         )
         formulation = formulate(req)
         assert formulation.required == {"a"}
+        assert {s.id for s in formulation.candidates} == {"a"}
 
     def test_started_screening_outside_active_schedule_is_dropped(self):
         req = request(screening("a", "14:00", "16:00"), now=at("15:00"))
@@ -90,7 +91,46 @@ class TestStartedScreenings:
             screening_commitments=frozenset({"a"}),
             now=at("15:00"),
         )
-        assert formulate(req).unsatisfiable
+        formulation = formulate(req)
+        assert formulation.unsatisfiable
+        assert formulation.candidates == ()
+
+    def test_started_active_screening_is_kept_despite_later_rules(self):
+        next_day = DAY + datetime.timedelta(days=1)
+        req = request(
+            screening("a", "14:00", "16:00"),
+            active_schedule=frozenset({"a"}),
+            now=at("15:00"),
+            excluded_screenings=frozenset({"a"}),
+            excluded_programme_entries=frozenset({"a"}),
+            seen_films=frozenset({"film-a"}),
+            preferences=Preferences(start_date=next_day),
+        )
+        formulation = formulate(req)
+        assert {s.id for s in formulation.candidates} == {"a"}
+        assert formulation.required == {"a"}
+
+    def test_started_screenings_do_not_conflict_with_each_other(self):
+        req = request(
+            screening("a", "14:00", "16:00"),
+            screening("b", "16:10", "18:00"),
+            active_schedule=frozenset({"a", "b"}),
+            now=at("19:00"),
+            preferences=Preferences(buffer_minutes=30),
+        )
+        formulation = formulate(req)
+        assert formulation.conflicts == frozenset()
+        assert formulation.required == {"a", "b"}
+
+    def test_started_screening_still_conflicts_with_unreachable_future_one(self):
+        req = request(
+            screening("a", "14:00", "16:00"),
+            screening("b", "16:10", "18:00"),
+            active_schedule=frozenset({"a"}),
+            now=at("15:00"),
+            preferences=Preferences(buffer_minutes=30),
+        )
+        assert conflicts(req) == {frozenset({"a", "b"})}
 
 
 class TestGroups:
