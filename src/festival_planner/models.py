@@ -148,6 +148,8 @@ class ScheduleConfig(BaseModel):
     buffer_time_minutes: int = 15
     start_date: Optional[datetime.date] = None
     end_date: Optional[datetime.date] = None
+    time_zone: str = "Europe/Oslo"
+    """The festival's IANA time zone; legacy naive times are interpreted in it."""
 
 
 class PriorityConfig(BaseModel):

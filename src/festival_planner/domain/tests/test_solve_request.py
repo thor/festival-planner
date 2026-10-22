@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+from pydantic import ValidationError
 
 from festival_planner.domain.solving import SolveRequest
 from festival_planner.domain.tests.builders import entry, request, screening
@@ -44,3 +47,16 @@ def test_unknown_venue_is_rejected_naming_both_ids():
 def test_unknown_fields_are_rejected():
     with pytest.raises(ValueError, match="surprise"):
         SolveRequest(venues=(), programme_entries=(), screenings=(), surprise=1)
+
+
+def test_unknown_time_zone_is_rejected():
+    with pytest.raises(ValidationError, match="Unknown time zone"):
+        request(screening("s", "18:00", "20:00"), time_zone="Mars/Olympus")
+
+
+def test_local_date_uses_the_festival_time_zone():
+    # 23:30 UTC on 8 Nov is 00:30 on 9 Nov in Oslo.
+    instant = datetime.datetime(2025, 11, 8, 23, 30, tzinfo=datetime.UTC)
+    assert request(time_zone="Europe/Oslo").local_date(instant) == datetime.date(
+        2025, 11, 9
+    )

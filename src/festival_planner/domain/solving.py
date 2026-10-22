@@ -7,12 +7,13 @@ adapter only has to optimise the resulting `Formulation`.
 import datetime
 import enum
 import itertools
+import zoneinfo
 from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Protocol, Self
 
-from pydantic import Field, model_validator
+from pydantic import AwareDatetime, Field, model_validator
 
 from .planning import Preferences
 from .programme import (
@@ -24,7 +25,7 @@ from .programme import (
     Venue,
 )
 from .travel import RouteTable
-from .values import Value
+from .values import TimeZone, Value
 
 DEFAULT_WEIGHT = 1.0
 """Weight of a Screening without any weight preference."""
@@ -41,6 +42,8 @@ class SolveRequest(Value):
     venues: tuple[Venue, ...]
     programme_entries: tuple[ProgrammeEntry, ...]
     screenings: tuple[Screening, ...]
+    time_zone: TimeZone
+    """The Festival's time zone; date ranges are festival-local dates."""
     routes: RouteTable = Field(default_factory=RouteTable)
     preferences: Preferences = Field(default_factory=Preferences)
     screening_commitments: frozenset[ScreeningId] = frozenset()
@@ -49,7 +52,7 @@ class SolveRequest(Value):
     excluded_programme_entries: frozenset[ProgrammeEntryId] = frozenset()
     seen_films: frozenset[FilmId] = frozenset()
     active_schedule: frozenset[ScreeningId] = frozenset()
-    now: datetime.datetime | None = None
+    now: AwareDatetime | None = None
     time_limit_seconds: float = 60.0
 
     @model_validator(mode="after")
@@ -79,6 +82,10 @@ class SolveRequest(Value):
                 )
         return self
 
+    def local_date(self, instant: datetime.datetime) -> datetime.date:
+        """The festival-local calendar day of `instant`."""
+        return instant.astimezone(zoneinfo.ZoneInfo(self.time_zone)).date()
+
 
 class SolveStatus(enum.StrEnum):
     OPTIMAL = "OPTIMAL"
@@ -90,7 +97,7 @@ class SolveStatus(enum.StrEnum):
 
 class ScheduledScreening(Value):
     screening_id: ScreeningId
-    arrival_time: datetime.datetime
+    arrival_time: AwareDatetime
     weight: float
 
 
@@ -155,7 +162,7 @@ def formulate(request: SolveRequest) -> Formulation:
       the date range.
     - Excluded Screenings and Programme Entries are dropped.
     - Screenings of Seen Films are dropped unless committed to.
-    - Screenings outside the preferred date range are dropped.
+    - Screenings outside the preferred (festival-local) date range are dropped.
     - Each Film Commitment needs exactly one of its remaining Screenings.
     - At most one Screening per Programme Entry.
     - Two Screenings conflict when neither can be reached from the other in
@@ -204,7 +211,7 @@ def formulate(request: SolveRequest) -> Formulation:
             and entry.id not in request.film_commitments
         ):
             continue
-        if not preferences.covers(screening.start_time.date()):
+        if not preferences.covers(request.local_date(screening.start_time)):
             continue
         candidates.append(screening)
 

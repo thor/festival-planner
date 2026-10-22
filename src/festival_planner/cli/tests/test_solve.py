@@ -1,5 +1,6 @@
 """End-to-end tests of the `solve` command, from YAML files and JSON requests."""
 
+import datetime
 import json
 
 import pytest
@@ -128,3 +129,24 @@ def test_time_limit_of_a_loaded_request_is_kept_unless_given(xdg):
 
     assert result.exit_code == 0, result.output
     assert json.loads(second.read_text())["time_limit_seconds"] == 5
+
+
+def test_times_are_shown_in_the_festival_time_zone(xdg):
+    request_path, output = xdg / "request.json", xdg / "schedule.md"
+    CliRunner().invoke(app, ["solve", "--export-request", str(request_path)])
+    request = json.loads(request_path.read_text())
+    for screening in request["screenings"]:
+        for key in ("start_time", "end_time"):
+            local = datetime.datetime.fromisoformat(screening[key])
+            screening[key] = local.astimezone(datetime.UTC).isoformat()
+    request_path.write_text(json.dumps(request))
+
+    result = CliRunner().invoke(
+        app, ["solve", "--request", str(request_path), "-o", str(output)]
+    )
+
+    assert result.exit_code == 0, result.output
+    schedule = output.read_text()
+    assert "## 2025-11-08" in schedule
+    assert "- **Start**: 14:00" in schedule
+    assert "- **Arrive**: 13:45" in schedule

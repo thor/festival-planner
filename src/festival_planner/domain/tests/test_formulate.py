@@ -292,3 +292,28 @@ class TestUnknownCommitments:
         formulation = formulate(req)
         assert {s.id for s in formulation.candidates} == {"a"}
         assert not formulation.unsatisfiable
+
+
+def test_date_range_is_applied_to_festival_local_dates():
+    # Stored in UTC, 00:30 on 9 Nov in Oslo is still 8 Nov.
+    oslo = screening("late", "00:30", "02:00", day=datetime.date(2025, 11, 9))
+    late = oslo.model_copy(
+        update={
+            "start_time": oslo.start_time.astimezone(datetime.UTC),
+            "end_time": oslo.end_time.astimezone(datetime.UTC),
+        }
+    )
+    on_ninth = Preferences(
+        buffer_minutes=0,
+        start_date=datetime.date(2025, 11, 9),
+        end_date=datetime.date(2025, 11, 9),
+    )
+    on_eighth = Preferences(
+        buffer_minutes=0,
+        start_date=datetime.date(2025, 11, 8),
+        end_date=datetime.date(2025, 11, 8),
+    )
+    assert [
+        s.id for s in formulate(request(late, preferences=on_ninth)).candidates
+    ] == ["late"]
+    assert formulate(request(late, preferences=on_eighth)).candidates == ()

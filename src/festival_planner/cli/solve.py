@@ -1,6 +1,7 @@
 """CLI commands for solving the festival scheduling optimization problem."""
 
 import datetime
+import zoneinfo
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,16 +25,22 @@ app = typer.Typer()
 
 @dataclass(frozen=True)
 class ScheduledRow:
-    """A scheduled Screening with everything needed to display it."""
+    """A scheduled Screening with everything needed to display it.
+
+    `arrival_time`, `start` and `end` are festival-local.
+    """
 
     screening: Screening
     entry: ProgrammeEntry
     venue: Venue
     arrival_time: datetime.datetime
+    start: datetime.datetime
+    end: datetime.datetime
     weight: float
 
 
 def _scheduled_rows(request: SolveRequest, result: SolveResult) -> list[ScheduledRow]:
+    local = zoneinfo.ZoneInfo(request.time_zone)
     screenings = {s.id: s for s in request.screenings}
     entries = {e.id: e for e in request.programme_entries}
     venues = {v.id: v for v in request.venues}
@@ -45,7 +52,9 @@ def _scheduled_rows(request: SolveRequest, result: SolveResult) -> list[Schedule
                 screening=screening,
                 entry=entries[screening.programme_entry_id],
                 venue=venues[screening.venue_id],
-                arrival_time=scheduled.arrival_time,
+                arrival_time=scheduled.arrival_time.astimezone(local),
+                start=screening.start_time.astimezone(local),
+                end=screening.end_time.astimezone(local),
                 weight=scheduled.weight,
             )
         )
@@ -229,8 +238,8 @@ def display_film_overview(request: SolveRequest, rows: list[ScheduledRow]) -> No
         )
         if row:
             screening = row.screening
-            date_str = screening.start_time.strftime("%a %d/%m")
-            time_str = screening.start_time.strftime("%H:%M")
+            date_str = row.start.strftime("%a %d/%m")
+            time_str = row.start.strftime("%H:%M")
             venue_str = venues[screening.venue_id].name + (
                 f" {screening.auditorium}" if screening.auditorium else ""
             )
@@ -260,7 +269,7 @@ def _rows_by_date(
 ) -> dict[datetime.date, list[ScheduledRow]]:
     by_date: defaultdict[datetime.date, list[ScheduledRow]] = defaultdict(list)
     for row in rows:
-        by_date[row.screening.start_time.date()].append(row)
+        by_date[row.start.date()].append(row)
     return dict(sorted(by_date.items()))
 
 
@@ -289,8 +298,8 @@ def display_schedule(rows: list[ScheduledRow]) -> None:
             year_str = f"{row.entry.year:4d}" if row.entry.year else "    "
             table.add_row(
                 row.arrival_time.strftime("%H:%M"),
-                _link(screening.start_time.strftime("%H:%M"), screening.ticket_url),
-                screening.end_time.strftime("%H:%M"),
+                _link(row.start.strftime("%H:%M"), screening.ticket_url),
+                row.end.strftime("%H:%M"),
                 row.entry.title,
                 _link(year_str, row.entry.url),
                 row.venue.name,
@@ -320,8 +329,8 @@ def save_schedule_to_file(rows: list[ScheduledRow], filepath: Path) -> None:
                 )
                 f.write(f"### {title_md}\n")
                 f.write(f"- **Arrive**: {row.arrival_time.strftime('%H:%M')}\n")
-                f.write(f"- **Start**: {screening.start_time.strftime('%H:%M')}\n")
-                f.write(f"- **End**: {screening.end_time.strftime('%H:%M')}\n")
+                f.write(f"- **Start**: {row.start.strftime('%H:%M')}\n")
+                f.write(f"- **End**: {row.end.strftime('%H:%M')}\n")
                 f.write(f"- **Venue**: {row.venue.name}\n")
                 if screening.auditorium:
                     f.write(f"- **Auditorium**: {screening.auditorium}\n")

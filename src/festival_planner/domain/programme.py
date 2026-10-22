@@ -3,7 +3,7 @@
 import datetime
 from typing import Self
 
-from pydantic import model_validator
+from pydantic import AwareDatetime, model_validator
 
 from .values import Value
 
@@ -39,8 +39,8 @@ class Event(Value):
     """
 
     description: str
-    start_time: datetime.datetime | None = None
-    end_time: datetime.datetime | None = None
+    start_time: AwareDatetime | None = None
+    end_time: AwareDatetime | None = None
 
     @model_validator(mode="after")
     def _times_form_an_interval(self) -> Self:
@@ -61,8 +61,8 @@ class Screening(Value):
     id: ScreeningId
     programme_entry_id: ProgrammeEntryId
     venue_id: VenueId
-    start_time: datetime.datetime
-    end_time: datetime.datetime
+    start_time: AwareDatetime
+    end_time: AwareDatetime
     auditorium: str | None = None
     ticket_url: str | None = None
     events: tuple[Event, ...] = ()

@@ -4,7 +4,9 @@ The YAML files identify everything by title, so titles become ids: one
 Programme Entry and one Film per title, and one Venue per cinema name.
 """
 
+import datetime
 import itertools
+import zoneinfo
 
 from ...config import Config
 from ...domain.planning import Preferences
@@ -46,11 +48,13 @@ def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
     venue_ids = list(dict.fromkeys(film.cinema for film in films))
     seen = config.films.seen
     excluded_on_date = {(s.title, s.date) for s in seen if s.date is not None}
+    zone = zoneinfo.ZoneInfo(config.schedule.time_zone)
 
     return SolveRequest(
         venues=tuple(Venue(id=v, name=v) for v in venue_ids),
         programme_entries=tuple(entries.values()),
-        screenings=tuple(_screening(film) for film in films),
+        screenings=tuple(_screening(film, zone) for film in films),
+        time_zone=config.schedule.time_zone,
         routes=_route_table(config, venue_ids),
         preferences=_preferences(films, config),
         excluded_screenings=frozenset(
@@ -62,13 +66,18 @@ def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
     )
 
 
-def _screening(film: Film) -> Screening:
+def _aware(moment: datetime.datetime, zone: zoneinfo.ZoneInfo) -> datetime.datetime:
+    """Legacy YAML times are naive festival-local times."""
+    return moment if moment.tzinfo else moment.replace(tzinfo=zone)
+
+
+def _screening(film: Film, zone: zoneinfo.ZoneInfo) -> Screening:
     return Screening(
         id=screening_id(film),
         programme_entry_id=film.title,
         venue_id=film.cinema,
-        start_time=film.start_time,
-        end_time=film.end_time,
+        start_time=_aware(film.start_time, zone),
+        end_time=_aware(film.end_time, zone),
         auditorium=film.auditorium,
         ticket_url=film.ticket_url,
         events=(Event(description=film.special_notes),) if film.special_notes else (),

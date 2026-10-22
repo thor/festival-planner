@@ -2,13 +2,11 @@ import datetime
 
 import pytest
 
+from pydantic import ValidationError
+
 from festival_planner.domain.programme import Event, Screening
 
-
-def at(hhmm: str) -> datetime.datetime:
-    return datetime.datetime.combine(
-        datetime.date(2025, 11, 8), datetime.time.fromisoformat(hhmm)
-    )
+from .builders import at
 
 
 def screening(*events: Event) -> Screening:
@@ -75,3 +73,28 @@ def test_screening_cannot_end_before_it_starts():
             start_time=at("16:00"),
             end_time=at("14:00"),
         )
+
+
+def test_screening_rejects_naive_times():
+    with pytest.raises(ValidationError):
+        Screening(
+            id="s",
+            programme_entry_id="e",
+            venue_id="A",
+            start_time=datetime.datetime(2025, 11, 8, 18, 0),
+            end_time=datetime.datetime(2025, 11, 8, 20, 0),
+        )
+
+
+def test_event_rejects_naive_times():
+    with pytest.raises(ValidationError):
+        Event(
+            description="Q&A",
+            start_time=datetime.datetime(2025, 11, 8, 20, 0),
+            end_time=datetime.datetime(2025, 11, 8, 21, 0),
+        )
+
+
+def test_times_in_different_zones_compare_as_instants():
+    utc = at("17:00").astimezone(datetime.UTC)
+    assert utc == at("18:00") - datetime.timedelta(hours=1)

@@ -115,3 +115,17 @@ def test_duplicate_film_rows_are_dropped_keeping_the_first():
         screening_id(a),
         screening_id(film("A", 18)),
     ]
+
+
+def test_naive_legacy_times_are_festival_local():
+    request = build_solve_request([film("A", 18)], Config())
+    assert request.time_zone == "Europe/Oslo"
+    [s] = request.screenings
+    assert s.start_time.utcoffset() == datetime.timedelta(hours=1)
+    assert s.start_time.astimezone(datetime.UTC).hour == 17
+
+
+def test_the_festival_time_zone_comes_from_the_schedule_config():
+    config = Config(schedule=ScheduleConfig(time_zone="America/New_York"))
+    [s] = build_solve_request([film("A", 18)], config).screenings
+    assert s.start_time.astimezone(datetime.UTC).hour == 23
