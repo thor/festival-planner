@@ -134,6 +134,8 @@ Options:
 - `--output`, `-o`: Save schedule to file
 - `--time-limit`, `-t`: Solver time limit in seconds (default: 60)
 - `--buffer`, `-b`: Override buffer time in minutes
+- `--export-request`: Save the solve request as JSON (after the overrides above)
+- `--request`: Solve a saved JSON solve request instead of the YAML configuration
 
 Examples:
 ```bash
@@ -148,6 +150,10 @@ mise exec -- festival-planner solve --buffer 20
 
 # Save schedule to file
 mise exec -- festival-planner solve --output schedule.md
+
+# Capture a solve request and replay it while experimenting with the solver
+mise exec -- festival-planner solve --export-request request.json
+mise exec -- festival-planner solve --request request.json --buffer 10
 ```
 
 ### 3. Mark Films as Seen
@@ -179,15 +185,18 @@ mise exec -- python src/scripts/scrape_filmfrasor.py
 
 ## How It Works
 
-The planner uses constraint programming (CP-SAT) to solve the scheduling problem:
+The planner is built as ports and adapters (see `docs/adr/0001-hexagonal-architecture.md`).
+The CLI turns the YAML files (or a saved JSON file) into a self-contained *solve request*;
+the domain core applies the scheduling rules (`festival_planner.domain.solving.formulate`)
+and a CP-SAT adapter optimises the result:
 
-1. **Decision Variables**: Binary variable for each film (attend or not)
-2. **Objective**: Maximize sum of `(1.0 + preference_weight)` for attended films
+1. **Decision variables**: one boolean per candidate screening (attend or not)
+2. **Objective**: maximise the sum of screening weights (default `1.0`, overridden per
+   film or screening, plus year and event adjustments)
 3. **Constraints**:
-   - No overlapping films (including buffer and travel time)
-   - Film end + travel time + buffer ≤ next film start
-   - Exclude already seen films
-   - Films on different days don't conflict
+   - At most one screening per film
+   - No two screenings unless the earlier one's end + travel time + buffer ≤ the later one's start
+   - Seen films are excluded; committed screenings are required
 
 ## Extending for Other Festivals
 

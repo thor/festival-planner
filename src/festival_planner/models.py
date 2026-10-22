@@ -239,17 +239,3 @@ class CinemaConfig(BaseModel):
             cinemas.add(travel_time.from_cinema)
             cinemas.add(travel_time.to_cinema)
         return cinemas
-
-
-class ScheduledFilm(BaseModel):
-    """Represents a film in an optimized schedule."""
-
-    film: Film
-    arrival_time: datetime.datetime = Field(
-        ..., description="Recommended arrival time (including buffer)"
-    )
-    calculated_weight: float = Field(
-        ...,
-        description="Calculated weight including all dynamic adjustments "
-        "(base + preference + year + special notes)",
-    )

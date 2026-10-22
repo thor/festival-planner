@@ -1,82 +1,106 @@
 """CLI commands for solving the festival scheduling optimization problem."""
 
+import datetime
+from collections import defaultdict
+from dataclasses import dataclass, replace
 from pathlib import Path
-from datetime import date
-from typing import Optional
-from rich import box
+
 import typer
+from rich import box
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from ..config import ConfigLoader
-from ..models import ScheduledFilm, Film
-from ..solver import FestivalScheduleSolver
 from .._logging import get_logger
+from ..adapters.json_files.solve_request import dump_solve_request, load_solve_request
+from ..adapters.solver.cpsat import CpSatScheduleSolver
+from ..adapters.yaml_files.solve_request import build_solve_request
+from ..config import ConfigLoader
+from ..domain.programme import ProgrammeEntry, Screening, Venue
+from ..domain.solving import SolveRequest, SolveResult
 
 console = Console()
 logger = get_logger(__name__)
 app = typer.Typer()
 
 
-def _format_clickable_title(title: str, url: Optional[str]) -> Text:
-    """Format a film title as a clickable link if URL is available.
+@dataclass(frozen=True)
+class ScheduledRow:
+    """A scheduled Screening with everything needed to display it."""
 
-    Args:
-        title: Film title to display
-        url: Optional URL to link to
+    screening: Screening
+    entry: ProgrammeEntry
+    venue: Venue
+    arrival_time: datetime.datetime
+    weight: float
 
-    Returns:
-        Rich Text object with hyperlink if URL provided, plain text otherwise
-    """
+
+def _scheduled_rows(request: SolveRequest, result: SolveResult) -> list[ScheduledRow]:
+    screenings = {s.id: s for s in request.screenings}
+    entries = {e.id: e for e in request.programme_entries}
+    venues = {v.id: v for v in request.venues}
+    rows = []
+    for scheduled in result.scheduled:
+        screening = screenings[scheduled.screening_id]
+        rows.append(
+            ScheduledRow(
+                screening=screening,
+                entry=entries[screening.programme_entry_id],
+                venue=venues[screening.venue_id],
+                arrival_time=scheduled.arrival_time,
+                weight=scheduled.weight,
+            )
+        )
+    return rows
+
+
+def _link(text: str, url: str | None) -> Text:
+    """Format text as a clickable link if a URL is available."""
     if url:
-        return Text(title, style=f"link {url}")
-    return Text(title)
+        return Text(text, style=f"link {url}")
+    return Text(text)
 
 
-def _format_clickable_status(film: Film, scheduled: bool) -> Text:
-    """Format a film status as a clickable link if URL is available.
-
-    Args:
-        film: Film to format
-        scheduled: Whether the film is scheduled
-    """
-
-    status = "❌" if not scheduled else "✅"
-    web = Text("🎬", style=f"link {film.url}")
-    ticket = Text("🎫", style=f"link {film.ticket_url}")
-    return Text.assemble(status, " ", web, " ", ticket)
+def _parse_dates(dates: str) -> tuple[datetime.date, datetime.date]:
+    """Parse `YYYY-MM-DD:YYYY-MM-DD` or a single `YYYY-MM-DD`."""
+    start, _, end = dates.partition(":")
+    return datetime.date.fromisoformat(start), datetime.date.fromisoformat(end or start)
 
 
-def _group_films_by_date(
-    scheduled_films: list[ScheduledFilm],
-) -> dict[date, list[ScheduledFilm]]:
-    """Group scheduled films by date.
+def _apply_overrides(
+    request: SolveRequest,
+    *,
+    dates: str | None,
+    buffer_time: int | None,
+    time_limit: int,
+) -> SolveRequest:
+    preferences = request.preferences
+    if buffer_time is not None:
+        preferences = replace(preferences, buffer_minutes=buffer_time)
+    if dates:
+        start, end = _parse_dates(dates)
+        preferences = replace(preferences, start_date=start, end_date=end)
+    return replace(request, preferences=preferences, time_limit_seconds=time_limit)
 
-    Args:
-        scheduled_films: List of scheduled films
 
-    Returns:
-        Dictionary mapping dates to lists of scheduled films
-    """
-    by_date: dict[date, list[ScheduledFilm]] = {}
-    for sf in scheduled_films:
-        film_date = sf.film.date
-        if film_date not in by_date:
-            by_date[film_date] = []
-        by_date[film_date].append(sf)
-    return by_date
+def _load_request_from_yaml() -> SolveRequest:
+    loader = ConfigLoader()
+    console.print("[bold blue]Loading configuration...[/bold blue]")
+    config = loader.load_config()
+    films = loader.load_films().films
+    console.print(f"[green]Loaded {len(films)} film screenings[/green]")
+    return build_solve_request(films, config)
 
 
 @app.command()
 def solve(
-    dates: Optional[str] = typer.Option(
+    dates: str | None = typer.Option(
         None,
         "--dates",
         "-d",
         help="Date range filter (format: YYYY-MM-DD:YYYY-MM-DD or single date)",
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output",
         "-o",
@@ -88,134 +112,78 @@ def solve(
         "-t",
         help="Solver time limit in seconds",
     ),
-    buffer_time: Optional[int] = typer.Option(
+    buffer_time: int | None = typer.Option(
         None,
         "--buffer",
         "-b",
         help="Buffer time before each film in minutes",
     ),
+    request_file: Path | None = typer.Option(
+        None,
+        "--request",
+        help="Solve a JSON solve request instead of the YAML configuration",
+    ),
+    export_request: Path | None = typer.Option(
+        None,
+        "--export-request",
+        help="Write the solve request as JSON before solving",
+    ),
 ) -> None:
     """Solve the scheduling optimization problem."""
-    loader = ConfigLoader()
-
-    # Load configuration
-    console.print("[bold blue]Loading configuration...[/bold blue]")
-    config = loader.load_config()
-    preferences = config.schedule
-
-    # Override buffer time if specified
-    if buffer_time is not None:
-        preferences.buffer_time_minutes = buffer_time
-
-    # Parse date range if specified
-    if dates:
-        if ":" in dates:
-            start_str, end_str = dates.split(":", 1)
-            preferences.start_date = date.fromisoformat(start_str)
-            preferences.end_date = date.fromisoformat(end_str)
-        else:
-            preferences.start_date = date.fromisoformat(dates)
-            preferences.end_date = date.fromisoformat(dates)
-
-    # Load films
-    film_list = loader.load_films()
-    console.print(f"[green]Loaded {len(film_list.films)} film screenings[/green]")
-
-    # Load seen films and filter
-    seen_list = config.films.seen
-    relevant_films = loader.filter_relevant_films(film_list.films, seen_list)
-    console.print(
-        f"[yellow]{len(film_list.films) - len(relevant_films)} films not relevant (seen or ignored)[/yellow]"
-    )
-    console.print(
-        f"[green]{len(relevant_films)} film screenings available to schedule[/green]"
+    if request_file:
+        request = load_solve_request(request_file)
+        console.print(f"[green]Loaded solve request from {request_file}[/green]")
+    else:
+        request = _load_request_from_yaml()
+    request = _apply_overrides(
+        request, dates=dates, buffer_time=buffer_time, time_limit=time_limit
     )
 
-    # Load and apply weight overrides
-    weights = config.films.weights
-    if weights:
-        relevant_films = loader.apply_weight_overrides(relevant_films, weights)
-        console.print(f"[blue]Applied {len(weights)} custom weight override(s)[/blue]")
+    if export_request:
+        dump_solve_request(request, export_request)
+        console.print(f"[green]Solve request saved to {export_request}[/green]")
 
-    # Solve
     console.print("[bold blue]Solving optimization problem...[/bold blue]")
-    solver = FestivalScheduleSolver(relevant_films, config)
-    scheduled_films = solver.solve(time_limit_seconds=time_limit)
+    result = CpSatScheduleSolver().solve(request)
 
-    # Display results
-    stats = solver.get_solution_stats()
+    if not result.is_solved:
+        console.print(f"[bold red]No schedule found ({result.status})[/bold red]")
+        for reason in result.reasons:
+            console.print(f"  - {reason}")
+        raise typer.Exit(code=1)
+
+    rows = _scheduled_rows(request, result)
     console.print("[bold green]Solution found![/bold green]")
-    console.print(f"Status: {stats['status']}")
-    console.print(f"Objective value: {stats['objective_value']:.2f}")
-    console.print(f"Solve time: {stats['wall_time']:.2f}s")
-    console.print(f"Films scheduled: {len(scheduled_films)}")
+    console.print(f"Status: {result.status}")
+    console.print(f"Objective value: {result.objective:.2f}")
+    console.print(f"Solve time: {result.wall_time_seconds:.2f}s")
+    console.print(f"Films scheduled: {len(rows)}")
 
-    # Display comprehensive film overview
-    display_film_overview(relevant_films, scheduled_films)
+    display_film_overview(request, rows)
+    display_schedule(rows)
 
-    # Display schedule
-    display_schedule(scheduled_films)
-
-    # Save to file if requested
     if output:
-        save_schedule_to_file(scheduled_films, output)
+        save_schedule_to_file(rows, output)
         console.print(f"[green]Schedule saved to {output}[/green]")
 
 
-def _group_films_by_title(films: list[Film]) -> dict[str, list[Film]]:
-    """Group films by title.
+def display_film_overview(request: SolveRequest, rows: list[ScheduledRow]) -> None:
+    """Display every Programme Entry with whether and when it is scheduled."""
+    screenings_by_entry: defaultdict[str, list[Screening]] = defaultdict(list)
+    for screening in request.screenings:
+        screenings_by_entry[screening.programme_entry_id].append(screening)
+    row_by_entry = {row.entry.id: row for row in rows}
+    venues = {v.id: v for v in request.venues}
 
-    Args:
-        films: List of films to group
-
-    Returns:
-        Dictionary mapping film titles to lists of screenings
-    """
-    films_by_title: dict[str, list[Film]] = {}
-    for film in films:
-        if film.title not in films_by_title:
-            films_by_title[film.title] = []
-        films_by_title[film.title].append(film)
-    return films_by_title
-
-
-def _print_festival_statistics(
-    total_unique: int,
-    total_screenings: int,
-    scheduled_count: int,
-    missed_count: int,
-) -> None:
-    """Print festival overview statistics.
-
-    Args:
-        total_unique: Total number of unique films
-        total_screenings: Total number of screenings
-        scheduled_count: Number of films scheduled
-        missed_count: Number of films missed
-    """
     console.print("\n[bold]Festival Overview[/bold]")
-    console.print(f"Unique films: {total_unique}")
-    console.print(f"Total screenings: {total_screenings}")
-    console.print(f"Films scheduled: [green]{scheduled_count}[/green]")
-    console.print(f"Films missed: [red]{missed_count}[/red]")
+    console.print(f"Unique films: {len(request.programme_entries)}")
+    console.print(f"Total screenings: {len(request.screenings)}")
+    console.print(f"Films scheduled: [green]{len(rows)}[/green]")
+    console.print(
+        f"Films missed: [red]{len(request.programme_entries) - len(rows)}[/red]"
+    )
     console.print()
 
-
-def _build_film_overview_table(
-    films_by_title: dict[str, list[Film]],
-    scheduled_titles: set[str],
-    scheduled_by_title: dict[str, ScheduledFilm],
-) -> Table:
-    """Build the film overview table with scheduling details.
-
-    Args:
-        films_by_title: Films grouped by title
-        scheduled_titles: Set of scheduled film titles
-        scheduled_by_title: Mapping of titles to scheduled films
-
-    Returns:
-        Formatted Rich Table
-    """
     table = Table(title="All Films in Festival", box=box.MINIMAL)
     table.add_column("Status", justify="center", style="bold", width=8, no_wrap=True)
     table.add_column("Title", style="bold")
@@ -224,178 +192,124 @@ def _build_film_overview_table(
     table.add_column("Screenings", justify="center")
     table.add_column("Date", style="cyan")
     table.add_column("Time", style="green")
-    table.add_column("Cinema", style="yellow")
-    table.add_column("Special Notes", style="dim")
+    table.add_column("Venue", style="yellow")
+    table.add_column("Events", style="dim")
 
-    # Sort by title and add rows with alternating styles
-    sorted_titles = sorted(films_by_title.keys())
-    for idx, title in enumerate(sorted_titles):
-        screenings = films_by_title[title]
-        num_screenings = len(screenings)
-
-        # Determine row style (every other row dimmed)
-        style = "dim" if idx % 2 == 1 else None
-
-        if title in scheduled_titles:
-            # Film is scheduled - show details
-            sf = scheduled_by_title[title]
-            film = sf.film
-            date_str = film.start_time.strftime("%a %d/%m")
-            time_str = film.start_time.strftime("%H:%M")
-            cinema_str = film.cinema + (
-                " " + film.auditorium if film.auditorium else ""
+    entries = sorted(request.programme_entries, key=lambda e: e.title)
+    for idx, entry in enumerate(entries):
+        row = row_by_entry.get(entry.id)
+        screenings = screenings_by_entry[entry.id]
+        shown = row.screening if row else screenings[0] if screenings else None
+        status = Text.assemble(
+            "✅" if row else "❌",
+            " ",
+            _link("🎬", entry.url),
+            " ",
+            _link("🎫", shown.ticket_url if shown else None),
+        )
+        if row:
+            screening = row.screening
+            date_str = screening.start_time.strftime("%a %d/%m")
+            time_str = screening.start_time.strftime("%H:%M")
+            venue_str = venues[screening.venue_id].name + (
+                f" {screening.auditorium}" if screening.auditorium else ""
             )
-            special_str = film.special_notes if film.special_notes else ""
+            events_str = "; ".join(e.description for e in screening.events)
         else:
-            # Film not scheduled - show minimal info
-            film = screenings[0]  # Use first screening for basic info
-            date_str = ""
-            time_str = ""
-            cinema_str = ""
-            special_str = ""
-
-        year_str = str(film.year) if film.year else ""
-        title_link = _format_clickable_title(title, film.url)
-        status = _format_clickable_status(film, title in scheduled_titles)
+            date_str = time_str = venue_str = events_str = ""
 
         table.add_row(
             status,
-            title_link,
-            year_str,
-            film.country,
-            str(num_screenings),
+            _link(entry.title, entry.url),
+            str(entry.year) if entry.year else "",
+            entry.country or "",
+            str(len(screenings)),
             date_str,
             time_str,
-            cinema_str,
-            special_str,
-            style=style,
+            venue_str,
+            events_str,
+            style="dim" if idx % 2 == 1 else None,
         )
 
-    return table
-
-
-def display_film_overview(
-    all_films: list[Film], scheduled_films: list[ScheduledFilm]
-) -> None:
-    """Display overview of all unique films with scheduled status.
-
-    Args:
-        all_films: All available film screenings
-        scheduled_films: Films that have been scheduled
-    """
-    # Get unique films by title
-    films_by_title = _group_films_by_title(all_films)
-
-    # Track which films are scheduled
-    scheduled_titles = {sf.film.title for sf in scheduled_films}
-    scheduled_by_title: dict[str, ScheduledFilm] = {
-        sf.film.title: sf for sf in scheduled_films
-    }
-
-    # Calculate and print statistics
-    total_unique = len(films_by_title)
-    total_screenings = len(all_films)
-    scheduled_count = len(scheduled_titles)
-    missed_count = total_unique - scheduled_count
-
-    _print_festival_statistics(
-        total_unique, total_screenings, scheduled_count, missed_count
-    )
-
-    # Build and display table
-    table = _build_film_overview_table(
-        films_by_title, scheduled_titles, scheduled_by_title
-    )
     console.print(table)
     console.print()
 
 
-def display_schedule(scheduled_films: list[ScheduledFilm]) -> None:
-    """Display the schedule in a nice table format.
+def _rows_by_date(
+    rows: list[ScheduledRow],
+) -> dict[datetime.date, list[ScheduledRow]]:
+    by_date: defaultdict[datetime.date, list[ScheduledRow]] = defaultdict(list)
+    for row in rows:
+        by_date[row.screening.start_time.date()].append(row)
+    return dict(sorted(by_date.items()))
 
-    Args:
-        scheduled_films: List of scheduled films to display
-    """
-    if not scheduled_films:
+
+def display_schedule(rows: list[ScheduledRow]) -> None:
+    """Display the schedule as one table per day."""
+    if not rows:
         console.print("[yellow]No films in schedule[/yellow]")
         return
 
-    max_title_length = max(len(sf.film.title) for sf in scheduled_films)
+    max_title_length = max(len(row.entry.title) for row in rows)
 
-    # Group by date
-    by_date = _group_films_by_date(scheduled_films)
-
-    # Display each day
-    for film_date in sorted(by_date.keys()):
-        table = Table(title=f"Schedule for {film_date}", box=box.MINIMAL)
+    for day, day_rows in _rows_by_date(rows).items():
+        table = Table(title=f"Schedule for {day}", box=box.MINIMAL)
         table.add_column("Arrive", style="cyan")
         table.add_column("Start", style="green")
         table.add_column("End", style="red")
         table.add_column("Film", style="bold", min_width=max_title_length)
         table.add_column("Year", max_width=4, overflow="crop", no_wrap=True)
-        table.add_column("Cinema", style="yellow")
+        table.add_column("Venue", style="yellow")
         table.add_column("Auditorium", style="magenta", no_wrap=True)
         table.add_column("Country", max_width=10, overflow="ellipsis", no_wrap=True)
         table.add_column("Weight", justify="right")
 
-        for sf in by_date[film_date]:
-            year_str = f"{sf.film.year:4d}" if sf.film.year else "    "
-            start_time = _format_clickable_title(
-                sf.film.start_time.strftime("%H:%M"), sf.film.ticket_url
-            )
-            year_link = _format_clickable_title(year_str, sf.film.url)
-            auditorium_str = sf.film.auditorium if sf.film.auditorium else ""
+        for row in day_rows:
+            screening = row.screening
+            year_str = f"{row.entry.year:4d}" if row.entry.year else "    "
             table.add_row(
-                sf.arrival_time.strftime("%H:%M"),
-                start_time,
-                sf.film.end_time.strftime("%H:%M"),
-                sf.film.title,
-                year_link,
-                sf.film.cinema,
-                auditorium_str,
-                sf.film.country,
-                f"{sf.calculated_weight:+.1f}",
+                row.arrival_time.strftime("%H:%M"),
+                _link(screening.start_time.strftime("%H:%M"), screening.ticket_url),
+                screening.end_time.strftime("%H:%M"),
+                row.entry.title,
+                _link(year_str, row.entry.url),
+                row.venue.name,
+                screening.auditorium or "",
+                row.entry.country or "",
+                f"{row.weight:+.1f}",
             )
 
         console.print(table)
         console.print()
 
 
-def save_schedule_to_file(scheduled_films: list[ScheduledFilm], filepath: Path) -> None:
-    """Save the schedule to a file.
-
-    Args:
-        scheduled_films: List of scheduled films to save
-        filepath: Path to output file
-    """
+def save_schedule_to_file(rows: list[ScheduledRow], filepath: Path) -> None:
+    """Save the schedule as Markdown."""
     with open(filepath, "w") as f:
         f.write("# Festival Schedule\n\n")
 
-        # Group by date
-        by_date = _group_films_by_date(scheduled_films)
+        for day, day_rows in _rows_by_date(rows).items():
+            f.write(f"## {day}\n\n")
 
-        # Write each day
-        for film_date in sorted(by_date.keys()):
-            f.write(f"## {film_date}\n\n")
-
-            for sf in by_date[film_date]:
-                # Format title with markdown link if URL available
-                if sf.film.url:
-                    title_md = f"[{sf.film.title}]({sf.film.url})"
-                else:
-                    title_md = sf.film.title
-
+            for row in day_rows:
+                screening = row.screening
+                title_md = (
+                    f"[{row.entry.title}]({row.entry.url})"
+                    if row.entry.url
+                    else row.entry.title
+                )
                 f.write(f"### {title_md}\n")
-                f.write(f"- **Arrive**: {sf.arrival_time.strftime('%H:%M')}\n")
-                f.write(f"- **Start**: {sf.film.start_time.strftime('%H:%M')}\n")
-                f.write(f"- **End**: {sf.film.end_time.strftime('%H:%M')}\n")
-                f.write(f"- **Cinema**: {sf.film.cinema}\n")
-                if sf.film.auditorium:
-                    f.write(f"- **Auditorium**: {sf.film.auditorium}\n")
-                f.write(f"- **Country**: {sf.film.country}\n")
-                if sf.film.special_notes:
-                    f.write(f"- **Notes**: {sf.film.special_notes}\n")
-                f.write(f"- **Weight**: {sf.calculated_weight:+.1f}\n")
+                f.write(f"- **Arrive**: {row.arrival_time.strftime('%H:%M')}\n")
+                f.write(f"- **Start**: {screening.start_time.strftime('%H:%M')}\n")
+                f.write(f"- **End**: {screening.end_time.strftime('%H:%M')}\n")
+                f.write(f"- **Venue**: {row.venue.name}\n")
+                if screening.auditorium:
+                    f.write(f"- **Auditorium**: {screening.auditorium}\n")
+                if row.entry.country:
+                    f.write(f"- **Country**: {row.entry.country}\n")
+                for event in screening.events:
+                    f.write(f"- **Event**: {event.description}\n")
+                f.write(f"- **Weight**: {row.weight:+.1f}\n")
                 f.write("\n")
 
             f.write("\n")
