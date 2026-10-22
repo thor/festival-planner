@@ -1,14 +1,14 @@
 """Scraper for filmfrasor.no film festival."""
 
 import re
-import sqlite3
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import httpx
 from bs4 import BeautifulSoup, Tag
-from hishel import Controller, SQLiteStorage, CacheClient
+from hishel import BaseFilter, FilterPolicy, Response, SyncSqliteStorage
+from hishel.httpx import SyncCacheClient
 from pydantic import ValidationError
 
 from ..models import Film, FilmList, build_normalization_map
@@ -17,6 +17,16 @@ from .base import BaseScraper
 from .._logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class _SuccessfulResponseFilter(BaseFilter[Response]):
+    """Only cache successful (2xx) responses."""
+
+    def needs_body(self) -> bool:
+        return False
+
+    def apply(self, item: Response, body: Optional[bytes]) -> bool:
+        return 200 <= item.status_code < 300
 
 
 class FilmfrasorScraper(BaseScraper):
@@ -66,20 +76,13 @@ class FilmfrasorScraper(BaseScraper):
             # No caching - use standard client
             self.client = httpx.Client(timeout=30.0, follow_redirects=True)
         else:
-            # Set up Hishel storage with SQLite backend
-            db_path = str(self.http_cache_dir / "hishel_cache.db")
-            connection = sqlite3.connect(db_path)
-            storage = SQLiteStorage(
-                connection=connection,
-                ttl=None,  # No expiration for festival data
-            )
-
-            # Use cached client
-            self.client = CacheClient(
-                controller=Controller(
-                    allow_stale=True, force_cache=not self.force_refresh
+            # Cache successful responses indefinitely, ignoring HTTP cache headers
+            # (festival data does not change within a run).
+            self.client = SyncCacheClient(
+                storage=SyncSqliteStorage(
+                    database_path=self.http_cache_dir / "http_cache.db"
                 ),
-                storage=storage,
+                policy=FilterPolicy(response_filters=[_SuccessfulResponseFilter()]),
                 timeout=30.0,
                 follow_redirects=True,
             )
