@@ -1,175 +1,67 @@
-"""Test cases for Film model cinema validation and normalization."""
+"""Tests for cinema normalisation of scraped film lists."""
+
+import datetime
+from pathlib import Path
 
 import pytest
-from pathlib import Path
-from datetime import datetime
-from pydantic import ValidationError
-from festival_planner.models import Film, build_normalization_map
+
 from festival_planner.config import ConfigLoader
+from festival_planner.models import (
+    CinemaConfig,
+    Film,
+    FilmList,
+    build_normalization_map,
+    normalise_cinemas,
+)
 
 
-class TestFilmCinemaValidation:
-    """Test Film model cinema validation with config-based normalization."""
+@pytest.fixture
+def cinemas() -> CinemaConfig:
+    fixtures_dir = Path(__file__).parents[2] / "tests" / "fixtures"
+    loader = ConfigLoader(
+        config_dir=fixtures_dir / "config", data_dir=fixtures_dir / "data"
+    )
+    return loader.load_config().cinemas
 
-    def setup_method(self):
-        """Set up test fixtures by loading the fixture config."""
-        # Load cinema config from the test fixtures
-        fixtures_dir = Path(__file__).parents[2] / "tests" / "fixtures"
-        config_dir = fixtures_dir / "config"
-        data_dir = fixtures_dir / "data"
-        loader = ConfigLoader(config_dir=config_dir, data_dir=data_dir)
-        cinema_config = loader.load_config().cinemas
 
-        # Set up normalization map from config
-        if cinema_config.cinema_aliases:
-            normalization_map = build_normalization_map(cinema_config.cinema_aliases)
-            Film.set_normalization_map(normalization_map)
+def film(cinema: str) -> Film:
+    return Film(
+        title="T",
+        country="NO",
+        cinema=cinema,
+        start_time=datetime.datetime(2025, 11, 8, 18),
+        end_time=datetime.datetime(2025, 11, 8, 20),
+    )
 
-        # Set up valid cinemas
-        valid_cinemas = cinema_config.get_valid_cinemas()
-        Film.set_valid_cinemas(valid_cinemas)
 
-    def test_vika_kino_normalized_in_film_model(self):
-        """Test that 'Vika Kino' in Film is normalized to 'Vika'."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "Vika Kino",
-            "auditorium": "3",
-        }
-        film = Film(**input)
-        assert film.cinema == "Vika"
+def test_aliases_are_mapped_to_canonical_names(cinemas):
+    result = normalise_cinemas(
+        FilmList(films=[film("Vika Kino"), film("vika"), film("vega scene")]), cinemas
+    )
+    assert [f.cinema for f in result.films] == ["Vika", "Vika", "Vega"]
 
-    def test_vika_lowercase_normalized(self):
-        """Test that 'vika' (lowercase) is normalized to 'Vika'."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "vika",
-            "auditorium": "2",
-        }
-        film = Film(**input)
-        assert film.cinema == "Vika"
 
-    def test_cinemateket_lowercase_normalized(self):
-        """Test that 'cinemateket' (lowercase) is normalized to 'Cinemateket'."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "cinemateket",
-            "auditorium": "Main",
-        }
-        film = Film(**input)
-        assert film.cinema == "Cinemateket"
+def test_canonical_names_pass_through(cinemas):
+    result = normalise_cinemas(FilmList(films=[film("Cinemateket")]), cinemas)
+    assert [f.cinema for f in result.films] == ["Cinemateket"]
 
-    def test_vega_scene_normalized(self):
-        """Test that 'Vega Scene' is normalized to 'Vega'."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "Vega Scene",
-            "auditorium": None,
-        }
-        film = Film(**input)
-        assert film.cinema == "Vega"
 
-    def test_canonical_name_accepted(self):
-        """Test that canonical names (Vika, Vega, Cinemateket) are accepted."""
-        input1 = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "Vika",
-            "auditorium": "1",
-        }
-        film1 = Film(**input1)
-        assert film1.cinema == "Vika"
+def test_unknown_cinemas_are_dropped(cinemas):
+    result = normalise_cinemas(
+        FilmList(films=[film("Vika"), film("Unknown Kino"), film("VIKA KINO")]),
+        cinemas,
+    )
+    assert [f.cinema for f in result.films] == ["Vika", "Vika"]
 
-        input2 = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 19, 0),
-            "end_time": datetime(2025, 11, 8, 21, 0),
-            "cinema": "Vega",
-            "auditorium": "2",
-        }
-        film2 = Film(**input2)
-        assert film2.cinema == "Vega"
 
-        input3 = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 20, 0),
-            "end_time": datetime(2025, 11, 8, 22, 0),
-            "cinema": "Cinemateket",
-            "auditorium": None,
-        }
-        film3 = Film(**input3)
-        assert film3.cinema == "Cinemateket"
+def test_without_cinema_config_nothing_changes():
+    films = FilmList(films=[film("Vika Kino"), film("Unknown Kino")])
+    result = normalise_cinemas(films, CinemaConfig())
+    assert [f.cinema for f in result.films] == ["Vika Kino", "Unknown Kino"]
 
-    def test_invalid_cinema_rejected(self):
-        """Test that invalid cinema names are rejected."""
-        with pytest.raises(ValidationError) as exc_info:
-            input = {
-                "title": "Test Film",
-                "country": "Norway",
-                "start_time": datetime(2025, 11, 8, 18, 0),
-                "end_time": datetime(2025, 11, 8, 20, 0),
-                "cinema": "Unknown Cinema",
-                "auditorium": "1",
-            }
-            Film(**input)
 
-        error = exc_info.value
-        assert "not in the valid cinema list" in str(error)
-
-    def test_auditorium_can_be_none(self):
-        """Test that auditorium can be None."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "Vika",
-            "auditorium": None,
-        }
-        film = Film(**input)
-        assert film.auditorium is None
-
-    def test_auditorium_with_string(self):
-        """Test that auditorium can be a string."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "Cinemateket",
-            "auditorium": "Lillebil",
-        }
-        film = Film(**input)
-        assert film.auditorium == "Lillebil"
-
-    def test_mixed_case_alias_normalized(self):
-        """Test that mixed case aliases work properly."""
-        input = {
-            "title": "Test Film",
-            "country": "Norway",
-            "start_time": datetime(2025, 11, 8, 18, 0),
-            "end_time": datetime(2025, 11, 8, 20, 0),
-            "cinema": "VIKA KINO",  # All caps
-            "auditorium": "3",
-        }
-        film = Film(**input)
-        assert film.cinema == "Vika"
+def test_film_accepts_any_cinema_name():
+    assert film("Anything").cinema == "Anything"
 
 
 class TestNormalizationMapBuilding:
@@ -214,8 +106,3 @@ class TestNormalizationMapBuilding:
         """Test that empty aliases dict returns empty map."""
         norm_map = build_normalization_map({})
         assert norm_map == {}
-
-
-if __name__ == "__main__":
-    # Run tests
-    pytest.main([__file__, "-v"])

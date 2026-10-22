@@ -2,6 +2,7 @@
 
 import re
 import time
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -11,8 +12,7 @@ from hishel import BaseFilter, FilterPolicy, Response, SyncSqliteStorage
 from hishel.httpx import SyncCacheClient
 from pydantic import ValidationError
 
-from ..models import Film, FilmList, build_normalization_map
-from ..config import ConfigLoader
+from ..models import Film, FilmList
 from .base import BaseScraper
 from .._logging import get_logger
 
@@ -39,7 +39,7 @@ class FilmfrasorScraper(BaseScraper):
         cache_dir: Optional[Path] = None,
         year: Optional[int] = None,
         force_refresh: bool = False,
-        config_dir: Optional[Path] = None,
+        known_venue_names: Iterable[str] = (),
         language: Optional[str] = "no",
     ):
         """Initialize the Filmfrasor scraper.
@@ -48,14 +48,18 @@ class FilmfrasorScraper(BaseScraper):
             cache_dir: Directory to cache scraped data and HTTP responses
             year: Festival year (defaults to current year)
             force_refresh: If True, bypass HTTP cache and fetch fresh data
-            config_dir: Directory containing config files (for cinema validation)
+            known_venue_names: Known cinema names and aliases, used to split
+                "Vika Kino 3" into cinema and auditorium. Normalising and
+                filtering cinemas is up to the caller (see
+                ``models.normalise_cinemas``).
+            language: Programme language
         """
         super().__init__(cache_dir)
         self.year = year or datetime.now().year
         self.force_refresh = force_refresh
-        self.config_dir = config_dir
         self.language = language
-        self.known_cinemas: set[str] = set()  # Store known cinema names for parsing
+        # Known cinema names (lowercase), for splitting cinema and auditorium
+        self.known_cinemas: set[str] = {name.lower() for name in known_venue_names}
 
         # Set up HTTP cache directory
         if cache_dir:
@@ -64,12 +68,6 @@ class FilmfrasorScraper(BaseScraper):
             self.http_cache_dir = Path(".cache") / "filmfrasor_http"
 
         self.http_cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # Load valid cinemas if config_dir provided
-        if config_dir:
-            self._setup_cinema_validation(config_dir)
-        else:
-            logger.warning("No config_dir provided - cinema validation disabled")
 
         # Create HTTP client (with or without caching)
         if self.force_refresh:
@@ -86,54 +84,6 @@ class FilmfrasorScraper(BaseScraper):
                 timeout=30.0,
                 follow_redirects=True,
             )
-
-    def _setup_cinema_validation(self, config_dir: Path) -> None:
-        """Set up cinema validation from config.
-
-        Args:
-            config_dir: Directory containing cinemas.yaml
-        """
-        try:
-            # Load cinema config
-            loader = ConfigLoader(config_dir=config_dir)
-            cinema_config = loader.load_config().cinemas
-
-            # Build and set normalization map from cinema aliases
-            if cinema_config.cinema_aliases:
-                normalization_map = build_normalization_map(
-                    cinema_config.cinema_aliases
-                )
-                Film.set_normalization_map(normalization_map)
-
-                # Store known cinema names (canonical + aliases) for parsing
-                for canonical, aliases in cinema_config.cinema_aliases.items():
-                    self.known_cinemas.add(canonical.lower())
-                    for alias in aliases:
-                        self.known_cinemas.add(alias.lower())
-
-                logger.info(
-                    "Cinema normalization enabled",
-                    canonical_names=sorted(cinema_config.cinema_aliases.keys()),
-                    total_aliases=len(normalization_map),
-                )
-            else:
-                logger.warning("No cinema aliases found in config")
-
-            # Extract valid cinemas
-            valid_cinemas = cinema_config.get_valid_cinemas()
-
-            if valid_cinemas:
-                # Set valid cinemas on Film model for validation
-                Film.set_valid_cinemas(valid_cinemas)
-                logger.info(
-                    "Cinema validation enabled", valid_cinemas=sorted(valid_cinemas)
-                )
-            else:
-                logger.warning("No cinemas found in config - validation disabled")
-
-        except Exception as e:
-            logger.error("Failed to load cinema config", error=str(e))
-            logger.warning("Cinema validation disabled due to config load error")
 
     def get_festival_name(self) -> str:
         """Get the name of the festival."""

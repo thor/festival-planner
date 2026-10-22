@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from ..config import ConfigLoader
+from ..models import normalise_cinemas
 from ..scrapers import FilmfrasorScraper
 from .._logging import get_logger
 
@@ -39,16 +40,24 @@ def scrape(
 ) -> None:
     """Scrape the Filmfrasor.no programme and cache the results."""
     loader = ConfigLoader()
-    
+    cinemas = loader.load_config().cinemas
+
     console.print("[bold blue]Scraping filmfrasor.no...[/bold blue]")
 
     scraper = FilmfrasorScraper(
         cache_dir=loader.path_provider.get_cache_home(),
         year=year,
         force_refresh=refresh,
-        config_dir=loader.config_write_dir,
+        known_venue_names=[
+            *cinemas.cinema_aliases,
+            *(
+                alias
+                for aliases in cinemas.cinema_aliases.values()
+                for alias in aliases
+            ),
+        ],
     )
-    film_list = scraper.scrape()
+    film_list = normalise_cinemas(scraper.scrape(), cinemas)
 
     console.print(f"[green]Scraped {len(film_list.films)} film screenings[/green]")
 

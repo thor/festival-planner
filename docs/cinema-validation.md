@@ -25,23 +25,25 @@ All aliases are case-insensitive and automatically normalized to the canonical n
 
 ## How It Works
 
-1. **Scraping**: When films are scraped, cinema names are validated and normalized
-2. **Validation**: Only cinemas listed in the config are accepted
-3. **Error Handling**: Invalid cinema names log a warning and the film is skipped
-4. **Normalization**: Aliases like "Vika Kino" are automatically normalized to "Vika"
+1. **Scraping**: The scraper keeps cinema names as found, only splitting off the auditorium
+2. **Normalization**: After scraping, the legacy `scrape` command runs `normalise_cinemas` (in `models.py`), which maps aliases like "Vika Kino" to "Vika"
+3. **Validation**: Only cinemas listed in the config are kept
+4. **Error Handling**: Screenings at unknown cinemas log a warning and are skipped
+
+Database ingestion (`festival-planner ingest`) does not use this step: it resolves venue names through Venue aliases instead.
 
 ## Auditorium Parsing
 
 The scraper uses the cinema aliases from config to intelligently parse cinema and auditorium information:
 
-- `"Vika Kino 3"` → cinema: `"Vika Kino"`, auditorium: `"3"` (model normalizes "Vika Kino" → "Vika")
+- `"Vika Kino 3"` → cinema: `"Vika Kino"`, auditorium: `"3"` (`normalise_cinemas` later maps "Vika Kino" → "Vika")
 - `"Cinemateket Lillebil"` → cinema: `"Cinemateket"`, auditorium: `"Lillebil"`
 - `"Vega 2"` → cinema: `"Vega"`, auditorium: `"2"`
 - `"Vega"` → cinema: `"Vega"`, auditorium: `None`
 
 **Key Design**:
 - The scraper extracts cinema + auditorium based on known cinema names from config
-- Cinema normalization happens in the Film model's Pydantic validator
+- Cinema normalization is an explicit step after scraping (`normalise_cinemas`)
 - This keeps the scraper simple and makes all normalization config-driven
 
 ## Adding New Cinemas or Aliases
@@ -74,6 +76,6 @@ uv run pytest
 The test suite includes 32 tests covering:
 - Cinema name normalization
 - Auditorium parsing logic
-- Film model validation
+- Cinema normalization and filtering
 - Configuration loading
 

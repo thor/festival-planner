@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from festival_planner.scrapers import FilmfrasorScraper
 from festival_planner.config import ConfigLoader
+from festival_planner.models import normalise_cinemas
 
 
 def main():
@@ -45,21 +46,30 @@ def main():
     if args.refresh:
         print("Force refresh enabled - fetching fresh data")
 
-    # Initialize scraper with cinema validation
+    loader = ConfigLoader(config_dir, data_dir)
+    cinemas = loader.load_config().cinemas
+
+    # Initialize scraper with known cinema names for auditorium parsing
     scraper = FilmfrasorScraper(
         cache_dir=data_dir,
         year=args.year,
         force_refresh=args.refresh,
-        config_dir=config_dir,
+        known_venue_names=[
+            *cinemas.cinema_aliases,
+            *(
+                alias
+                for aliases in cinemas.cinema_aliases.values()
+                for alias in aliases
+            ),
+        ],
     )
 
-    # Scrape programme
+    # Scrape programme, then normalise and filter cinemas
     try:
-        film_list = scraper.scrape()
+        film_list = normalise_cinemas(scraper.scrape(), cinemas)
         print(f"✓ Successfully scraped {len(film_list.films)} films")
 
         # Save to YAML
-        loader = ConfigLoader(config_dir, data_dir)
         output_file = data_dir / "films.yaml"
         loader.save_films(film_list, output_file)
 

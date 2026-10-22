@@ -1,8 +1,12 @@
 """Pydantic models for festival planner data structures."""
 
 import datetime
-from typing import Optional, ClassVar
-from pydantic import BaseModel, Field, field_validator, ValidationInfo, ConfigDict
+from typing import Optional
+from pydantic import BaseModel, Field, ConfigDict
+
+from ._logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def build_normalization_map(cinema_aliases: dict[str, list[str]]) -> dict[str, str]:
@@ -50,55 +54,6 @@ class Film(BaseModel):
         default=1.0,
         description="Preference weight (positive or negative relative to default)",
     )
-
-    # Class variable to store valid cinemas for validation
-    _valid_cinemas: ClassVar[Optional[set[str]]] = None
-    _normalization_map: ClassVar[dict[str, str]] = {}
-
-    @classmethod
-    def set_valid_cinemas(cls, valid_cinemas: set[str]) -> None:
-        """Set the list of valid cinema names for validation.
-
-        Args:
-            valid_cinemas: Set of valid cinema names
-        """
-        cls._valid_cinemas = valid_cinemas
-
-    @classmethod
-    def set_normalization_map(cls, normalization_map: dict[str, str]) -> None:
-        """Set the cinema name normalization map.
-
-        Args:
-            normalization_map: Dict mapping aliases (lowercase) to canonical names
-        """
-        cls._normalization_map = normalization_map
-
-    @field_validator("cinema")
-    @classmethod
-    def validate_cinema(cls, v: str, info: ValidationInfo) -> str:
-        """Validate and normalize cinema name.
-
-        Args:
-            v: Cinema name
-            info: Validation info
-
-        Returns:
-            Normalized cinema name
-
-        Raises:
-            ValueError: If cinema is not in the valid list
-        """
-        # Normalize the cinema name using the normalization map
-        v_lower = v.lower().strip()
-        normalized = cls._normalization_map.get(v_lower, v)
-
-        # Validate against valid cinemas if set
-        if cls._valid_cinemas is not None and normalized not in cls._valid_cinemas:
-            raise ValueError(
-                f"Cinema '{v}' (normalized to '{normalized}') is not in the valid cinema list: {sorted(cls._valid_cinemas)}"
-            )
-
-        return normalized
 
     @property
     def date(self) -> datetime.date:
@@ -241,3 +196,24 @@ class CinemaConfig(BaseModel):
             cinemas.add(travel_time.from_cinema)
             cinemas.add(travel_time.to_cinema)
         return cinemas
+
+
+def normalise_cinemas(film_list: FilmList, cinemas: CinemaConfig) -> FilmList:
+    """Map cinema aliases to canonical names and drop screenings at unknown
+    cinemas, logging each. Without any configured cinemas, nothing changes."""
+    normalization_map = build_normalization_map(cinemas.cinema_aliases)
+    valid = cinemas.get_valid_cinemas() | set(cinemas.cinema_aliases)
+    if not valid:
+        return film_list
+    kept = []
+    for film in film_list.films:
+        cinema = normalization_map.get(film.cinema.lower().strip(), film.cinema)
+        if cinema not in valid:
+            logger.warning(
+                "Unknown cinema - skipping screening",
+                cinema=film.cinema,
+                title=film.title,
+            )
+            continue
+        kept.append(film.model_copy(update={"cinema": cinema}))
+    return film_list.model_copy(update={"films": kept})

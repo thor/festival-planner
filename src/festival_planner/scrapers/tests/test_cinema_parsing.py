@@ -2,7 +2,18 @@
 
 import pytest
 from pathlib import Path
+from festival_planner.config import ConfigLoader
 from festival_planner.scrapers.filmfrasor import FilmfrasorScraper
+
+
+def _fixture_venue_names() -> list[str]:
+    """Every canonical cinema name and alias in the fixture config."""
+    fixtures_dir = Path(__file__).parents[2] / "tests" / "fixtures"
+    loader = ConfigLoader(
+        config_dir=fixtures_dir / "config", data_dir=fixtures_dir / "data"
+    )
+    aliases = loader.load_config().cinemas.cinema_aliases
+    return [*aliases, *(alias for names in aliases.values() for alias in names)]
 
 
 class TestCinemaAndAuditoriumParsing:
@@ -10,11 +21,7 @@ class TestCinemaAndAuditoriumParsing:
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Load cinema config from the test fixtures
-        config_dir = Path(__file__).parents[2] / "tests" / "fixtures" / "config"
-
-        # Create a scraper instance with config_dir for cinema parsing
-        self.scraper = FilmfrasorScraper(config_dir=config_dir)
+        self.scraper = FilmfrasorScraper(known_venue_names=_fixture_venue_names())
 
     # Test cases for Vika Kino parsing (normalization happens in Film model)
     def test_vika_kino_normalized_to_vika(self):
