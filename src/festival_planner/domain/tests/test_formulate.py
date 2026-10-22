@@ -200,8 +200,15 @@ class TestConflicts:
             screening("a", "14:00", "16:00", venue="A"),
             screening("b", "16:10", "18:00", venue="B"),
             routes=(
-                Route("A", "B", "walk+e-scooter", 20),
-                Route("B", "A", "walk+e-scooter", 5),
+                Route(
+                    from_venue_id="A",
+                    to_venue_id="B",
+                    mode="walk+e-scooter",
+                    minutes=20,
+                ),
+                Route(
+                    from_venue_id="B", to_venue_id="A", mode="walk+e-scooter", minutes=5
+                ),
             ),
         )
         assert conflicts(req) == {frozenset({"a", "b"})}
@@ -211,16 +218,26 @@ class TestConflicts:
             screening("a", "14:00", "16:00", venue="A"),
             screening("b", "16:10", "18:00", venue="B"),
             routes=(
-                Route("A", "B", "walk+e-scooter", 20),
-                Route("B", "A", "walk+e-scooter", 20),
-                Route("A", "B", "bike", 8),
+                Route(
+                    from_venue_id="A",
+                    to_venue_id="B",
+                    mode="walk+e-scooter",
+                    minutes=20,
+                ),
+                Route(
+                    from_venue_id="B",
+                    to_venue_id="A",
+                    mode="walk+e-scooter",
+                    minutes=20,
+                ),
+                Route(from_venue_id="A", to_venue_id="B", mode="bike", minutes=8),
             ),
             preferences=Preferences(buffer_minutes=0, transport_mode="bike"),
         )
         assert conflicts(req) == set()
 
     def test_separately_timed_event_blocks_time_when_attending_events(self):
-        panel = Event("Panel", at("16:00"), at("17:00"))
+        panel = Event(description="Panel", start_time=at("16:00"), end_time=at("17:00"))
         a = screening("a", "14:00", "16:00", events=(panel,))
         b = screening("b", "16:30", "18:00")
         assert conflicts(request(a, b)) == set()
@@ -230,7 +247,9 @@ class TestConflicts:
         assert conflicts(attending) == {frozenset({"a", "b"})}
 
     def test_separately_timed_event_before_screening_blocks_time_when_attending(self):
-        ceremony = Event("Ceremony", at("17:30"), at("18:00"))
+        ceremony = Event(
+            description="Ceremony", start_time=at("17:30"), end_time=at("18:00")
+        )
         a = screening("a", "16:00", "17:45")
         b = screening("b", "18:00", "20:00", events=(ceremony,))
         assert conflicts(request(a, b)) == set()

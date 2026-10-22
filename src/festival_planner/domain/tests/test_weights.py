@@ -49,7 +49,7 @@ def test_no_year_means_no_year_weight():
 
 def test_event_weight_applies_to_screenings_with_events():
     preferences = Preferences(event_weight=0.5)
-    talk = Event("Director Q&A")
+    talk = Event(description="Director Q&A")
     assert (
         screening_weight(
             screening("s", "14:00", "16:00", events=(talk,)), entry("s"), preferences
@@ -64,7 +64,7 @@ def test_event_weight_applies_to_screenings_with_events():
 
 def test_separately_timed_event_also_counts():
     preferences = Preferences(event_weight=0.5)
-    panel = Event("Panel", at("16:15"), at("17:00"))
+    panel = Event(description="Panel", start_time=at("16:15"), end_time=at("17:00"))
     assert (
         screening_weight(
             screening("s", "14:00", "16:00", events=(panel,)), entry("s"), preferences
@@ -78,7 +78,7 @@ def test_weights_combine_and_may_be_negative():
         programme_entry_weights={"s": -1.0}, year_weights={2025: -0.2}, event_weight=0.5
     )
     weight = screening_weight(
-        screening("s", "14:00", "16:00", events=(Event("Q&A"),)),
+        screening("s", "14:00", "16:00", events=(Event(description="Q&A"),)),
         entry("s", year=2025),
         preferences,
     )

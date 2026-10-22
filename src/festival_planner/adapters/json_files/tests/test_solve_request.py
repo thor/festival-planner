@@ -13,11 +13,18 @@ from festival_planner.domain.travel import Route
 def test_round_trips_every_field(tmp_path):
     original = request(
         screening(
-            "a", "14:00", "16:00", events=(Event("Panel", at("16:15"), at("17:00")),)
+            "a",
+            "14:00",
+            "16:00",
+            events=(
+                Event(
+                    description="Panel", start_time=at("16:15"), end_time=at("17:00")
+                ),
+            ),
         ),
         screening("b", "18:00", "20:00", venue="B"),
         entries=(entry("a", year=1960), entry("b")),
-        routes=(Route("A", "B", "bike", 8),),
+        routes=(Route(from_venue_id="A", to_venue_id="B", mode="bike", minutes=8),),
         preferences=Preferences(
             buffer_minutes=10,
             venue_buffer_minutes={"A": 20},

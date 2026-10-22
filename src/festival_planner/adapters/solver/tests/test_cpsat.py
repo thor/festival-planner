@@ -99,7 +99,9 @@ def test_arrival_time_uses_venue_buffer():
 
 
 def test_arrival_time_uses_earlier_event_when_attending_events():
-    ceremony = Event("Ceremony", at("13:30"), at("13:55"))
+    ceremony = Event(
+        description="Ceremony", start_time=at("13:30"), end_time=at("13:55")
+    )
     result = solver.solve(
         request(
             screening("a", "14:00", "16:00", events=(ceremony,)),

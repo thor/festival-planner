@@ -71,7 +71,7 @@ def _screening(film: Film) -> Screening:
         end_time=film.end_time,
         auditorium=film.auditorium,
         ticket_url=film.ticket_url,
-        events=(Event(film.special_notes),) if film.special_notes else (),
+        events=(Event(description=film.special_notes),) if film.special_notes else (),
     )
 
 
@@ -87,7 +87,9 @@ def _route_table(config: Config, venue_ids: list[str]) -> RouteTable:
         minutes.setdefault((a, b), LEGACY_DEFAULT_TRAVEL_MINUTES)
     return RouteTable(
         routes=tuple(
-            Route(a, b, DEFAULT_TRANSPORT_MODE, m)
+            Route(
+                from_venue_id=a, to_venue_id=b, mode=DEFAULT_TRANSPORT_MODE, minutes=m
+            )
             for (a, b), m in minutes.items()
             if a != b
         )
