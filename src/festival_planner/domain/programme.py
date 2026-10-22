@@ -1,6 +1,7 @@
 """Festival programme: what is shown, where and when."""
 
 import datetime
+import unicodedata
 from typing import Self
 
 from pydantic import AwareDatetime, model_validator
@@ -13,11 +14,36 @@ ProgrammeEntryId = str
 ScreeningId = str
 
 
+def title_key(title: str) -> str:
+    """A Film title normalised for matching: NFKC, case-folded, single spaces."""
+    return " ".join(unicodedata.normalize("NFKC", title).casefold().split())
+
+
+def venue_name_key(name: str) -> str:
+    """A Venue name or alias normalised for matching."""
+    return " ".join(name.casefold().split())
+
+
+class Film(Value):
+    """A cinematic work, independent of any festival."""
+
+    id: FilmId
+    title: str
+    year: int | None = None
+
+
 class Venue(Value):
     """A fixed physical place where screenings take place."""
 
     id: VenueId
     name: str
+    aliases: frozenset[str] = frozenset()
+    """Other names sources use for this Venue."""
+
+    def is_called(self, name: str) -> bool:
+        """Whether `name` is this Venue's name or one of its aliases."""
+        key = venue_name_key(name)
+        return key in {venue_name_key(n) for n in (self.name, *self.aliases)}
 
 
 class ProgrammeEntry(Value):
@@ -56,7 +82,10 @@ class Event(Value):
 
 
 class Screening(Value):
-    """A single showing of a Programme Entry at a given time and Venue."""
+    """A single showing of a Programme Entry at a given time and Venue.
+
+    A Withdrawn Screening is no longer in the Festival's programme.
+    """
 
     id: ScreeningId
     programme_entry_id: ProgrammeEntryId
@@ -66,6 +95,7 @@ class Screening(Value):
     auditorium: str | None = None
     ticket_url: str | None = None
     events: tuple[Event, ...] = ()
+    withdrawn: bool = False
 
     @model_validator(mode="after")
     def _ends_after_it_starts(self) -> Self:

@@ -1,10 +1,15 @@
 import datetime
 
 import pytest
-
 from pydantic import ValidationError
 
-from festival_planner.domain.programme import Event, Screening
+from festival_planner.domain.programme import (
+    Event,
+    Screening,
+    Venue,
+    title_key,
+    venue_name_key,
+)
 
 from .builders import at
 
@@ -98,3 +103,15 @@ def test_event_rejects_naive_times():
 def test_times_in_different_zones_compare_as_instants():
     utc = at("17:00").astimezone(datetime.UTC)
     assert utc == at("18:00") - datetime.timedelta(hours=1)
+
+
+def test_title_key_ignores_case_width_and_spacing():
+    assert title_key("  Fallen  Leaves ") == title_key("fallen leaves")
+    assert title_key("Ｆａｌｌｅｎ") == title_key("fallen")
+
+
+def test_venue_is_called_by_its_name_or_any_alias_ignoring_case():
+    vika = Venue(id="v", name="Vika", aliases=frozenset({"Vika Kino"}))
+    assert vika.is_called("VIKA") and vika.is_called("vika  kino")
+    assert not vika.is_called("Vega")
+    assert venue_name_key(" Vika  Kino ") == "vika kino"

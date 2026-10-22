@@ -317,3 +317,21 @@ def test_date_range_is_applied_to_festival_local_dates():
         s.id for s in formulate(request(late, preferences=on_ninth)).candidates
     ] == ["late"]
     assert formulate(request(late, preferences=on_eighth)).candidates == ()
+
+
+def test_withdrawn_screenings_are_never_candidates():
+    s = screening("s", "18:00", "20:00").model_copy(update={"withdrawn": True})
+    assert formulate(request(s)).candidates == ()
+
+
+def test_committing_to_a_withdrawn_screening_is_unsatisfiable():
+    s = screening("s", "18:00", "20:00").model_copy(update={"withdrawn": True})
+    result = formulate(request(s, screening_commitments=frozenset({"s"})))
+    assert result.candidates == ()
+    assert result.unsatisfiable == ("Committed screening 's' was withdrawn",)
+
+
+def test_a_started_withdrawn_screening_in_the_active_schedule_stays_fixed():
+    s = screening("s", "18:00", "20:00").model_copy(update={"withdrawn": True})
+    result = formulate(request(s, active_schedule=frozenset({"s"}), now=at("19:00")))
+    assert result.required == frozenset({"s"})

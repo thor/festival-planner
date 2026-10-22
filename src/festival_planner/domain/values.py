@@ -3,7 +3,7 @@
 import zoneinfo
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 
 class Value(BaseModel):
@@ -22,3 +22,6 @@ def _known_time_zone(key: str) -> str:
 
 TimeZone = Annotated[str, AfterValidator(_known_time_zone)]
 """An IANA time zone key, e.g. "Europe/Oslo"."""
+
+Slug = Annotated[str, Field(pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")]
+"""A stable, human-readable handle such as "films-from-the-south-2025"."""

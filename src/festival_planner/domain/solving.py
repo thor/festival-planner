@@ -158,6 +158,7 @@ def formulate(request: SolveRequest) -> Formulation:
     - Screenings that started before `now` are fixed: kept and required if in
       the Active Schedule, dropped otherwise. Fixed Screenings never conflict
       with each other.
+    - Withdrawn Screenings are dropped; committing to one is unsatisfiable.
     - Screening Commitments are required, regardless of exclusions, Seen or
       the date range.
     - Excluded Screenings and Programme Entries are dropped.
@@ -195,6 +196,12 @@ def formulate(request: SolveRequest) -> Formulation:
             elif committed:
                 unsatisfiable.append(
                     f"Committed screening {screening.id!r} has already started"
+                )
+            continue
+        if screening.withdrawn:
+            if committed:
+                unsatisfiable.append(
+                    f"Committed screening {screening.id!r} was withdrawn"
                 )
             continue
         if committed:
