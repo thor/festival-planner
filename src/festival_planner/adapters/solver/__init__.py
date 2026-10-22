@@ -1,0 +1,1 @@
+"""ScheduleSolver adapters."""
