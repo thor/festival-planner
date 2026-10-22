@@ -3,13 +3,14 @@
 import re
 import time
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote
 import httpx
 from bs4 import BeautifulSoup, Tag
 from hishel import BaseFilter, FilterPolicy, Response, SyncSqliteStorage
-from hishel.httpx import SyncCacheClient
+from hishel.httpx import SyncCacheTransport
 from pydantic import ValidationError
 
 from ..models import Film, FilmList
@@ -27,6 +28,37 @@ class _SuccessfulResponseFilter(BaseFilter[Response]):
 
     def apply(self, item: Response, body: Optional[bytes]) -> bool:
         return 200 <= item.status_code < 300
+
+
+class _AsciiHeadersTransport(httpx.BaseTransport):
+    """Percent-encode non-ASCII response header values.
+
+    hishel re-encodes header values as ASCII, so a raw UTF-8 header such as
+    ``Link: <https://www.filmfrasor.no/no/film/2026/adrián-...>`` would
+    otherwise fail the request.
+    """
+
+    _SAFE = "".join(map(chr, range(0x20, 0x7F)))
+
+    def __init__(self, transport: httpx.BaseTransport):
+        self._transport = transport
+
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
+        response = self._transport.handle_request(request)
+        if all(value.isascii() for _, value in response.headers.raw):
+            return response
+        return httpx.Response(
+            status_code=response.status_code,
+            headers=[
+                (key, value if value.isascii() else quote(value, safe=self._SAFE))
+                for key, value in response.headers.raw
+            ],
+            stream=response.stream,
+            extensions=response.extensions,
+        )
+
+    def close(self) -> None:
+        self._transport.close()
 
 
 class FilmfrasorScraper(BaseScraper):
@@ -76,11 +108,14 @@ class FilmfrasorScraper(BaseScraper):
         else:
             # Cache successful responses indefinitely, ignoring HTTP cache headers
             # (festival data does not change within a run).
-            self.client = SyncCacheClient(
-                storage=SyncSqliteStorage(
-                    database_path=self.http_cache_dir / "http_cache.db"
+            self.client = httpx.Client(
+                transport=SyncCacheTransport(
+                    next_transport=_AsciiHeadersTransport(httpx.HTTPTransport()),
+                    storage=SyncSqliteStorage(
+                        database_path=self.http_cache_dir / "http_cache.db"
+                    ),
+                    policy=FilterPolicy(response_filters=[_SuccessfulResponseFilter()]),
                 ),
-                policy=FilterPolicy(response_filters=[_SuccessfulResponseFilter()]),
                 timeout=30.0,
                 follow_redirects=True,
             )
@@ -98,8 +133,9 @@ class FilmfrasorScraper(BaseScraper):
         films: list[Film] = []
 
         try:
-            # Fetch the programme page
-            programme_url = f"{self.BASE_URL}/{self.language}/program"
+            # Fetch the programme's film list view; the plain programme page
+            # only shows a single day's calendar.
+            programme_url = f"{self.BASE_URL}/{self.language}/program?films"
 
             logger.info("Fetching programme", url=programme_url)
             if self.force_refresh:
@@ -127,7 +163,9 @@ class FilmfrasorScraper(BaseScraper):
                     film_response.raise_for_status()
 
                     # Check if from cache (Hishel extension)
-                    from_cache = film_response.extensions.get("from_cache", False)
+                    from_cache = film_response.extensions.get(
+                        "hishel_from_cache", False
+                    )
 
                     logger.info(
                         "Scraping film page",
@@ -170,8 +208,8 @@ class FilmfrasorScraper(BaseScraper):
         """
         film_links = set()
 
-        # Look for links that point to film pages
-        # Filmfrasor.no film pages typically have URLs like /no/film/film-title
+        # Film pages have URLs like /no/film/2026/film-title
+        film_path = re.compile(rf"/{self.language}/film/\d{{4}}/[^/?#]+")
         for link in soup.find_all("a", href=True):
             href = link["href"]
             if not isinstance(href, str):
@@ -179,7 +217,7 @@ class FilmfrasorScraper(BaseScraper):
                 continue
 
             # Check if this looks like a film page link
-            if f"/{self.language}/film/" in href:
+            if film_path.search(href):
                 # Make it an absolute URL if it's relative
                 if href.startswith("/"):
                     full_url = f"{self.BASE_URL}{href}"
@@ -295,63 +333,45 @@ class FilmfrasorScraper(BaseScraper):
     ) -> tuple[str, Optional[int]]:
         """Extract country and year information from the page.
 
-        Country is in: .entry-info > .extra > span
-        Year is in .extra but after the span and before the link (a element).
+        The facts live in .entry-info > .extra as label/value pairs, where each
+        value is a span preceded by its label text:
+        "Land <span>Sør-Korea</span> | År <span>2025</span> | Regissør <span>…</span>".
+        Any pair may be missing.
 
         Returns:
             Tuple of (country, year) where year may be None if not found
         """
-        # Find the entry-info container
         entry_info = soup.find(class_="entry-info")
-        if not entry_info:
-            logger.debug("No element with class 'entry-info' found")
-            return "Unknown", None
-
-        # Find the extra div within entry-info
-        extra_div = entry_info.find(class_="extra")
+        extra_div = entry_info.find(class_="extra") if entry_info else None
         if not extra_div:
-            logger.debug("No element with class 'extra' found within entry-info")
+            logger.debug("No .entry-info .extra element found")
             return "Unknown", None
 
-        # Find the span within extra - this contains the country
-        country_span = extra_div.find("span")
-        country = "Unknown"
-        if country_span:
-            country = country_span.get_text(strip=True)
-            logger.debug("Found country", country=country)
-        else:
-            logger.debug("No span found within extra div")
+        facts: dict[str, str] = {}
+        for span in extra_div.find_all("span", recursive=False):
+            label = span.find_previous_sibling(string=True)
+            if label is None:
+                continue
+            key = label.strip(" |\n\t").lower()
+            facts[key] = span.get_text(" ", strip=True)
 
-        # Extract year - it's text between the span and the a element
-        # Get all text from extra_div and extract the year
+        country = facts.get("land") or facts.get("country") or "Unknown"
+
         year = None
-        extra_text = extra_div.get_text(strip=True)
-
-        # Remove the country text to isolate the year
-        if country_span:
-            country_text = country_span.get_text(strip=True)
-            extra_text = extra_text.replace(country_text, "")
-
-        # Remove link text (after the a element)
-        link = extra_div.find("a")
-        if link:
-            link_text = link.get_text(strip=True)
-            extra_text = extra_text.replace(link_text, "")
-
-        # Extract year with regex - looking for 4 digits
-        year_match = re.search(r"\b(19\d{2}|20\d{2})\b", extra_text)
+        year_text = facts.get("år") or facts.get("year") or ""
+        year_match = re.search(r"\b(19\d{2}|20\d{2})\b", year_text)
         if year_match:
             year = int(year_match.group(1))
-            logger.debug("Found year", year=year)
         else:
-            logger.debug("No year found in extra text", extra_text=extra_text[:100])
+            logger.debug("No year found", facts=facts)
 
         return country, year
 
     def _find_screening_elements(self, soup: BeautifulSoup) -> list:
         """Find elements that contain screening information.
 
-        Filmfrasor.no uses divs with class "show-item" for each screening.
+        Filmfrasor.no uses divs with class "show-item" for each screening,
+        with a data-start attribute like "2026-11-04 18:00".
         Each show-item contains:
         - class "date": Date (e.g., "lør. 08.11")
         - class "time": Time range (e.g., "13:15 - 14:53")
@@ -373,7 +393,8 @@ class FilmfrasorScraper(BaseScraper):
     def _parse_screening_element(self, element: Tag) -> Optional[tuple]:
         """Parse a screening element to extract time, cinema, etc.
 
-        The element is a div with class "show-item" containing:
+        The element is a div with class "show-item" and a data-start attribute
+        (e.g. "2026-11-04 18:00") containing:
         - class "date": Date (e.g., "lør. 08.11")
         - class "time": Time range (e.g., "13:15 - 14:53")
         - class "location": Cinema (e.g., "Vika 3")
@@ -382,22 +403,35 @@ class FilmfrasorScraper(BaseScraper):
         Returns:
             Tuple of (start_time, end_time, cinema, auditorium, special_notes, ticket_url) or None
         """
-        # Extract date from element with class "date"
-        date_elem = element.find(class_="date")
-        if not date_elem:
-            logger.debug("No date element found in show-item")
-            return None
+        # The date (with year) comes from data-start; fall back to the
+        # "date" element (e.g. "lør. 08.11") with the configured year.
+        year = self.year
+        data_start = element.get("data-start")
+        start_match = (
+            re.match(r"(\d{4})-(\d{2})-(\d{2})", data_start)
+            if isinstance(data_start, str)
+            else None
+        )
+        if start_match:
+            year, month, day = (int(g) for g in start_match.groups())
+            # Film pages may also list screenings from earlier festivals
+            if year != self.year:
+                logger.debug("Skipping screening from another year", year=year)
+                return None
+        else:
+            date_elem = element.find(class_="date")
+            if not date_elem:
+                logger.debug("No date element found in show-item")
+                return None
 
-        date_text = date_elem.get_text(strip=True)
+            date_text = date_elem.get_text(strip=True)
+            date_match = re.search(r"(\d{1,2})\.(\d{1,2})", date_text)
+            if not date_match:
+                logger.debug("Could not parse date from text", date_text=date_text)
+                return None
 
-        # Parse date: "lør. 08.11" -> day 08, month 11
-        date_match = re.search(r"(\d{1,2})\.(\d{1,2})", date_text)
-        if not date_match:
-            logger.debug("Could not parse date from text", date_text=date_text)
-            return None
-
-        day = int(date_match.group(1))
-        month = int(date_match.group(2))
+            day = int(date_match.group(1))
+            month = int(date_match.group(2))
 
         # Extract time from element with class "time"
         time_elem = element.find(class_="time")
@@ -418,15 +452,16 @@ class FilmfrasorScraper(BaseScraper):
         end_hour = int(time_match.group(3))
         end_minute = int(time_match.group(4))
 
-        # Use specified year or current year
-        year = self.year
-
         try:
             start_time = datetime(year, month, day, start_hour, start_minute)
             end_time = datetime(year, month, day, end_hour, end_minute)
         except ValueError as e:
             logger.debug("Invalid date/time values", error=str(e), day=day, month=month)
             return None
+
+        # Screenings that run past midnight end on the next day
+        if end_time <= start_time:
+            end_time += timedelta(days=1)
 
         # Extract cinema from element with class "location"
         location_elem = element.find(class_="location")
