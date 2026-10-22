@@ -12,7 +12,7 @@ class TestFilmCinemaValidation:
     """Test Film model cinema validation with config-based normalization."""
 
     def setup_method(self):
-        """Set up test fixtures by loading actual config."""
+        """Set up test fixtures by loading the fixture config."""
         # Load cinema config from the test fixtures
         fixtures_dir = Path(__file__).parents[2] / "tests" / "fixtures"
         config_dir = fixtures_dir / "config"
