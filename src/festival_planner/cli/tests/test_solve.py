@@ -100,3 +100,31 @@ def test_infeasible_request_exits_with_error(xdg, tmp_path):
 
     assert result.exit_code == 1
     assert "No schedule found" in result.output
+
+
+def test_overview_separates_seen_films_from_missed_ones(xdg):
+    (xdg / "config" / "festival-planner" / "preferences.yaml").write_text(
+        'seen:\n  - title: "Late"\n'
+    )
+
+    result = CliRunner().invoke(app, ["solve"])
+
+    assert result.exit_code == 0, result.output
+    assert "Films not relevant (seen or excluded): 1" in result.output
+    assert "Films missed: 1" in result.output
+    assert "Films scheduled: 1" in result.output
+
+
+def test_time_limit_of_a_loaded_request_is_kept_unless_given(xdg):
+    first, second = xdg / "first.json", xdg / "second.json"
+    CliRunner().invoke(app, ["solve", "--export-request", str(first)])
+    request = json.loads(first.read_text())
+    request["time_limit_seconds"] = 5
+    first.write_text(json.dumps(request))
+
+    result = CliRunner().invoke(
+        app, ["solve", "--request", str(first), "--export-request", str(second)]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(second.read_text())["time_limit_seconds"] == 5

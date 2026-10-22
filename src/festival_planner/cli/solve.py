@@ -11,7 +11,6 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from .._logging import get_logger
 from ..adapters.json_files.solve_request import dump_solve_request, load_solve_request
 from ..adapters.solver.cpsat import CpSatScheduleSolver
 from ..adapters.yaml_files.solve_request import build_solve_request
@@ -20,7 +19,6 @@ from ..domain.programme import ProgrammeEntry, Screening, Venue
 from ..domain.solving import SolveRequest, SolveResult
 
 console = Console()
-logger = get_logger(__name__)
 app = typer.Typer()
 
 
@@ -72,7 +70,7 @@ def _apply_overrides(
     *,
     dates: str | None,
     buffer_time: int | None,
-    time_limit: int,
+    time_limit: int | None,
 ) -> SolveRequest:
     preferences = request.preferences
     if buffer_time is not None:
@@ -80,7 +78,10 @@ def _apply_overrides(
     if dates:
         start, end = _parse_dates(dates)
         preferences = replace(preferences, start_date=start, end_date=end)
-    return replace(request, preferences=preferences, time_limit_seconds=time_limit)
+    request = replace(request, preferences=preferences)
+    if time_limit is not None:
+        request = replace(request, time_limit_seconds=time_limit)
+    return request
 
 
 def _load_request_from_yaml() -> SolveRequest:
@@ -106,11 +107,11 @@ def solve(
         "-o",
         help="Output file for schedule",
     ),
-    time_limit: int = typer.Option(
-        60,
+    time_limit: int | None = typer.Option(
+        None,
         "--time-limit",
         "-t",
-        help="Solver time limit in seconds",
+        help="Solver time limit in seconds (default: 60, or the request's own)",
     ),
     buffer_time: int | None = typer.Option(
         None,
@@ -167,6 +168,17 @@ def solve(
         console.print(f"[green]Schedule saved to {output}[/green]")
 
 
+def _is_not_relevant(
+    request: SolveRequest, entry: ProgrammeEntry, screenings: list[Screening]
+) -> bool:
+    """Whether the film is Seen or excluded, so missing it is no loss."""
+    return (
+        entry.film_id in request.seen_films
+        or entry.id in request.excluded_programme_entries
+        or all(s.id in request.excluded_screenings for s in screenings)
+    )
+
+
 def display_film_overview(request: SolveRequest, rows: list[ScheduledRow]) -> None:
     """Display every Programme Entry with whether and when it is scheduled."""
     screenings_by_entry: defaultdict[str, list[Screening]] = defaultdict(list)
@@ -174,14 +186,20 @@ def display_film_overview(request: SolveRequest, rows: list[ScheduledRow]) -> No
         screenings_by_entry[screening.programme_entry_id].append(screening)
     row_by_entry = {row.entry.id: row for row in rows}
     venues = {v.id: v for v in request.venues}
+    not_relevant = {
+        entry.id
+        for entry in request.programme_entries
+        if entry.id not in row_by_entry
+        and _is_not_relevant(request, entry, screenings_by_entry[entry.id])
+    }
+    missed = len(request.programme_entries) - len(rows) - len(not_relevant)
 
     console.print("\n[bold]Festival Overview[/bold]")
     console.print(f"Unique films: {len(request.programme_entries)}")
     console.print(f"Total screenings: {len(request.screenings)}")
     console.print(f"Films scheduled: [green]{len(rows)}[/green]")
-    console.print(
-        f"Films missed: [red]{len(request.programme_entries) - len(rows)}[/red]"
-    )
+    console.print(f"Films missed: [red]{missed}[/red]")
+    console.print(f"Films not relevant (seen or excluded): {len(not_relevant)}")
     console.print()
 
     table = Table(title="All Films in Festival", box=box.MINIMAL)
@@ -201,7 +219,7 @@ def display_film_overview(request: SolveRequest, rows: list[ScheduledRow]) -> No
         screenings = screenings_by_entry[entry.id]
         shown = row.screening if row else screenings[0] if screenings else None
         status = Text.assemble(
-            "✅" if row else "❌",
+            "✅" if row else "🚫" if entry.id in not_relevant else "❌",
             " ",
             _link("🎬", entry.url),
             " ",
