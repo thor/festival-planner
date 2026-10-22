@@ -134,9 +134,18 @@ Each step is its own plan and leaves working, tested software:
 2. **Persistence**: Festival, Film, Venue, Organization entities; SQLAlchemy
    repositories; Alembic; ingesting a `ProgrammeSource` (the Filmfrasor
    scraper) and Routes into the database.
+   Must decide the time-zone policy first (festival-local naive vs. aware
+   datetimes plus a Festival time zone, with date ranges on local dates),
+   add domain invariants (end ≥ start, non-negative Route minutes) and keep
+   Screening ids stable across re-ingestion.
 3. **Planning use-cases**: Drafts as change sets, accept, Stale, diff,
    Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
-4. **GraphQL API and auth**: Strawberry schema over the use-cases,
+   Also: deterministic solving (CP-SAT seed and tie-break, so Draft diffs
+   don't show noise), change-set validation for contradictory inputs, a
+   format version in exported solve requests, curation weight and
+   Comparisons in Preferences, and Pydantic vs. dataclasses for Preferences.
+4. **GraphQL API and auth**: distinct id types (`NewType`) before the
+   global-id mapping; Strawberry schema over the use-cases,
    `TokenVerifier` adapters, local token issuer, SDL export. Evaluate
    Strawberry's Pydantic integration
    (<https://strawberry.rocks/docs/integrations/pydantic>) for deriving
