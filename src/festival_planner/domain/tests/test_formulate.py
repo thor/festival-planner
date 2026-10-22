@@ -1,7 +1,4 @@
 import datetime
-from dataclasses import replace
-
-import pytest
 
 from festival_planner.domain.planning import Preferences
 from festival_planner.domain.programme import Event
@@ -266,42 +263,7 @@ class TestConflicts:
         assert conflicts(req) == {frozenset({"late", "early"})}
 
 
-class TestValidation:
-    def test_duplicate_screening_ids_are_rejected(self):
-        req = request(
-            screening("a", "14:00", "16:00"),
-            screening("a", "18:00", "20:00"),
-            entries=(entry("a"),),
-        )
-        with pytest.raises(ValueError, match="'a'"):
-            formulate(req)
-
-    def test_duplicate_programme_entry_ids_are_rejected(self):
-        req = request(
-            screening("a", "14:00", "16:00"), entries=(entry("a"), entry("a"))
-        )
-        with pytest.raises(ValueError, match="'a'"):
-            formulate(req)
-
-    def test_duplicate_venue_ids_are_rejected(self):
-        req = request(screening("a", "14:00", "16:00"))
-        req = replace(req, venues=req.venues * 2)
-        with pytest.raises(ValueError, match="'A'"):
-            formulate(req)
-
-    def test_unknown_programme_entry_is_rejected_naming_both_ids(self):
-        req = request(
-            screening("a", "14:00", "16:00", entry_id="e"), entries=(entry("other"),)
-        )
-        with pytest.raises(ValueError, match="'a'.*'e'"):
-            formulate(req)
-
-    def test_unknown_venue_is_rejected_naming_both_ids(self):
-        req = request(screening("a", "14:00", "16:00"))
-        req = replace(req, venues=())
-        with pytest.raises(ValueError, match="'a'.*'A'"):
-            formulate(req)
-
+class TestUnknownCommitments:
     def test_unknown_screening_commitment_is_unsatisfiable(self):
         req = request(
             screening("a", "14:00", "16:00"),

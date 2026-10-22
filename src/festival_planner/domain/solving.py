@@ -9,8 +9,10 @@ import enum
 import itertools
 from collections import defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass, field
-from typing import Protocol
+from dataclasses import dataclass
+from typing import Protocol, Self
+
+from pydantic import Field, model_validator
 
 from .planning import Preferences
 from .programme import (
@@ -22,20 +24,25 @@ from .programme import (
     Venue,
 )
 from .travel import RouteTable
+from .values import Value
 
 DEFAULT_WEIGHT = 1.0
 """Weight of a Screening without any weight preference."""
 
 
-@dataclass(frozen=True)
-class SolveRequest:
-    """Everything needed to solve one Schedule, as plain values."""
+class SolveRequest(Value):
+    """Everything needed to solve one Schedule, as plain values.
+
+    Ids must be unique per kind, and Screenings must refer to known Programme
+    Entries and Venues. Other ids (commitments, exclusions, Seen, Active
+    Schedule) may refer to nothing; `formulate` decides what that means.
+    """
 
     venues: tuple[Venue, ...]
     programme_entries: tuple[ProgrammeEntry, ...]
     screenings: tuple[Screening, ...]
-    routes: RouteTable = field(default_factory=RouteTable)
-    preferences: Preferences = field(default_factory=Preferences)
+    routes: RouteTable = Field(default_factory=RouteTable)
+    preferences: Preferences = Field(default_factory=Preferences)
     screening_commitments: frozenset[ScreeningId] = frozenset()
     film_commitments: frozenset[ProgrammeEntryId] = frozenset()
     excluded_screenings: frozenset[ScreeningId] = frozenset()
@@ -44,6 +51,33 @@ class SolveRequest:
     active_schedule: frozenset[ScreeningId] = frozenset()
     now: datetime.datetime | None = None
     time_limit_seconds: float = 60.0
+
+    @model_validator(mode="after")
+    def _references_are_sound(self) -> Self:
+        for kind, items in (
+            ("screening", self.screenings),
+            ("programme entry", self.programme_entries),
+            ("venue", self.venues),
+        ):
+            seen: set[str] = set()
+            for item in items:
+                if item.id in seen:
+                    raise ValueError(f"Duplicate {kind} id {item.id!r}")
+                seen.add(item.id)
+        entry_ids = {e.id for e in self.programme_entries}
+        venue_ids = {v.id for v in self.venues}
+        for screening in self.screenings:
+            if screening.programme_entry_id not in entry_ids:
+                raise ValueError(
+                    f"Screening {screening.id!r} references unknown programme entry "
+                    f"{screening.programme_entry_id!r}"
+                )
+            if screening.venue_id not in venue_ids:
+                raise ValueError(
+                    f"Screening {screening.id!r} references unknown venue "
+                    f"{screening.venue_id!r}"
+                )
+        return self
 
 
 class SolveStatus(enum.StrEnum):
@@ -54,15 +88,13 @@ class SolveStatus(enum.StrEnum):
     """The time limit ran out before any Schedule was found."""
 
 
-@dataclass(frozen=True, slots=True)
-class ScheduledScreening:
+class ScheduledScreening(Value):
     screening_id: ScreeningId
     arrival_time: datetime.datetime
     weight: float
 
 
-@dataclass(frozen=True)
-class SolveResult:
+class SolveResult(Value):
     status: SolveStatus
     scheduled: tuple[ScheduledScreening, ...] = ()
     objective: float = 0.0
@@ -129,7 +161,6 @@ def formulate(request: SolveRequest) -> Formulation:
     - Two Screenings conflict when neither can be reached from the other in
       time, given travel and the arrival buffer.
     """
-    _validate(request)
     preferences = request.preferences
     entries = {e.id: e for e in request.programme_entries}
     unsatisfiable: list[str] = [
@@ -205,31 +236,6 @@ def formulate(request: SolveRequest) -> Formulation:
         conflicts=_conflicts(candidates, fixed, request.routes, preferences),
         unsatisfiable=tuple(unsatisfiable),
     )
-
-
-def _validate(request: SolveRequest) -> None:
-    """Reject requests whose ids are duplicated or refer to nothing."""
-    for kind, items in (
-        ("screening", request.screenings),
-        ("programme entry", request.programme_entries),
-        ("venue", request.venues),
-    ):
-        ids = [item.id for item in items]
-        for duplicate in sorted({i for i in ids if ids.count(i) > 1}):
-            raise ValueError(f"Duplicate {kind} id {duplicate!r}")
-    entry_ids = {e.id for e in request.programme_entries}
-    venue_ids = {v.id for v in request.venues}
-    for screening in request.screenings:
-        if screening.programme_entry_id not in entry_ids:
-            raise ValueError(
-                f"Screening {screening.id!r} references unknown programme entry "
-                f"{screening.programme_entry_id!r}"
-            )
-        if screening.venue_id not in venue_ids:
-            raise ValueError(
-                f"Screening {screening.id!r} references unknown venue "
-                f"{screening.venue_id!r}"
-            )
 
 
 def _conflicts(

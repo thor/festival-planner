@@ -23,3 +23,10 @@ def test_date_range_may_be_open_ended():
     assert Preferences(start_date=DAY).covers(DAY + 365 * ONE_DAY)
     assert Preferences(end_date=DAY).covers(DAY - 365 * ONE_DAY)
     assert Preferences().covers(DAY)
+
+
+def test_preferences_do_not_alias_the_mappings_they_are_given():
+    weights = {"a": 1.0}
+    preferences = Preferences(programme_entry_weights=weights)
+    weights["a"] = 2.0
+    assert preferences.programme_entry_weights["a"] == 1.0

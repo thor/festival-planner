@@ -40,3 +40,8 @@ def test_routes_are_one_directional():
     )
     with pytest.raises(MissingRouteError):
         table.minutes("B", "A", None)
+
+
+def test_route_minutes_cannot_be_negative():
+    with pytest.raises(ValueError):
+        Route(from_venue_id="A", to_venue_id="B", mode="bike", minutes=-1)

@@ -1,31 +1,31 @@
 """Travel between Venues."""
 
-from dataclasses import dataclass
 from functools import cached_property
 
+from pydantic import Field
+
 from .programme import VenueId
+from .values import Value
 
 TransportMode = str
 
 DEFAULT_TRANSPORT_MODE: TransportMode = "walk+e-scooter"
 
 
-@dataclass(frozen=True, slots=True)
-class Route:
+class Route(Value):
     """A precalculated way of travelling from one Venue to another."""
 
     from_venue_id: VenueId
     to_venue_id: VenueId
     mode: TransportMode
-    minutes: int
+    minutes: int = Field(ge=0)
 
 
 class MissingRouteError(LookupError):
     """No Route exists between two Venues in the chosen or default mode."""
 
 
-@dataclass(frozen=True)
-class RouteTable:
+class RouteTable(Value):
     """All known Routes, plus the globally decided default Transport Mode."""
 
     routes: tuple[Route, ...] = ()

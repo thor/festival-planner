@@ -1,4 +1,7 @@
 import datetime
+import json
+
+import pytest
 
 from festival_planner.adapters.json_files.solve_request import (
     dump_solve_request,
@@ -51,3 +54,14 @@ def test_round_trips_every_field(tmp_path):
     dump_solve_request(original, path)
 
     assert load_solve_request(path) == original
+
+
+def test_rejects_a_request_with_duplicate_screenings(tmp_path):
+    path = tmp_path / "request.json"
+    dump_solve_request(request(screening("a", "14:00", "16:00")), path)
+    data = json.loads(path.read_text())
+    data["screenings"] *= 2
+    path.write_text(json.dumps(data))
+
+    with pytest.raises(ValueError, match="Duplicate screening id 'a'"):
+        load_solve_request(path)

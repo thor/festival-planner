@@ -2,25 +2,26 @@
 
 import datetime
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+
+from pydantic import Field
 
 from .programme import ProgrammeEntryId, ScreeningId, VenueId
 from .travel import TransportMode
+from .values import Value
 
 
-@dataclass(frozen=True)
-class Preferences:
+class Preferences(Value):
     """A User's settings that shape their Schedules for a Festival."""
 
     buffer_minutes: int = 15
-    venue_buffer_minutes: Mapping[VenueId, int] = field(default_factory=dict)
+    venue_buffer_minutes: Mapping[VenueId, int] = Field(default_factory=dict)
     start_date: datetime.date | None = None
     end_date: datetime.date | None = None
-    programme_entry_weights: Mapping[ProgrammeEntryId, float] = field(
+    programme_entry_weights: Mapping[ProgrammeEntryId, float] = Field(
         default_factory=dict
     )
-    screening_weights: Mapping[ScreeningId, float] = field(default_factory=dict)
-    year_weights: Mapping[int, float] = field(default_factory=dict)
+    screening_weights: Mapping[ScreeningId, float] = Field(default_factory=dict)
+    year_weights: Mapping[int, float] = Field(default_factory=dict)
     event_weight: float = 0.0
     attend_events: bool = False
     transport_mode: TransportMode | None = None

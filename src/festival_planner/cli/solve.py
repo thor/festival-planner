@@ -2,7 +2,7 @@
 
 import datetime
 from collections import defaultdict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 import typer
@@ -74,13 +74,15 @@ def _apply_overrides(
 ) -> SolveRequest:
     preferences = request.preferences
     if buffer_time is not None:
-        preferences = replace(preferences, buffer_minutes=buffer_time)
+        preferences = preferences.model_copy(update={"buffer_minutes": buffer_time})
     if dates:
         start, end = _parse_dates(dates)
-        preferences = replace(preferences, start_date=start, end_date=end)
-    request = replace(request, preferences=preferences)
+        preferences = preferences.model_copy(
+            update={"start_date": start, "end_date": end}
+        )
+    request = request.model_copy(update={"preferences": preferences})
     if time_limit is not None:
-        request = replace(request, time_limit_seconds=time_limit)
+        request = request.model_copy(update={"time_limit_seconds": time_limit})
     return request
 
 

@@ -59,3 +59,19 @@ def test_earlier_separately_timed_events_start_the_screening_when_included():
     assert screening(Event(description="Q&A")).starts_at(include_events=True) == at(
         "14:00"
     )
+
+
+def test_event_cannot_end_before_it_starts():
+    with pytest.raises(ValueError):
+        Event(description="Panel", start_time=at("17:00"), end_time=at("16:00"))
+
+
+def test_screening_cannot_end_before_it_starts():
+    with pytest.raises(ValueError):
+        Screening(
+            id="s",
+            programme_entry_id="e",
+            venue_id="v",
+            start_time=at("16:00"),
+            end_time=at("14:00"),
+        )
