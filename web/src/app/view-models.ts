@@ -105,7 +105,7 @@ export interface ScheduleVM {
 export interface ProblemVM {
   id: string
   title: string
-  action: "Solve again" | "Release"
+  action: "Repair" | "Release"
   /** Already done in the pending Change Set. */
   on: boolean
   onAct: () => void
@@ -162,8 +162,10 @@ export interface DraftVM {
   status: "solving" | "ready" | "infeasible" | "failed"
   stale: boolean
   scoreDelta: string | null
-  added: DiffRowVM[]
-  removed: DiffRowVM[]
+  /** Screenings the Draft brings into the Schedule. */
+  in: DiffRowVM[]
+  /** Screenings the Draft takes out of it; not Withdrawn, just not chosen. */
+  out: DiffRowVM[]
   droppedTickets: number
   reasons: string[]
   items: ItemVM[]

@@ -319,8 +319,8 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
       d.diff && Math.abs(d.diff.scoreDelta) >= 0.05
         ? signed(d.diff.scoreDelta)
         : null,
-    added: d.diff?.added.map(row) ?? [],
-    removed: d.diff?.removed.map(row) ?? [],
+    in: d.diff?.added.map(row) ?? [],
+    out: d.diff?.removed.map(row) ?? [],
     droppedTickets: d.diff?.droppedTickets.length ?? 0,
     reasons: d.reasons,
     items: itemsOf(d.changeSet, lookup),

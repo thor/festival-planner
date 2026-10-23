@@ -116,7 +116,7 @@ export function useTicketModels(
           {
             id: f.screening.id,
             title: f.screening.title,
-            action: "Solve again",
+            action: "Repair",
             on: false,
             onAct: () => solve.mutate(),
           },

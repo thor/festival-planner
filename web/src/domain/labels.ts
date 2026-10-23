@@ -33,7 +33,7 @@ export const verbWord: Record<ItemVerb, string> = {
   release: "Release",
   exclude: "Exclude",
   include: "Include",
-  prefer: "Prefer",
+  compare: "Compare",
   buffer: "Buffer",
   other: "Change",
 }

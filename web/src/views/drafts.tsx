@@ -112,8 +112,8 @@ export function DraftView({ vm }: { vm: DraftVM }) {
       )}
 
       <div className="grid gap-x-10 md:grid-cols-2">
-        <DiffList rows={vm.added} sign="plus" empty="Nothing added." />
-        <DiffList rows={vm.removed} sign="minus" empty="Nothing removed." />
+        <DiffList rows={vm.in} sign="plus" empty="Nothing new." />
+        <DiffList rows={vm.out} sign="minus" empty="Nothing out." />
       </div>
 
       {vm.items.length > 0 && (
@@ -141,7 +141,7 @@ function DiffList({
 }) {
   const Glyph = sign === "plus" ? PlusIcon : MinusIcon
   return (
-    <ul aria-label={sign === "plus" ? "Added" : "Removed"}>
+    <ul aria-label={sign === "plus" ? "In" : "Out"}>
       {rows.length === 0 && (
         <li className="border-b border-ink py-4 text-grain">{empty}</li>
       )}

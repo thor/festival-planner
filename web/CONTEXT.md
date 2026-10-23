@@ -49,8 +49,16 @@ To add an Excluded Screening or Programme Entry to the Pending Change Set. Its o
 _Avoid_: Hide, ignore, skip
 
 **Solve**:
-To turn the Pending Change Set into a Draft. **Solve again** re-solves an existing Draft, or creates a Draft with an empty Change Set to repair the Active Schedule.
+To turn the Pending Change Set into a Draft. **Solve again** re-solves an existing Draft against the current Active Schedule.
 _Avoid_: Optimise, run, generate
+
+**Repair**:
+To make a Draft with an empty Change Set, so the Active Schedule's own inputs are solved again after a Screening in it is Withdrawn.
+_Avoid_: Solve again (that re-solves a Draft), fix, refresh
+
+**In** and **Out**:
+The Screenings a Draft brings into the Schedule and takes out of it. An Out Screening was only not chosen; a Withdrawn one is a different thing.
+_Avoid_: Added, removed, dropped
 
 **Accept**:
 To make a Draft's Schedule the Active Schedule. It never changes Tickets.
@@ -71,7 +79,7 @@ A Ticket that is not a Ticket to let go: its Screening is in the Active Schedule
 _Avoid_: Active ticket, valid ticket
 
 **Keep**:
-To put a Ticket to let go back into the Schedule by committing to its Screening, through the Pending Change Set.
+A Commit to a Ticket's Screening, named for the Ticket. It is not an operation of its own: it adds a Screening Commitment to the Pending Change Set, like Commit.
 _Avoid_: Restore, reschedule
 
 **Gone**:
@@ -79,7 +87,7 @@ The User's statement that they no longer hold a Ticket (sold, refunded, exchange
 _Avoid_: Delete, cancel, drop
 
 **Freed Ticket**:
-A Ticket whose Screening a Draft removes from the Schedule. Accepting the Draft makes it a Ticket to let go; it does not remove it.
+A Ticket whose Screening is Out in a Draft. Accepting the Draft makes it a Ticket to let go; it does not remove it.
 _Avoid_: Dropped ticket, lost ticket
 
 ### Attention
@@ -92,4 +100,4 @@ _Avoid_: Warning, error, alert
 
 **Compare**:
 To record a Comparison by choosing, from a Comparison Suggestion's pair, the Programme Entry the User would rather see. Skipping records nothing.
-_Avoid_: Vote, rank, swipe
+_Avoid_: Prefer, vote, rank, swipe

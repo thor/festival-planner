@@ -18,7 +18,7 @@ export const verbIcon: Record<ItemVerb, Icon> = {
   release: MinusIcon,
   exclude: ProhibitIcon,
   include: CheckIcon,
-  prefer: ArrowsLeftRightIcon,
+  compare: ArrowsLeftRightIcon,
   buffer: TimerIcon,
   other: WrenchIcon,
 }

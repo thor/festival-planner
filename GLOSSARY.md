@@ -83,7 +83,7 @@ A User's commitment to attend one specific Screening.
 _Avoid_: Pin, booking, will-watch
 
 **Film Commitment**:
-A User's commitment to watch a Programme Entry at one of its Screenings, leaving the choice of Screening open.
+A User's commitment to watch a Programme Entry at one of its Screenings, leaving the choice of Screening open. "Film" here means the Programme Entry, not the festival-independent Film.
 _Avoid_: Want, wishlist
 
 **Ticket**:

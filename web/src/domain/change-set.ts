@@ -194,7 +194,7 @@ export type ItemVerb =
   | "release"
   | "exclude"
   | "include"
-  | "prefer"
+  | "compare"
   | "buffer"
   | "other"
 
@@ -213,7 +213,7 @@ export function verbOf(item: ChangeSetItem): ItemVerb {
     case "removeExcludedProgrammeEntry":
       return "include"
     case "recordComparison":
-      return "prefer"
+      return "compare"
     case "setBuffer":
       return "buffer"
     case "other":
