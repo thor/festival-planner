@@ -22,11 +22,12 @@ from ..adapters.json_files.solve_request import dump_solve_request
 from ..adapters.solver.cpsat import CpSatScheduleSolver
 from ..adapters.sqlalchemy.unit_of_work import SqlAlchemyUnitOfWork
 from ..domain.change_sets import ChangeSet, InvalidChangeSetError
-from ..domain.drafts import DraftStatus
+from ..domain.drafts import DraftId, DraftStatus
+from ..domain.festival import FestivalId
 from ..domain.planner import DraftView, Planner, PlanningError
 from ..domain.planning import Ticket
-from ..domain.programme import ScreeningId
-from ..domain.users import LOCAL_ISSUER, user_for
+from ..domain.programme import FilmId, ScreeningId
+from ..domain.users import LOCAL_ISSUER, UserId, user_for
 from .db import DATABASE_OPTION, open_database
 
 app = typer.Typer(
@@ -42,7 +43,7 @@ console = Console()
 @dataclass
 class _Session:
     planner: Planner
-    user_id: str
+    user_id: UserId
     engine: Engine
 
     def unit_of_work(self) -> SqlAlchemyUnitOfWork:
@@ -95,7 +96,7 @@ def _load_change_set(path: Path | None) -> ChangeSet:
 
 
 def _describe(
-    s: _Session, festival_id: str, screening_ids: Iterable[ScreeningId]
+    s: _Session, festival_id: FestivalId, screening_ids: Iterable[ScreeningId]
 ) -> dict[ScreeningId, str]:
     """One line per Screening: festival-local day and time, title and Venue."""
     with s.unit_of_work() as uow:
@@ -213,7 +214,7 @@ def show(
 ) -> None:
     """Show a Draft's Schedule and how it differs from the Active Schedule."""
     with _session(database) as s:
-        view = s.planner.draft(s.user_id, draft_id)
+        view = s.planner.draft(s.user_id, DraftId(draft_id))
         _print_view(s, view)
         lines = _describe(s, view.draft.festival_id, view.draft.screening_ids)
         console.print("Schedule:")
@@ -221,7 +222,7 @@ def show(
             console.print(f"  {escape(lines.get(i, i))}", soft_wrap=True)
         if export_request is not None:
             dump_solve_request(
-                s.planner.solve_request(s.user_id, draft_id), export_request
+                s.planner.solve_request(s.user_id, DraftId(draft_id)), export_request
             )
             console.print(f"Solve request written to {export_request}")
 
@@ -233,7 +234,7 @@ def accept(
 ) -> None:
     """Accept a Draft: its Schedule becomes the Active Schedule."""
     with _session(database) as s:
-        schedule = s.planner.accept(s.user_id, draft_id)
+        schedule = s.planner.accept(s.user_id, DraftId(draft_id))
         console.print(
             f"[green]Schedule {schedule.number} is now active "
             f"({len(schedule.screening_ids)} screenings, score {schedule.score:.2f})"
@@ -249,7 +250,7 @@ def resolve(
 ) -> None:
     """Solve a Draft again against the current Active Schedule."""
     with _session(database) as s:
-        _print_view(s, s.planner.resolve(s.user_id, draft_id))
+        _print_view(s, s.planner.resolve(s.user_id, DraftId(draft_id)))
 
 
 @app.command()
@@ -259,7 +260,7 @@ def discard(
 ) -> None:
     """Discard a Draft."""
     with _session(database) as s:
-        s.planner.discard(s.user_id, draft_id)
+        s.planner.discard(s.user_id, DraftId(draft_id))
         console.print(f"Discarded draft {draft_id}")
 
 
@@ -322,7 +323,7 @@ def ticket_add(
         s.planner.record_ticket(
             s.user_id,
             Ticket(
-                screening_id=screening,
+                screening_id=ScreeningId(screening),
                 exchangeable=exchangeable,
                 refundable=refundable,
             ),
@@ -337,7 +338,7 @@ def ticket_remove(
 ) -> None:
     """Remove a Ticket."""
     with _session(database) as s:
-        s.planner.remove_ticket(s.user_id, screening)
+        s.planner.remove_ticket(s.user_id, ScreeningId(screening))
         console.print(f"Ticket removed for {screening}")
 
 
@@ -348,7 +349,7 @@ def seen_add(
 ) -> None:
     """Mark a Film Seen."""
     with _session(database) as s:
-        s.planner.mark_seen(s.user_id, film)
+        s.planner.mark_seen(s.user_id, FilmId(film))
         console.print(f"Film {film} marked Seen")
 
 
@@ -359,7 +360,7 @@ def seen_remove(
 ) -> None:
     """Unmark a Film as Seen."""
     with _session(database) as s:
-        s.planner.unmark_seen(s.user_id, film)
+        s.planner.unmark_seen(s.user_id, FilmId(film))
         console.print(f"Film {film} no longer marked Seen")
 
 
@@ -370,7 +371,7 @@ def seen_dismiss(
 ) -> None:
     """Say you did not go to a Screening, so it does not make its Film Seen."""
     with _session(database) as s:
-        s.planner.dismiss_inferred_seen(s.user_id, screening)
+        s.planner.dismiss_inferred_seen(s.user_id, ScreeningId(screening))
         console.print(f"Screening {screening} dismissed")
 
 
@@ -381,5 +382,5 @@ def seen_restore(
 ) -> None:
     """Undo a dismissal."""
     with _session(database) as s:
-        s.planner.restore_inferred_seen(s.user_id, screening)
+        s.planner.restore_inferred_seen(s.user_id, ScreeningId(screening))
         console.print(f"Screening {screening} restored")

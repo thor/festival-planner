@@ -1,5 +1,5 @@
 from festival_planner.domain.planning import Comparison, Preferences
-from festival_planner.domain.programme import Event
+from festival_planner.domain.programme import Event, ProgrammeEntryId, ScreeningId
 from festival_planner.domain.solving import (
     DEFAULT_WEIGHT,
     formulate,
@@ -17,7 +17,7 @@ def test_default_weight():
 
 
 def test_programme_entry_weight_replaces_default():
-    preferences = Preferences(programme_entry_weights={"s": 0.5})
+    preferences = Preferences(programme_entry_weights={ProgrammeEntryId("s"): 0.5})
     assert (
         screening_weight(screening("s", "14:00", "16:00"), entry("s"), preferences)
         == 0.5
@@ -26,7 +26,8 @@ def test_programme_entry_weight_replaces_default():
 
 def test_screening_weight_beats_programme_entry_weight():
     preferences = Preferences(
-        programme_entry_weights={"s": 0.5}, screening_weights={"s": 2.0}
+        programme_entry_weights={ProgrammeEntryId("s"): 0.5},
+        screening_weights={ScreeningId("s"): 2.0},
     )
     assert (
         screening_weight(screening("s", "14:00", "16:00"), entry("s"), preferences)
@@ -80,7 +81,9 @@ def test_separately_timed_event_also_counts():
 
 def test_weights_combine_and_may_be_negative():
     preferences = Preferences(
-        programme_entry_weights={"s": -1.0}, year_weights={2025: -0.2}, event_weight=0.5
+        programme_entry_weights={ProgrammeEntryId("s"): -1.0},
+        year_weights={2025: -0.2},
+        event_weight=0.5,
     )
     weight = screening_weight(
         screening("s", "14:00", "16:00", events=(Event(description="Q&A"),)),
@@ -95,17 +98,31 @@ def test_comparisons_shift_programme_entry_weights():
         screening("a", "14:00", "16:00"),
         screening("b", "18:00", "20:00"),
         preferences=Preferences(
-            buffer_minutes=0, comparisons=(Comparison(preferred="b", other="a"),)
+            buffer_minutes=0,
+            comparisons=(
+                Comparison(
+                    preferred=ProgrammeEntryId("b"), other=ProgrammeEntryId("a")
+                ),
+            ),
         ),
     )
     weights = formulate(req).weights
-    assert weights["b"] > 1.0 > weights["a"]
+    assert weights[ScreeningId("b")] > 1.0 > weights[ScreeningId("a")]
 
 
 def test_score_sums_the_weights_of_known_screenings():
     req = request(
         screening("a", "14:00", "16:00"),
         screening("b", "18:00", "20:00"),
-        preferences=Preferences(buffer_minutes=0, programme_entry_weights={"b": 3.0}),
+        preferences=Preferences(
+            buffer_minutes=0,
+            programme_entry_weights={ProgrammeEntryId("b"): 3.0},
+        ),
     )
-    assert score(req, {"a", "b", "unknown"}) == 4.0
+    assert (
+        score(
+            req,
+            {ScreeningId("a"), ScreeningId("b"), ScreeningId("unknown")},
+        )
+        == 4.0
+    )

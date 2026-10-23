@@ -10,7 +10,16 @@ import zoneinfo
 
 from ...config import Config
 from ...domain.planning import Preferences
-from ...domain.programme import Event, ProgrammeEntry, Screening, Venue
+from ...domain.programme import (
+    Event,
+    FilmId,
+    ProgrammeEntry,
+    ProgrammeEntryId,
+    Screening,
+    ScreeningId,
+    Venue,
+    VenueId,
+)
 from ...domain.solving import SolveRequest
 from ...domain.travel import DEFAULT_TRANSPORT_MODE, Route, RouteTable
 from ...models import Film
@@ -19,8 +28,8 @@ LEGACY_DEFAULT_TRAVEL_MINUTES = 30
 """Travel time assumed between cinemas without a configured travel time."""
 
 
-def screening_id(film: Film) -> str:
-    return f"{film.title} @ {film.start_time.isoformat()} @ {film.cinema}"
+def screening_id(film: Film) -> ScreeningId:
+    return ScreeningId(f"{film.title} @ {film.start_time.isoformat()} @ {film.cinema}")
 
 
 def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
@@ -37,8 +46,8 @@ def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
         entries.setdefault(
             film.title,
             ProgrammeEntry(
-                id=film.title,
-                film_id=film.title,
+                id=ProgrammeEntryId(film.title),
+                film_id=FilmId(film.title),
                 title=film.title,
                 year=film.year,
                 country=film.country,
@@ -51,7 +60,7 @@ def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
     zone = zoneinfo.ZoneInfo(config.schedule.time_zone)
 
     return SolveRequest(
-        venues=tuple(Venue(id=v, name=v) for v in venue_ids),
+        venues=tuple(Venue(id=VenueId(v), name=v) for v in venue_ids),
         programme_entries=tuple(entries.values()),
         screenings=tuple(_screening(film, zone) for film in films),
         time_zone=config.schedule.time_zone,
@@ -62,7 +71,7 @@ def build_solve_request(films: list[Film], config: Config) -> SolveRequest:
             for film in films
             if (film.title, film.date) in excluded_on_date
         ),
-        seen_films=frozenset(s.title for s in seen if s.date is None),
+        seen_films=frozenset(FilmId(s.title) for s in seen if s.date is None),
     )
 
 
@@ -74,8 +83,8 @@ def _aware(moment: datetime.datetime, zone: zoneinfo.ZoneInfo) -> datetime.datet
 def _screening(film: Film, zone: zoneinfo.ZoneInfo) -> Screening:
     return Screening(
         id=screening_id(film),
-        programme_entry_id=film.title,
-        venue_id=film.cinema,
+        programme_entry_id=ProgrammeEntryId(film.title),
+        venue_id=VenueId(film.cinema),
         start_time=_aware(film.start_time, zone),
         end_time=_aware(film.end_time, zone),
         auditorium=film.auditorium,
@@ -97,7 +106,10 @@ def _route_table(config: Config, venue_ids: list[str]) -> RouteTable:
     return RouteTable(
         routes=tuple(
             Route(
-                from_venue_id=a, to_venue_id=b, mode=DEFAULT_TRANSPORT_MODE, minutes=m
+                from_venue_id=VenueId(a),
+                to_venue_id=VenueId(b),
+                mode=DEFAULT_TRANSPORT_MODE,
+                minutes=m,
             )
             for (a, b), m in minutes.items()
             if a != b
@@ -109,11 +121,13 @@ def _preferences(films: list[Film], config: Config) -> Preferences:
     """Screening overrides beat title overrides, which beat a scraped
     `preference_weight`, matching the legacy precedence."""
     overrides = config.films.weights
-    title_weights = {w.title: w.weight for w in overrides if w.start_time is None}
+    title_weights = {
+        ProgrammeEntryId(w.title): w.weight for w in overrides if w.start_time is None
+    }
     start_weights = {
         (w.title, w.start_time): w.weight for w in overrides if w.start_time is not None
     }
-    screening_weights: dict[str, float] = {}
+    screening_weights: dict[ScreeningId, float] = {}
     for film in films:
         if (film.title, film.start_time) in start_weights:
             screening_weights[screening_id(film)] = start_weights[

@@ -1,7 +1,7 @@
 import datetime
 
 from festival_planner.domain.planning import Preferences
-from festival_planner.domain.programme import Event
+from festival_planner.domain.programme import Event, VenueId
 from festival_planner.domain.solving import formulate
 from festival_planner.domain.tests.builders import DAY, at, entry, request, screening
 from festival_planner.domain.travel import Route
@@ -188,7 +188,9 @@ class TestConflicts:
         req = request(
             screening("a", "14:00", "16:00", venue="A"),
             screening("b", "16:10", "18:00", venue="A"),
-            preferences=Preferences(buffer_minutes=15, venue_buffer_minutes={"A": 5}),
+            preferences=Preferences(
+                buffer_minutes=15, venue_buffer_minutes={VenueId("A"): 5}
+            ),
         )
         assert conflicts(req) == set()
 
@@ -198,13 +200,16 @@ class TestConflicts:
             screening("b", "16:10", "18:00", venue="B"),
             routes=(
                 Route(
-                    from_venue_id="A",
-                    to_venue_id="B",
+                    from_venue_id=VenueId("A"),
+                    to_venue_id=VenueId("B"),
                     mode="walk+e-scooter",
                     minutes=20,
                 ),
                 Route(
-                    from_venue_id="B", to_venue_id="A", mode="walk+e-scooter", minutes=5
+                    from_venue_id=VenueId("B"),
+                    to_venue_id=VenueId("A"),
+                    mode="walk+e-scooter",
+                    minutes=5,
                 ),
             ),
         )
@@ -216,18 +221,23 @@ class TestConflicts:
             screening("b", "16:10", "18:00", venue="B"),
             routes=(
                 Route(
-                    from_venue_id="A",
-                    to_venue_id="B",
+                    from_venue_id=VenueId("A"),
+                    to_venue_id=VenueId("B"),
                     mode="walk+e-scooter",
                     minutes=20,
                 ),
                 Route(
-                    from_venue_id="B",
-                    to_venue_id="A",
+                    from_venue_id=VenueId("B"),
+                    to_venue_id=VenueId("A"),
                     mode="walk+e-scooter",
                     minutes=20,
                 ),
-                Route(from_venue_id="A", to_venue_id="B", mode="bike", minutes=8),
+                Route(
+                    from_venue_id=VenueId("A"),
+                    to_venue_id=VenueId("B"),
+                    mode="bike",
+                    minutes=8,
+                ),
             ),
             preferences=Preferences(buffer_minutes=0, transport_mode="bike"),
         )

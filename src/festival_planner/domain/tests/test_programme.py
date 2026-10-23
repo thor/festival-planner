@@ -5,8 +5,11 @@ from pydantic import ValidationError
 
 from festival_planner.domain.programme import (
     Event,
+    ProgrammeEntryId,
     Screening,
+    ScreeningId,
     Venue,
+    VenueId,
     title_key,
     venue_name_key,
 )
@@ -16,9 +19,9 @@ from .builders import at
 
 def screening(*events: Event) -> Screening:
     return Screening(
-        id="s",
-        programme_entry_id="e",
-        venue_id="v",
+        id=ScreeningId("s"),
+        programme_entry_id=ProgrammeEntryId("e"),
+        venue_id=VenueId("v"),
         start_time=at("14:00"),
         end_time=at("16:00"),
         events=events,
@@ -72,9 +75,9 @@ def test_event_cannot_end_before_it_starts():
 def test_screening_cannot_end_before_it_starts():
     with pytest.raises(ValueError):
         Screening(
-            id="s",
-            programme_entry_id="e",
-            venue_id="v",
+            id=ScreeningId("s"),
+            programme_entry_id=ProgrammeEntryId("e"),
+            venue_id=VenueId("v"),
             start_time=at("16:00"),
             end_time=at("14:00"),
         )
@@ -83,9 +86,9 @@ def test_screening_cannot_end_before_it_starts():
 def test_screening_rejects_naive_times():
     with pytest.raises(ValidationError):
         Screening(
-            id="s",
-            programme_entry_id="e",
-            venue_id="A",
+            id=ScreeningId("s"),
+            programme_entry_id=ProgrammeEntryId("e"),
+            venue_id=VenueId("A"),
             start_time=datetime.datetime(2025, 11, 8, 18, 0),
             end_time=datetime.datetime(2025, 11, 8, 20, 0),
         )
@@ -111,7 +114,7 @@ def test_title_key_ignores_case_width_and_spacing():
 
 
 def test_venue_is_called_by_its_name_or_any_alias_ignoring_case():
-    vika = Venue(id="v", name="Vika", aliases=frozenset({"Vika Kino"}))
+    vika = Venue(id=VenueId("v"), name="Vika", aliases=frozenset({"Vika Kino"}))
     assert vika.is_called("VIKA") and vika.is_called("vika  kino")
     assert not vika.is_called("Vega")
     assert venue_name_key(" Vika  Kino ") == "vika kino"

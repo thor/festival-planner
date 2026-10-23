@@ -23,8 +23,10 @@ def comparison_bonuses(
     sorted order, so the result does not depend on input order.
     """
     comparisons = tuple(comparisons)
-    games: defaultdict[str, Counter[str]] = defaultdict(Counter)
-    wins: Counter[str] = Counter()
+    games: defaultdict[ProgrammeEntryId, Counter[ProgrammeEntryId]] = defaultdict(
+        Counter
+    )
+    wins: Counter[ProgrammeEntryId] = Counter()
     for c in comparisons:
         games[c.preferred][c.other] += 1
         games[c.other][c.preferred] += 1

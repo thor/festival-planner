@@ -1,4 +1,4 @@
-from festival_planner.domain.users import LOCAL_ISSUER, User, user_for
+from festival_planner.domain.users import LOCAL_ISSUER, User, UserId, user_for
 
 from .fakes import InMemoryUnitOfWork, concurrently, sequential_ids
 
@@ -22,7 +22,7 @@ def test_users_are_keyed_on_issuer_and_subject():
 
 def test_user_for_returns_the_user_a_concurrent_first_sight_created():
     uow = InMemoryUnitOfWork()
-    winner = User(id="winner", issuer=LOCAL_ISSUER, subject="thor")
+    winner = User(id=UserId("winner"), issuer=LOCAL_ISSUER, subject="thor")
     uow.hooks["users.save"] = concurrently(
         uow, lambda state: state.users.__setitem__(winner.id, winner)
     )

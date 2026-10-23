@@ -2,14 +2,14 @@
 
 import datetime
 import zoneinfo
-from typing import Self
+from typing import NewType, Self
 
 from pydantic import model_validator
 
 from .values import Slug, TimeZone, Value
 
-FestivalId = str
-FestivalSeriesId = str
+FestivalId = NewType("FestivalId", str)
+FestivalSeriesId = NewType("FestivalSeriesId", str)
 
 
 class FestivalSeries(Value):

@@ -13,6 +13,7 @@ from festival_planner.domain.planning import (
     Preferences,
     Ticket,
 )
+from festival_planner.domain.programme import ProgrammeEntryId, ScreeningId
 
 from .builders import at, entry, request, screening
 
@@ -26,10 +27,16 @@ def test_diff_lists_added_and_removed_and_the_score_delta():
         screening("a", "10:00", "12:00"),
         screening("b", "14:00", "16:00"),
         screening("c", "18:00", "20:00"),
-        preferences=Preferences(buffer_minutes=0, programme_entry_weights={"c": 3.0}),
+        preferences=Preferences(
+            buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("c"): 3.0}
+        ),
         active_schedule=frozenset({"a", "b"}),
     )
-    result = diff(req, frozenset({"b", "c"}), [Ticket(screening_id="a")])
+    result = diff(
+        req,
+        frozenset({ScreeningId("b"), ScreeningId("c")}),
+        [Ticket(screening_id=ScreeningId("a"))],
+    )
     assert result.added == frozenset({"c"})
     assert result.removed == frozenset({"a"})
     assert result.score_delta == pytest.approx(2.0)
@@ -38,7 +45,7 @@ def test_diff_lists_added_and_removed_and_the_score_delta():
 
 def test_without_an_active_schedule_everything_is_added():
     req = request(screening("a", "10:00", "12:00"))
-    result = diff(req, frozenset({"a"}), [])
+    result = diff(req, frozenset({ScreeningId("a")}), [])
     assert (result.added, result.removed, result.score_delta) == (
         frozenset({"a"}),
         frozenset(),
@@ -53,13 +60,13 @@ def test_flags():
     ]
     found = flags(
         screenings,
-        PlanningInputs(screening_commitments=frozenset({"gone"})),
+        PlanningInputs(screening_commitments=frozenset({ScreeningId("gone")})),
         [
-            Ticket(screening_id="gone"),
-            Ticket(screening_id="here"),
-            Ticket(screening_id="elsewhere"),
+            Ticket(screening_id=ScreeningId("gone")),
+            Ticket(screening_id=ScreeningId("here")),
+            Ticket(screening_id=ScreeningId("elsewhere")),
         ],
-        active=frozenset({"gone"}),
+        active=frozenset({ScreeningId("gone")}),
     )
     assert [(f.kind, f.target_id) for f in found] == [
         (FlagKind.WITHDRAWN_COMMITMENT, "gone"),
@@ -72,7 +79,7 @@ def test_flags():
 def test_a_film_commitment_with_only_withdrawn_screenings_is_flagged():
     found = flags(
         [withdrawn(screening("s", "10:00", "12:00", entry_id="e"))],
-        PlanningInputs(film_commitments=frozenset({"e"})),
+        PlanningInputs(film_commitments=frozenset({ProgrammeEntryId("e")})),
         [],
         active=frozenset(),
     )
@@ -89,10 +96,17 @@ def test_suggests_conflicting_pairs_closest_weights_first():
         screening("d", "19:00", "21:00"),
         preferences=Preferences(
             buffer_minutes=0,
-            programme_entry_weights={"a": 2.0, "b": 1.0, "c": 1.2, "d": 1.1},
+            programme_entry_weights={
+                ProgrammeEntryId("a"): 2.0,
+                ProgrammeEntryId("b"): 1.0,
+                ProgrammeEntryId("c"): 1.2,
+                ProgrammeEntryId("d"): 1.1,
+            },
         ),
     )
-    suggestions = suggest_comparisons(req, frozenset({"a", "c"}))
+    suggestions = suggest_comparisons(
+        req, frozenset({ScreeningId("a"), ScreeningId("c")})
+    )
     assert [(s.scheduled, s.other) for s in suggestions] == [("c", "d"), ("a", "b")]
     assert suggestions[0].weight_gap == pytest.approx(0.1)
 
@@ -102,10 +116,15 @@ def test_pairs_already_compared_are_not_suggested():
         screening("a", "14:00", "16:00"),
         screening("b", "15:00", "17:00"),
         preferences=Preferences(
-            buffer_minutes=0, comparisons=(Comparison(preferred="a", other="b"),)
+            buffer_minutes=0,
+            comparisons=(
+                Comparison(
+                    preferred=ProgrammeEntryId("a"), other=ProgrammeEntryId("b")
+                ),
+            ),
         ),
     )
-    assert suggest_comparisons(req, frozenset({"a"})) == ()
+    assert suggest_comparisons(req, frozenset({ScreeningId("a")})) == ()
 
 
 def test_suggestions_are_limited():
@@ -114,7 +133,7 @@ def test_suggestions_are_limited():
         screening("b", "15:00", "17:00"),
         screening("c", "15:30", "17:00"),
     )
-    assert len(suggest_comparisons(req, frozenset({"a"}), limit=1)) == 1
+    assert len(suggest_comparisons(req, frozenset({ScreeningId("a")}), limit=1)) == 1
 
 
 def test_ended_screenings_make_their_films_seen_unless_dismissed():
@@ -125,5 +144,7 @@ def test_ended_screenings_make_their_films_seen_unless_dismissed():
         withdrawn(screening("gone", "10:00", "12:00")),
     ]
     entries = {s.programme_entry_id: entry(s.programme_entry_id) for s in screenings}
-    seen = inferred_seen(screenings, entries, frozenset({"dismissed"}), at("13:00"))
+    seen = inferred_seen(
+        screenings, entries, frozenset({ScreeningId("dismissed")}), at("13:00")
+    )
     assert seen == frozenset({"film-past"})

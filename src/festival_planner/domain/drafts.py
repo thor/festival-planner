@@ -1,6 +1,7 @@
 """Drafts and accepted Schedules."""
 
 import enum
+from typing import NewType
 
 from pydantic import AwareDatetime
 
@@ -11,8 +12,8 @@ from .solving import ScheduledScreening
 from .users import UserId
 from .values import Value
 
-DraftId = str
-ScheduleId = str
+DraftId = NewType("DraftId", str)
+ScheduleId = NewType("ScheduleId", str)
 
 
 class DraftStatus(enum.StrEnum):

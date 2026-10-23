@@ -12,15 +12,18 @@ from festival_planner.domain.change_sets import (
     SetDateRange,
     SetYearWeight,
 )
+from festival_planner.domain.programme import ProgrammeEntryId, ScreeningId, VenueId
 
 
 def test_change_sets_round_trip_through_json_by_kind():
     change_set = ChangeSet(
         items=(
-            AddScreeningCommitment(screening_id="s"),
+            AddScreeningCommitment(screening_id=ScreeningId("s")),
             SetYearWeight(year=2025, weight=0.2),
-            SetBuffer(venue_id="v", minutes=5),
-            RecordComparison(preferred="a", other="b"),
+            SetBuffer(venue_id=VenueId("v"), minutes=5),
+            RecordComparison(
+                preferred=ProgrammeEntryId("a"), other=ProgrammeEntryId("b")
+            ),
         )
     )
     dumped = change_set.model_dump_json()

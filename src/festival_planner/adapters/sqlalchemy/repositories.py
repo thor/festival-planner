@@ -12,13 +12,17 @@ from collections.abc import Iterable, Mapping
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from ...domain.festival import Festival, FestivalId, FestivalSeries
+from ...domain.festival import Festival, FestivalId, FestivalSeries, FestivalSeriesId
 from ...domain.programme import (
     Event,
     Film,
+    FilmId,
     ProgrammeEntry,
+    ProgrammeEntryId,
     Screening,
+    ScreeningId,
     Venue,
+    VenueId,
     title_key,
 )
 from ...domain.travel import Route
@@ -67,7 +71,9 @@ class SqlAlchemyFestivalRepository:
         return (
             None
             if row is None
-            else FestivalSeries(id=row.id, slug=row.slug, name=row.name)
+            else FestivalSeries(
+                id=FestivalSeriesId(row.id), slug=row.slug, name=row.name
+            )
         )
 
     def save_series(self, series: FestivalSeries) -> None:
@@ -81,13 +87,15 @@ class SqlAlchemyFestivalRepository:
 
 def _festival(row: FestivalRow) -> Festival:
     return Festival(
-        id=row.id,
+        id=FestivalId(row.id),
         slug=row.slug,
         name=row.name,
         start_date=row.start_date,
         end_date=row.end_date,
         time_zone=row.time_zone,
-        series_id=row.series_id,
+        series_id=FestivalSeriesId(row.series_id)
+        if row.series_id is not None
+        else None,
     )
 
 
@@ -99,7 +107,7 @@ class SqlAlchemyVenueRepository:
         rows = self._session.scalars(select(VenueRow).order_by(VenueRow.name))
         return tuple(
             Venue(
-                id=row.id,
+                id=VenueId(row.id),
                 name=row.name,
                 aliases=frozenset(a.alias for a in row.aliases),
             )
@@ -134,8 +142,8 @@ class SqlAlchemyRouteRepository:
         )
         return tuple(
             Route(
-                from_venue_id=row.from_venue_id,
-                to_venue_id=row.to_venue_id,
+                from_venue_id=VenueId(row.from_venue_id),
+                to_venue_id=VenueId(row.to_venue_id),
                 mode=row.mode,
                 minutes=row.minutes,
             )
@@ -168,11 +176,19 @@ class SqlAlchemyFilmRepository:
             .order_by(FilmRow.id)
             .limit(1)
         ).first()
-        return None if row is None else Film(id=row.id, title=row.title, year=row.year)
+        return (
+            None
+            if row is None
+            else Film(id=FilmId(row.id), title=row.title, year=row.year)
+        )
 
-    def by_id(self, film_id: str) -> Film | None:
+    def by_id(self, film_id: FilmId) -> Film | None:
         row = self._session.get(FilmRow, film_id)
-        return None if row is None else Film(id=row.id, title=row.title, year=row.year)
+        return (
+            None
+            if row is None
+            else Film(id=FilmId(row.id), title=row.title, year=row.year)
+        )
 
     def save(self, film: Film) -> None:
         row = self._session.get(FilmRow, film.id) or FilmRow(id=film.id)
@@ -197,7 +213,9 @@ class SqlAlchemyProgrammeRepository:
         )
         return {row.source_key: _entry(row) for row in rows}
 
-    def entries_by_id(self, ids: Iterable[str]) -> tuple[ProgrammeEntry, ...]:
+    def entries_by_id(
+        self, ids: Iterable[ProgrammeEntryId]
+    ) -> tuple[ProgrammeEntry, ...]:
         rows = self._session.scalars(
             select(ProgrammeEntryRow)
             .where(ProgrammeEntryRow.id.in_(sorted(set(ids))))
@@ -205,7 +223,7 @@ class SqlAlchemyProgrammeRepository:
         )
         return tuple(_entry(row) for row in rows)
 
-    def screenings_by_id(self, ids: Iterable[str]) -> tuple[Screening, ...]:
+    def screenings_by_id(self, ids: Iterable[ScreeningId]) -> tuple[Screening, ...]:
         rows = self._session.scalars(
             select(ScreeningRow)
             .where(ScreeningRow.id.in_(sorted(set(ids))))
@@ -266,8 +284,8 @@ class SqlAlchemyProgrammeRepository:
 
 def _entry(row: ProgrammeEntryRow) -> ProgrammeEntry:
     return ProgrammeEntry(
-        id=row.id,
-        film_id=row.film_id,
+        id=ProgrammeEntryId(row.id),
+        film_id=FilmId(row.film_id),
         title=row.title,
         year=row.year,
         country=row.country,
@@ -277,9 +295,9 @@ def _entry(row: ProgrammeEntryRow) -> ProgrammeEntry:
 
 def _screening(row: ScreeningRow) -> Screening:
     return Screening(
-        id=row.id,
-        programme_entry_id=row.programme_entry_id,
-        venue_id=row.venue_id,
+        id=ScreeningId(row.id),
+        programme_entry_id=ProgrammeEntryId(row.programme_entry_id),
+        venue_id=VenueId(row.venue_id),
         start_time=row.start_time,
         end_time=row.end_time,
         auditorium=row.auditorium,

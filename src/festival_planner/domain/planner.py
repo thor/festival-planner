@@ -6,7 +6,7 @@ import logging
 from collections.abc import Callable
 
 from .change_sets import ChangeSet, ProgrammeIndex, apply, check, rebase
-from .drafts import Draft, DraftId, DraftStatus, Schedule
+from .drafts import Draft, DraftId, DraftStatus, Schedule, ScheduleId
 from .festival import Festival, FestivalId
 from .ingestion import new_id as _new_id
 from .insights import (
@@ -97,7 +97,7 @@ class Planner:
                 _programme_index(uow, festival.id),
             )
             draft = Draft(
-                id=self._new_id(),
+                id=DraftId(self._new_id()),
                 user_id=user_id,
                 festival_id=festival.id,
                 change_set=change_set,
@@ -155,7 +155,7 @@ class Planner:
                 )
             inputs = uow.planning.inputs(user_id, draft.festival_id)
             schedule = Schedule(
-                id=self._new_id(),
+                id=ScheduleId(self._new_id()),
                 user_id=user_id,
                 festival_id=draft.festival_id,
                 # The number follows the Active Schedule this Draft is based

@@ -1,6 +1,6 @@
 from festival_planner.adapters.solver.cpsat import CpSatScheduleSolver
 from festival_planner.domain.planning import Preferences
-from festival_planner.domain.programme import Event
+from festival_planner.domain.programme import Event, ProgrammeEntryId, VenueId
 from festival_planner.domain.solving import ScheduleSolver, SolveStatus
 from festival_planner.domain.tests.builders import at, request, screening
 from festival_planner.domain.travel import DEFAULT_TRANSPORT_MODE, Route
@@ -32,7 +32,7 @@ def test_prefers_higher_weight_among_conflicting_screenings():
             screening("a", "14:00", "16:00"),
             screening("b", "15:00", "17:00"),
             preferences=Preferences(
-                buffer_minutes=0, programme_entry_weights={"b": 2.0}
+                buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("b"): 2.0}
             ),
         )
     )
@@ -46,7 +46,7 @@ def test_screening_commitment_wins_over_higher_weight():
             screening("a", "14:00", "16:00"),
             screening("b", "15:00", "17:00"),
             preferences=Preferences(
-                buffer_minutes=0, programme_entry_weights={"b": 2.0}
+                buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("b"): 2.0}
             ),
             screening_commitments=frozenset({"a"}),
         )
@@ -82,7 +82,7 @@ def test_negative_weight_screenings_are_left_out():
         request(
             screening("a", "14:00", "16:00"),
             preferences=Preferences(
-                buffer_minutes=0, programme_entry_weights={"a": -1.0}
+                buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("a"): -1.0}
             ),
         )
     )
@@ -93,7 +93,9 @@ def test_arrival_time_uses_venue_buffer():
     result = solver.solve(
         request(
             screening("a", "14:00", "16:00", venue="A"),
-            preferences=Preferences(buffer_minutes=15, venue_buffer_minutes={"A": 25}),
+            preferences=Preferences(
+                buffer_minutes=15, venue_buffer_minutes={VenueId("A"): 25}
+            ),
         )
     )
     assert result.scheduled[0].arrival_time == at("13:35")
@@ -130,10 +132,16 @@ def test_identical_requests_give_identical_schedules():
     ]
     routes = (
         Route(
-            from_venue_id="A", to_venue_id="B", mode=DEFAULT_TRANSPORT_MODE, minutes=10
+            from_venue_id=VenueId("A"),
+            to_venue_id=VenueId("B"),
+            mode=DEFAULT_TRANSPORT_MODE,
+            minutes=10,
         ),
         Route(
-            from_venue_id="B", to_venue_id="A", mode=DEFAULT_TRANSPORT_MODE, minutes=10
+            from_venue_id=VenueId("B"),
+            to_venue_id=VenueId("A"),
+            mode=DEFAULT_TRANSPORT_MODE,
+            minutes=10,
         ),
     )
     first = solver.solve(request(*screenings, routes=routes))
@@ -168,7 +176,7 @@ def test_tie_break_never_costs_score():
             screening("a", "14:00", "16:00"),
             screening("b", "15:00", "17:00"),
             preferences=Preferences(
-                buffer_minutes=0, programme_entry_weights={"a": 2.0}
+                buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("a"): 2.0}
             ),
             active_schedule=frozenset({"b"}),
         )
@@ -183,7 +191,7 @@ def test_tie_break_leaves_out_zero_weight_screenings_not_in_the_active_schedule(
             screening("a", "14:00", "16:00"),
             screening("z", "18:00", "20:00"),
             preferences=Preferences(
-                buffer_minutes=0, programme_entry_weights={"z": 0.0}
+                buffer_minutes=0, programme_entry_weights={ProgrammeEntryId("z"): 0.0}
             ),
         )
     )

@@ -7,15 +7,30 @@ from collections.abc import Callable, Iterable, Mapping
 from types import TracebackType
 from typing import Self
 
-from festival_planner.domain.drafts import Draft, DraftStatus, Schedule
-from festival_planner.domain.festival import Festival, FestivalSeries
+from festival_planner.domain.drafts import (
+    Draft,
+    DraftId,
+    DraftStatus,
+    Schedule,
+    ScheduleId,
+)
+from festival_planner.domain.festival import (
+    Festival,
+    FestivalId,
+    FestivalSeries,
+    FestivalSeriesId,
+)
 from festival_planner.domain.planning import PlanningInputs, Ticket
 from festival_planner.domain.planning_ports import ConflictError
 from festival_planner.domain.programme import (
     Film,
+    FilmId,
     ProgrammeEntry,
+    ProgrammeEntryId,
     Screening,
+    ScreeningId,
     Venue,
+    VenueId,
     title_key,
 )
 from festival_planner.domain.solving import (
@@ -26,7 +41,7 @@ from festival_planner.domain.solving import (
     formulate,
 )
 from festival_planner.domain.travel import Route
-from festival_planner.domain.users import User
+from festival_planner.domain.users import User, UserId
 
 
 def sequential_ids() -> Callable[[], str]:
@@ -37,21 +52,23 @@ def sequential_ids() -> Callable[[], str]:
 
 class _State:
     def __init__(self) -> None:
-        self.series: dict[str, FestivalSeries] = {}
-        self.festivals: dict[str, Festival] = {}
-        self.venues: dict[str, Venue] = {}
+        self.series: dict[FestivalSeriesId, FestivalSeries] = {}
+        self.festivals: dict[FestivalId, Festival] = {}
+        self.venues: dict[VenueId, Venue] = {}
         self.routes: list[Route] = []
-        self.films: dict[str, Film] = {}
-        self.entries: dict[str, tuple[str, str, ProgrammeEntry]] = {}
+        self.films: dict[FilmId, Film] = {}
+        self.entries: dict[
+            ProgrammeEntryId, tuple[FestivalId, str, ProgrammeEntry]
+        ] = {}
         """entry id -> (festival id, source key, entry)"""
-        self.screenings: dict[str, Screening] = {}
-        self.users: dict[str, User] = {}
-        self.inputs: dict[tuple[str, str], PlanningInputs] = {}
-        self.schedules: dict[str, Schedule] = {}
-        self.drafts: dict[str, Draft] = {}
-        self.tickets: dict[tuple[str, str], Ticket] = {}
-        self.seen: set[tuple[str, str]] = set()
-        self.dismissals: set[tuple[str, str]] = set()
+        self.screenings: dict[ScreeningId, Screening] = {}
+        self.users: dict[UserId, User] = {}
+        self.inputs: dict[tuple[UserId, FestivalId], PlanningInputs] = {}
+        self.schedules: dict[ScheduleId, Schedule] = {}
+        self.drafts: dict[DraftId, Draft] = {}
+        self.tickets: dict[tuple[UserId, ScreeningId], Ticket] = {}
+        self.seen: set[tuple[UserId, FilmId]] = set()
+        self.dismissals: set[tuple[UserId, ScreeningId]] = set()
 
 
 Hook = Callable[[_State], None]
@@ -114,7 +131,7 @@ class _Festivals:
     def __init__(self, state: _State) -> None:
         self.s = state
 
-    def by_id(self, festival_id: str) -> Festival | None:
+    def by_id(self, festival_id: FestivalId) -> Festival | None:
         return self.s.festivals.get(festival_id)
 
     def by_slug(self, slug: str) -> Festival | None:
@@ -156,7 +173,7 @@ class _Films:
     def __init__(self, state: _State) -> None:
         self.s = state
 
-    def by_id(self, film_id: str) -> Film | None:
+    def by_id(self, film_id: FilmId) -> Film | None:
         return self.s.films.get(film_id)
 
     def find(self, title: str, year: int) -> Film | None:
@@ -177,15 +194,15 @@ class _Programme:
     def __init__(self, state: _State) -> None:
         self.s = state
 
-    def entries(self, festival_id: str) -> Mapping[str, ProgrammeEntry]:
+    def entries(self, festival_id: FestivalId) -> Mapping[str, ProgrammeEntry]:
         return {key: e for fid, key, e in self.s.entries.values() if fid == festival_id}
 
     def save_entry(
-        self, festival_id: str, source_key: str, entry: ProgrammeEntry
+        self, festival_id: FestivalId, source_key: str, entry: ProgrammeEntry
     ) -> None:
         self.s.entries[entry.id] = (festival_id, source_key, entry)
 
-    def screenings(self, festival_id: str) -> tuple[Screening, ...]:
+    def screenings(self, festival_id: FestivalId) -> tuple[Screening, ...]:
         ids = {e.id for fid, _, e in self.s.entries.values() if fid == festival_id}
         return tuple(
             s for s in self.s.screenings.values() if s.programme_entry_id in ids
@@ -194,12 +211,14 @@ class _Programme:
     def save_screening(self, screening: Screening) -> None:
         self.s.screenings[screening.id] = screening
 
-    def screenings_by_id(self, ids: Iterable[str]) -> tuple[Screening, ...]:
+    def screenings_by_id(self, ids: Iterable[ScreeningId]) -> tuple[Screening, ...]:
         return tuple(
             self.s.screenings[i] for i in sorted(set(ids)) if i in self.s.screenings
         )
 
-    def entries_by_id(self, ids: Iterable[str]) -> tuple[ProgrammeEntry, ...]:
+    def entries_by_id(
+        self, ids: Iterable[ProgrammeEntryId]
+    ) -> tuple[ProgrammeEntry, ...]:
         return tuple(
             self.s.entries[i][2] for i in sorted(set(ids)) if i in self.s.entries
         )
@@ -235,16 +254,18 @@ class _Planning:
         self.s = state
         self._fire = fire
 
-    def inputs(self, user_id: str, festival_id: str) -> PlanningInputs:
+    def inputs(self, user_id: UserId, festival_id: FestivalId) -> PlanningInputs:
         self._fire("planning.inputs")
         return self.s.inputs.get((user_id, festival_id), PlanningInputs())
 
     def save_inputs(
-        self, user_id: str, festival_id: str, inputs: PlanningInputs
+        self, user_id: UserId, festival_id: FestivalId, inputs: PlanningInputs
     ) -> None:
         self.s.inputs[user_id, festival_id] = inputs
 
-    def schedules(self, user_id: str, festival_id: str) -> tuple[Schedule, ...]:
+    def schedules(
+        self, user_id: UserId, festival_id: FestivalId
+    ) -> tuple[Schedule, ...]:
         return tuple(
             sorted(
                 (
@@ -256,11 +277,13 @@ class _Planning:
             )
         )
 
-    def active_schedule(self, user_id: str, festival_id: str) -> Schedule | None:
+    def active_schedule(
+        self, user_id: UserId, festival_id: FestivalId
+    ) -> Schedule | None:
         history = self.schedules(user_id, festival_id)
         return history[-1] if history else None
 
-    def active_schedules(self, user_id: str) -> tuple[Schedule, ...]:
+    def active_schedules(self, user_id: UserId) -> tuple[Schedule, ...]:
         festivals = sorted(
             {s.festival_id for s in self.s.schedules.values() if s.user_id == user_id}
         )
@@ -277,10 +300,10 @@ class _Planning:
             raise ConflictError(f"Schedule number {schedule.number} exists")
         self.s.schedules[schedule.id] = schedule
 
-    def draft(self, draft_id: str, *, for_update: bool = False) -> Draft | None:
+    def draft(self, draft_id: DraftId, *, for_update: bool = False) -> Draft | None:
         return self.s.drafts.get(draft_id)
 
-    def drafts(self, user_id: str, festival_id: str) -> tuple[Draft, ...]:
+    def drafts(self, user_id: UserId, festival_id: FestivalId) -> tuple[Draft, ...]:
         return tuple(
             sorted(
                 (
@@ -300,7 +323,7 @@ class _Planning:
     def save_draft(self, draft: Draft) -> None:
         self.s.drafts[draft.id] = draft
 
-    def delete_draft(self, draft_id: str) -> None:
+    def delete_draft(self, draft_id: DraftId) -> None:
         self.s.drafts.pop(draft_id, None)
 
 
@@ -308,13 +331,13 @@ class _Tickets:
     def __init__(self, state: _State) -> None:
         self.s = state
 
-    def tickets(self, user_id: str) -> tuple[Ticket, ...]:
+    def tickets(self, user_id: UserId) -> tuple[Ticket, ...]:
         return tuple(t for (u, _), t in sorted(self.s.tickets.items()) if u == user_id)
 
-    def save(self, user_id: str, ticket: Ticket) -> None:
+    def save(self, user_id: UserId, ticket: Ticket) -> None:
         self.s.tickets[user_id, ticket.screening_id] = ticket
 
-    def delete(self, user_id: str, screening_id: str) -> None:
+    def delete(self, user_id: UserId, screening_id: ScreeningId) -> None:
         self.s.tickets.pop((user_id, screening_id), None)
 
 
@@ -322,22 +345,22 @@ class _Seen:
     def __init__(self, state: _State) -> None:
         self.s = state
 
-    def films(self, user_id: str) -> frozenset[str]:
+    def films(self, user_id: UserId) -> frozenset[FilmId]:
         return frozenset(f for u, f in self.s.seen if u == user_id)
 
-    def mark(self, user_id: str, film_id: str) -> None:
+    def mark(self, user_id: UserId, film_id: FilmId) -> None:
         self.s.seen.add((user_id, film_id))
 
-    def unmark(self, user_id: str, film_id: str) -> None:
+    def unmark(self, user_id: UserId, film_id: FilmId) -> None:
         self.s.seen.discard((user_id, film_id))
 
-    def dismissals(self, user_id: str) -> frozenset[str]:
+    def dismissals(self, user_id: UserId) -> frozenset[ScreeningId]:
         return frozenset(s for u, s in self.s.dismissals if u == user_id)
 
-    def dismiss(self, user_id: str, screening_id: str) -> None:
+    def dismiss(self, user_id: UserId, screening_id: ScreeningId) -> None:
         self.s.dismissals.add((user_id, screening_id))
 
-    def restore(self, user_id: str, screening_id: str) -> None:
+    def restore(self, user_id: UserId, screening_id: ScreeningId) -> None:
         self.s.dismissals.discard((user_id, screening_id))
 
 
@@ -351,7 +374,7 @@ class GreedySolver:
             return SolveResult(status=SolveStatus.INFEASIBLE, reasons=f.unsatisfiable)
         conflicts = set(f.conflicts) | {(b, a) for a, b in f.conflicts}
         groups = [*f.exactly_one, *f.at_most_one]
-        chosen: list[str] = []
+        chosen: list[ScreeningId] = []
         for s in sorted(
             f.candidates, key=lambda s: (s.id not in f.required, -f.weights[s.id], s.id)
         ):

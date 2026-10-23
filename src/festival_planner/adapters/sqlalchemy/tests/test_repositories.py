@@ -6,37 +6,51 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from festival_planner.adapters.sqlalchemy.unit_of_work import SqlAlchemyUnitOfWork
-from festival_planner.domain.festival import Festival, FestivalSeries
+from festival_planner.domain.festival import (
+    Festival,
+    FestivalId,
+    FestivalSeries,
+    FestivalSeriesId,
+)
 from festival_planner.domain.programme import (
     Event,
     Film,
+    FilmId,
     ProgrammeEntry,
+    ProgrammeEntryId,
     Screening,
+    ScreeningId,
     Venue,
+    VenueId,
 )
 from festival_planner.domain.travel import Route
 
 OSLO = zoneinfo.ZoneInfo("Europe/Oslo")
 T18 = datetime.datetime(2025, 11, 8, 18, 0, tzinfo=OSLO)
-SERIES = FestivalSeries(id="s", slug="fests", name="Fests")
+SERIES = FestivalSeries(id=FestivalSeriesId("s"), slug="fests", name="Fests")
 FESTIVAL = Festival(
-    id="f",
+    id=FestivalId("f"),
     slug="fests-2025",
     name="Fests 2025",
     start_date=datetime.date(2025, 11, 6),
     end_date=datetime.date(2025, 11, 16),
     time_zone="Europe/Oslo",
-    series_id="s",
+    series_id=FestivalSeriesId("s"),
 )
-VIKA = Venue(id="vika", name="Vika", aliases=frozenset({"Vika Kino", "vika"}))
-FILM = Film(id="m", title="Fallen Leaves", year=2023)
+VIKA = Venue(id=VenueId("vika"), name="Vika", aliases=frozenset({"Vika Kino", "vika"}))
+FILM = Film(id=FilmId("m"), title="Fallen Leaves", year=2023)
 ENTRY = ProgrammeEntry(
-    id="e", film_id="m", title="Fallen Leaves", year=2023, country="FI", url="https://x"
+    id=ProgrammeEntryId("e"),
+    film_id=FilmId("m"),
+    title="Fallen Leaves",
+    year=2023,
+    country="FI",
+    url="https://x",
 )
 SCREENING = Screening(
-    id="sc",
-    programme_entry_id="e",
-    venue_id="vika",
+    id=ScreeningId("sc"),
+    programme_entry_id=ProgrammeEntryId("e"),
+    venue_id=VenueId("vika"),
     start_time=T18,
     end_time=T18 + datetime.timedelta(hours=2),
     auditorium="3",
@@ -58,7 +72,7 @@ def stored(engine):
         uow.festivals.save(FESTIVAL)
         uow.venues.save(VIKA)
         uow.films.save(FILM)
-        uow.programme.save_entry("f", "film/fallen-leaves", ENTRY)
+        uow.programme.save_entry(FestivalId("f"), "film/fallen-leaves", ENTRY)
         uow.programme.save_screening(SCREENING)
         uow.commit()
     return engine
@@ -102,16 +116,26 @@ def test_saving_an_unchanged_venue_is_harmless(stored):
 
 def test_venues_are_ordered_by_name(stored):
     with SqlAlchemyUnitOfWork(stored) as uow:
-        uow.venues.save(Venue(id="a", name="Amalie"))
+        uow.venues.save(Venue(id=VenueId("a"), name="Amalie"))
         uow.commit()
     names = read(stored, lambda uow: [v.name for v in uow.venues.all()])
     assert names == ["Amalie", "Vika"]
 
 
 def test_routes_are_replaced_wholesale(stored):
-    vega = Venue(id="vega", name="Vega")
-    first = Route(from_venue_id="vika", to_venue_id="vega", mode="walk", minutes=15)
-    second = Route(from_venue_id="vega", to_venue_id="vika", mode="walk", minutes=16)
+    vega = Venue(id=VenueId("vega"), name="Vega")
+    first = Route(
+        from_venue_id=VenueId("vika"),
+        to_venue_id=VenueId("vega"),
+        mode="walk",
+        minutes=15,
+    )
+    second = Route(
+        from_venue_id=VenueId("vega"),
+        to_venue_id=VenueId("vika"),
+        mode="walk",
+        minutes=16,
+    )
     for routes in ([first], [second]):
         with SqlAlchemyUnitOfWork(stored) as uow:
             uow.venues.save(vega)
@@ -121,9 +145,14 @@ def test_routes_are_replaced_wholesale(stored):
 
 
 def test_routes_can_be_replaced_by_themselves_after_reading(stored):
-    route = Route(from_venue_id="vika", to_venue_id="vega", mode="walk", minutes=15)
+    route = Route(
+        from_venue_id=VenueId("vika"),
+        to_venue_id=VenueId("vega"),
+        mode="walk",
+        minutes=15,
+    )
     with SqlAlchemyUnitOfWork(stored) as uow:
-        uow.venues.save(Venue(id="vega", name="Vega"))
+        uow.venues.save(Venue(id=VenueId("vega"), name="Vega"))
         uow.routes.replace_all([route])
         uow.commit()
     with SqlAlchemyUnitOfWork(stored) as uow:
@@ -138,24 +167,24 @@ def test_films_are_found_by_normalised_title_and_year(stored):
 
 
 def test_entries_are_keyed_by_source_key_per_festival(stored):
-    assert read(stored, lambda uow: uow.programme.entries("f")) == {
+    assert read(stored, lambda uow: uow.programme.entries(FestivalId("f"))) == {
         "film/fallen-leaves": ENTRY
     }
-    assert read(stored, lambda uow: uow.programme.entries("other")) == {}
+    assert read(stored, lambda uow: uow.programme.entries(FestivalId("other"))) == {}
 
 
 def test_saving_an_entry_again_updates_it(stored):
     changed = ENTRY.model_copy(update={"country": "SE", "url": None})
     with SqlAlchemyUnitOfWork(stored) as uow:
-        uow.programme.save_entry("f", "film/fallen-leaves", changed)
+        uow.programme.save_entry(FestivalId("f"), "film/fallen-leaves", changed)
         uow.commit()
-    assert read(stored, lambda uow: uow.programme.entries("f")) == {
+    assert read(stored, lambda uow: uow.programme.entries(FestivalId("f"))) == {
         "film/fallen-leaves": changed
     }
 
 
 def test_screenings_round_trip_with_events_as_utc_instants(stored):
-    [screening] = read(stored, lambda uow: uow.programme.screenings("f"))
+    [screening] = read(stored, lambda uow: uow.programme.screenings(FestivalId("f")))
     assert screening == SCREENING
     assert screening.start_time.tzinfo == datetime.UTC
     event_start = screening.events[1].start_time
@@ -163,7 +192,7 @@ def test_screenings_round_trip_with_events_as_utc_instants(stored):
 
 
 def test_screenings_belong_to_their_festival(stored):
-    assert read(stored, lambda uow: uow.programme.screenings("other")) == ()
+    assert read(stored, lambda uow: uow.programme.screenings(FestivalId("other"))) == ()
 
 
 def test_saving_a_screening_replaces_its_events_and_keeps_withdrawn(stored):
@@ -173,11 +202,13 @@ def test_saving_a_screening_replaces_its_events_and_keeps_withdrawn(stored):
     with SqlAlchemyUnitOfWork(stored) as uow:
         uow.programme.save_screening(changed)
         uow.commit()
-    assert read(stored, lambda uow: uow.programme.screenings("f")) == (changed,)
+    assert read(stored, lambda uow: uow.programme.screenings(FestivalId("f"))) == (
+        changed,
+    )
 
 
 def test_a_second_screening_with_the_same_natural_key_is_rejected(stored):
     with SqlAlchemyUnitOfWork(stored) as uow, pytest.raises(IntegrityError):
         uow.programme.save_screening(
-            SCREENING.model_copy(update={"id": "other", "events": ()})
+            SCREENING.model_copy(update={"id": ScreeningId("other"), "events": ()})
         )

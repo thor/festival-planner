@@ -6,6 +6,7 @@ from festival_planner.adapters.yaml_files.solve_request import (
     screening_id,
 )
 from festival_planner.config import Config, FilmPreferences
+from festival_planner.domain.programme import VenueId
 from festival_planner.models import (
     CinemaConfig,
     Film,
@@ -103,9 +104,12 @@ def test_travel_times_are_symmetric_and_missing_pairs_get_default():
     )
     films = [film("A", 12, "Vika"), film("B", 15, "Vega"), film("C", 18, "Cinemateket")]
     routes = build_solve_request(films, config).routes
-    assert routes.minutes("Vika", "Vega", None) == 15
-    assert routes.minutes("Vega", "Vika", None) == 15
-    assert routes.minutes("Vika", "Cinemateket", None) == LEGACY_DEFAULT_TRAVEL_MINUTES
+    assert routes.minutes(VenueId("Vika"), VenueId("Vega"), None) == 15
+    assert routes.minutes(VenueId("Vega"), VenueId("Vika"), None) == 15
+    assert (
+        routes.minutes(VenueId("Vika"), VenueId("Cinemateket"), None)
+        == LEGACY_DEFAULT_TRAVEL_MINUTES
+    )
 
 
 def test_duplicate_film_rows_are_dropped_keeping_the_first():

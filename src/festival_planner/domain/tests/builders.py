@@ -2,9 +2,19 @@
 
 import datetime
 import zoneinfo
+from collections.abc import Iterable
 
 from festival_planner.domain.planning import Preferences
-from festival_planner.domain.programme import Event, ProgrammeEntry, Screening, Venue
+from festival_planner.domain.programme import (
+    Event,
+    FilmId,
+    ProgrammeEntry,
+    ProgrammeEntryId,
+    Screening,
+    ScreeningId,
+    Venue,
+    VenueId,
+)
 from festival_planner.domain.solving import SolveRequest
 from festival_planner.domain.travel import Route, RouteTable
 
@@ -22,7 +32,12 @@ def at(hhmm: str, day: datetime.date = DAY) -> datetime.datetime:
 def entry(
     id: str, *, film_id: str | None = None, year: int | None = None
 ) -> ProgrammeEntry:
-    return ProgrammeEntry(id=id, film_id=film_id or f"film-{id}", title=id, year=year)
+    return ProgrammeEntry(
+        id=ProgrammeEntryId(id),
+        film_id=FilmId(film_id or f"film-{id}"),
+        title=id,
+        year=year,
+    )
 
 
 def screening(
@@ -36,9 +51,9 @@ def screening(
     events: tuple[Event, ...] = (),
 ) -> Screening:
     return Screening(
-        id=id,
-        programme_entry_id=entry_id or id,
-        venue_id=venue,
+        id=ScreeningId(id),
+        programme_entry_id=ProgrammeEntryId(entry_id or id),
+        venue_id=VenueId(venue),
         start_time=at(start, day),
         end_time=at(end, day),
         events=events,
@@ -51,7 +66,14 @@ def request(
     routes: tuple[Route, ...] = (),
     preferences: Preferences | None = None,
     time_zone: str = ZONE,
-    **kwargs,
+    screening_commitments: Iterable[str] = (),
+    film_commitments: Iterable[str] = (),
+    excluded_screenings: Iterable[str] = (),
+    excluded_programme_entries: Iterable[str] = (),
+    seen_films: Iterable[str] = (),
+    active_schedule: Iterable[str] = (),
+    now: datetime.datetime | None = None,
+    time_limit_seconds: float = 60.0,
 ) -> SolveRequest:
     """A SolveRequest whose entries default to one per distinct entry id."""
     if entries is None:
@@ -65,5 +87,14 @@ def request(
         time_zone=time_zone,
         routes=RouteTable(routes=routes),
         preferences=preferences or Preferences(buffer_minutes=0),
-        **kwargs,
+        screening_commitments=frozenset(ScreeningId(i) for i in screening_commitments),
+        film_commitments=frozenset(ProgrammeEntryId(i) for i in film_commitments),
+        excluded_screenings=frozenset(ScreeningId(i) for i in excluded_screenings),
+        excluded_programme_entries=frozenset(
+            ProgrammeEntryId(i) for i in excluded_programme_entries
+        ),
+        seen_films=frozenset(FilmId(i) for i in seen_films),
+        active_schedule=frozenset(ScreeningId(i) for i in active_schedule),
+        now=now,
+        time_limit_seconds=time_limit_seconds,
     )

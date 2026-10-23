@@ -13,13 +13,17 @@ from typing import Protocol, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
-from .festival import Festival, FestivalId, FestivalSeries
+from .festival import Festival, FestivalId, FestivalSeries, FestivalSeriesId
 from .programme import (
     Event,
     Film,
+    FilmId,
     ProgrammeEntry,
+    ProgrammeEntryId,
     Screening,
+    ScreeningId,
     Venue,
+    VenueId,
     title_key,
     venue_name_key,
 )
@@ -142,7 +146,7 @@ class RouteRepository(Protocol):
 
 
 class FilmRepository(Protocol):
-    def by_id(self, film_id: str) -> Film | None: ...
+    def by_id(self, film_id: FilmId) -> Film | None: ...
     def find(self, title: str, year: int) -> Film | None:
         """A Film whose `title_key` and year match, if any."""
         ...
@@ -167,11 +171,13 @@ class ProgrammeRepository(Protocol):
         """Insert or update by id, replacing the Events."""
         ...
 
-    def screenings_by_id(self, ids: Iterable[str]) -> tuple[Screening, ...]:
+    def screenings_by_id(self, ids: Iterable[ScreeningId]) -> tuple[Screening, ...]:
         """The Screenings with these ids, in any Festival; unknown ids are skipped."""
         ...
 
-    def entries_by_id(self, ids: Iterable[str]) -> tuple[ProgrammeEntry, ...]:
+    def entries_by_id(
+        self, ids: Iterable[ProgrammeEntryId]
+    ) -> tuple[ProgrammeEntry, ...]:
         """The Programme Entries with these ids; unknown ids are skipped."""
         ...
 
@@ -293,7 +299,7 @@ def ingest_venues(
             key = venue_name_key(described.name)
             old = existing.get(key)
             venue = Venue(
-                id=old.id if old else new_id(),
+                id=old.id if old else VenueId(new_id()),
                 name=described.name,
                 aliases=described.aliases,
             )
@@ -315,7 +321,7 @@ def ingest_venues(
         ]
         if unknown:
             raise UnknownVenuesError(unknown)
-        routes: dict[tuple[str, str, TransportMode], Route] = {}
+        routes: dict[tuple[VenueId, VenueId, TransportMode], Route] = {}
         for r in source_routes:
             a, b = directory.resolve(r.from_venue), directory.resolve(r.to_venue)
             assert a is not None and b is not None
@@ -371,12 +377,12 @@ def ingest_programme(
             raise UnknownVenuesError(unknown)
         festival = _store_festival(uow, programme, new_id)
 
-        def film_for(entry: SourceEntry) -> str:
+        def film_for(entry: SourceEntry) -> FilmId:
             if entry.year is not None and (
                 film := uow.films.find(entry.title, entry.year)
             ):
                 return film.id
-            film = Film(id=new_id(), title=entry.title, year=entry.year)
+            film = Film(id=FilmId(new_id()), title=entry.title, year=entry.year)
             uow.films.save(film)
             counts["films_created"] += 1
             return film.id
@@ -386,7 +392,7 @@ def ingest_programme(
             (s.programme_entry_id, s.venue_id, s.start_time): s
             for s in uow.programme.screenings(festival.id)
         }
-        current: set[tuple[str, str, datetime.datetime]] = set()
+        current: set[tuple[ProgrammeEntryId, VenueId, datetime.datetime]] = set()
         for described in programme.entries:
             old = stored_entries.get(described.source_key)
             same_work = old is not None and (title_key(old.title), old.year) == (
@@ -394,7 +400,7 @@ def ingest_programme(
                 described.year,
             )
             entry = ProgrammeEntry(
-                id=old.id if old else new_id(),
+                id=old.id if old else ProgrammeEntryId(new_id()),
                 film_id=old.film_id if old and same_work else film_for(described),
                 title=described.title,
                 year=described.year,
@@ -413,7 +419,7 @@ def ingest_programme(
                 current.add(key)
                 previous = stored_screenings.get(key)
                 screening = Screening(
-                    id=previous.id if previous else new_id(),
+                    id=previous.id if previous else ScreeningId(new_id()),
                     programme_entry_id=entry.id,
                     venue_id=venue.id,
                     start_time=s.start_time,
@@ -446,7 +452,7 @@ def _store_festival(
     if described.series:
         old_series = uow.festivals.series_by_slug(described.series.slug)
         series = FestivalSeries(
-            id=old_series.id if old_series else new_id(),
+            id=old_series.id if old_series else FestivalSeriesId(new_id()),
             slug=described.series.slug,
             name=described.series.name,
         )
@@ -468,7 +474,7 @@ def _store_festival(
         )
     old = uow.festivals.by_slug(described.slug)
     festival = Festival(
-        id=old.id if old else new_id(),
+        id=old.id if old else FestivalId(new_id()),
         slug=described.slug,
         name=described.name,
         start_date=start,

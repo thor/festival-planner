@@ -13,7 +13,7 @@ from festival_planner.domain.ingestion import (
     UnknownVenuesError,
     ingest_programme,
 )
-from festival_planner.domain.programme import Event, Venue
+from festival_planner.domain.programme import Event, Venue, VenueId
 
 from .builders import at
 from .fakes import InMemoryUnitOfWork
@@ -61,8 +61,10 @@ def entry(
 def uow():
     uow = InMemoryUnitOfWork()
     uow.stored.venues = {
-        "vika": Venue(id="vika", name="Vika", aliases=frozenset({"Vika Kino"})),
-        "vega": Venue(id="vega", name="Vega"),
+        VenueId("vika"): Venue(
+            id=VenueId("vika"), name="Vika", aliases=frozenset({"Vika Kino"})
+        ),
+        VenueId("vega"): Venue(id=VenueId("vega"), name="Vega"),
     }
     return uow
 
@@ -185,7 +187,7 @@ def test_source_dates_win_over_screening_dates(uow):
 
 def test_festival_dates_are_festival_local_days():
     uow = InMemoryUnitOfWork()
-    uow.stored.venues = {"vika": Venue(id="vika", name="Vika Kino")}
+    uow.stored.venues = {VenueId("vika"): Venue(id=VenueId("vika"), name="Vika Kino")}
     # 00:30 in Oslo is still the previous day in UTC.
     ingest_programme(
         uow,

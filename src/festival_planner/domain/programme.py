@@ -2,16 +2,16 @@
 
 import datetime
 import unicodedata
-from typing import Self
+from typing import NewType, Self
 
 from pydantic import AwareDatetime, model_validator
 
 from .values import Value
 
-VenueId = str
-FilmId = str
-ProgrammeEntryId = str
-ScreeningId = str
+VenueId = NewType("VenueId", str)
+FilmId = NewType("FilmId", str)
+ProgrammeEntryId = NewType("ProgrammeEntryId", str)
+ScreeningId = NewType("ScreeningId", str)
 
 
 def title_key(title: str) -> str:

@@ -9,7 +9,7 @@ from festival_planner.domain.ingestion import (
     SourceScreening,
     VenueDirectory,
 )
-from festival_planner.domain.programme import Venue
+from festival_planner.domain.programme import Venue, VenueId
 
 from .builders import at
 
@@ -28,14 +28,14 @@ def test_source_screening_cannot_end_before_it_starts():
 
 
 def test_venue_directory_resolves_names_and_aliases():
-    vika = Venue(id="v", name="Vika", aliases=frozenset({"Vika Kino"}))
+    vika = Venue(id=VenueId("v"), name="Vika", aliases=frozenset({"Vika Kino"}))
     directory = VenueDirectory((vika,))
     assert directory.resolve("vika kino") == vika
     assert directory.resolve("Vega") is None
 
 
 def test_venue_directory_rejects_a_name_shared_by_two_venues():
-    a = Venue(id="a", name="Vika", aliases=frozenset({"Kino"}))
-    b = Venue(id="b", name="Vega", aliases=frozenset({"kino"}))
+    a = Venue(id=VenueId("a"), name="Vika", aliases=frozenset({"Kino"}))
+    b = Venue(id=VenueId("b"), name="Vega", aliases=frozenset({"kino"}))
     with pytest.raises(AmbiguousVenueNameError, match="'kino'"):
         VenueDirectory((a, b))
