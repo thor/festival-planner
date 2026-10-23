@@ -162,7 +162,7 @@ export const PlanningQuery = graphql(
           exchangeable
           refundable
           screening {
-            id
+            ...ScreeningFields
           }
         }
         planning(festivalId: $festivalId) {
@@ -199,7 +199,7 @@ export const PlanningQuery = graphql(
             kind
             message
             screening {
-              id
+              ...ScreeningFields
             }
             programmeEntry {
               id

@@ -4,6 +4,8 @@ import { Link } from "react-router"
 import type { WeekVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
+import { Button } from "@/components/ui/button"
+
 import { Page } from "./parts"
 
 export function WeekView({ vm }: { vm: WeekVM }) {
@@ -24,16 +26,7 @@ export function WeekView({ vm }: { vm: WeekVM }) {
         <p className="text-grain">{vm.count} films</p>
       </header>
 
-      {vm.flags.length > 0 && (
-        <ul className="border-b border-ink py-3">
-          {vm.flags.map((f) => (
-            <li key={f} className="flex items-center gap-2">
-              <WarningIcon size={18} weight="light" className="shrink-0" />
-              {f}
-            </li>
-          ))}
-        </ul>
-      )}
+      <Notices vm={vm} />
 
       <div aria-hidden className="relative ml-20 hidden h-8 border-b border-ink md:block">
         {vm.ticks.map((t) => (
@@ -94,5 +87,38 @@ export function WeekView({ vm }: { vm: WeekVM }) {
         ))}
       </ol>
     </Page>
+  )
+}
+
+/** One quiet line per thing to do; details live on the Tickets page. */
+function Notices({ vm }: { vm: WeekVM }) {
+  if (vm.letGo === 0 && vm.problems.length === 0) return null
+  return (
+    <ul className="border-b border-ink">
+      {vm.letGo > 0 && (
+        <li className="border-b border-haze last:border-b-0">
+          <Link to={vm.ticketsHref} className="flex items-center gap-3 py-3 text-stamp hover:underline hover:underline-offset-4">
+            <TicketIcon size={18} weight="light" className="shrink-0" />
+            {vm.letGo} {vm.letGo === 1 ? "ticket" : "tickets"} to let go
+          </Link>
+        </li>
+      )}
+      {vm.problems.map((p) => (
+        <li key={p.id} className="flex items-center justify-between gap-4 border-b border-haze py-2 last:border-b-0">
+          <span className="flex min-w-0 items-center gap-3">
+            <WarningIcon size={18} weight="light" className="shrink-0" />
+            <span className="truncate">{p.title} withdrawn.</span>
+          </span>
+          <Button
+            variant="outline"
+            aria-pressed={p.on}
+            onClick={p.onAct}
+            className={cn("h-9 shrink-0 border-ink px-3 text-base", p.on && "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85")}
+          >
+            {p.action}
+          </Button>
+        </li>
+      ))}
+    </ul>
   )
 }

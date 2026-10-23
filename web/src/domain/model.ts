@@ -59,7 +59,7 @@ export interface ProgrammeEntry {
 }
 
 export interface Ticket {
-  screeningId: ScreeningId
+  screening: Screening
   exchangeable: boolean
   refundable: boolean
 }
@@ -104,7 +104,8 @@ export type FlagKind =
 export interface Flag {
   kind: FlagKind
   message: string
-  screeningId: ScreeningId | null
+  /** Withdrawn Screenings included, so it can be named. */
+  screening: Screening | null
   programmeEntryId: ProgrammeEntryId | null
 }
 
@@ -128,6 +129,7 @@ export interface Planning {
   drafts: Draft[]
   inputs: PlanningInputs
   flags: Flag[]
+  /** All the User's Tickets, any Festival; see `festivalTickets`. */
   tickets: Ticket[]
   suggestions: ComparisonPair[]
 }

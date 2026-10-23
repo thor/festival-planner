@@ -1,4 +1,4 @@
-import { MinusIcon, PlusIcon, TicketIcon, WarningIcon } from "@phosphor-icons/react"
+import { MinusIcon, PlusIcon, TicketIcon } from "@phosphor-icons/react"
 import { Link } from "react-router"
 
 import type { DiffRowVM, DraftListItemVM, DraftVM } from "@/app/view-models"
@@ -83,10 +83,11 @@ export function DraftView({ vm }: { vm: DraftVM }) {
           {r}
         </p>
       ))}
+      {/* Informs, never blocks: a freed ticket waits on the Tickets page. */}
       {vm.droppedTickets > 0 && (
         <p className="flex items-center gap-2 border-b border-ink py-3">
-          <WarningIcon size={18} weight="light" />
-          Drops {vm.droppedTickets} {vm.droppedTickets === 1 ? "ticket" : "tickets"}.
+          <TicketIcon size={18} weight="light" />
+          Frees {vm.droppedTickets} {vm.droppedTickets === 1 ? "ticket" : "tickets"}.
         </p>
       )}
 

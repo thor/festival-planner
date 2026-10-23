@@ -152,8 +152,12 @@ function diff(draft: Screening[], active: Screening[], score: number, activeScor
     scoreDelta: score - activeScore,
     added: draft.filter((s) => !inActive.has(s.id)),
     removed,
-    droppedTickets: removed.filter((s) => tickets.some((t) => t.screeningId === s.id)),
+    droppedTickets: removed.filter((s) => tickets.some((t) => t.screening.id === s.id)),
   }
+}
+
+function ticket(id: string, flags: Partial<Omit<Ticket, "screening">> = {}): Ticket {
+  return { screening: screening(id as ScreeningId), exchangeable: false, refundable: false, ...flags }
 }
 
 function initial(): State {
@@ -178,23 +182,40 @@ function initial(): State {
       },
     ],
     drafts: [],
-    tickets: [{ screeningId: "screening-2-1" as ScreeningId, exchangeable: false, refundable: false }],
+    tickets: [
+      // Held: in the schedule.
+      ticket("screening-2-1"),
+      // Let go: another screening of a film the schedule has elsewhere.
+      ticket("screening-1-2", { refundable: true }),
+      // Let go: withdrawn.
+      ticket("screening-11-2", { exchangeable: true }),
+    ],
     nextId: 1,
   }
 }
 
+// Mirrors the backend's Flags, kind for kind.
 function flags(state: State): Flag[] {
+  const active = new Set(state.schedules.at(-1)?.screenings.map((s) => s.id))
+  const flag = (kind: Flag["kind"], message: string, s: Screening): Flag => ({
+    kind,
+    message,
+    screening: s,
+    programmeEntryId: null,
+  })
   const out: Flag[] = []
-  const active = state.schedules.at(-1)
   for (const id of state.inputs.screeningCommitments) {
     const s = screening(id)
-    if (s.withdrawn) out.push({ kind: "WITHDRAWN_COMMITMENT", message: `${s.title} was withdrawn.`, screeningId: id, programmeEntryId: null })
+    if (s.withdrawn) out.push(flag("WITHDRAWN_COMMITMENT", "A committed Screening was withdrawn", s))
   }
   for (const t of state.tickets) {
-    if (!active?.screenings.some((s) => s.id === t.screeningId)) {
-      const s = screening(t.screeningId)
-      out.push({ kind: "UNSCHEDULED_TICKET", message: `Ticket for ${s.title} is not in the schedule.`, screeningId: s.id, programmeEntryId: null })
-    }
+    if (t.screening.withdrawn) out.push(flag("WITHDRAWN_TICKET", "A ticketed Screening was withdrawn", t.screening))
+    else if (!active.has(t.screening.id))
+      out.push(flag("UNSCHEDULED_TICKET", "A ticketed Screening is not in the Active Schedule", t.screening))
+  }
+  for (const id of active) {
+    const s = screening(id)
+    if (s.withdrawn) out.push(flag("WITHDRAWN_IN_SCHEDULE", "A scheduled Screening was withdrawn", s))
   }
   return out
 }
@@ -339,14 +360,14 @@ export function memoryPlanning(session: SessionPort): PlanningPort {
     async recordTicket(id) {
       await wait(80)
       signedIn()
-      if (!state.tickets.some((t) => t.screeningId === id)) {
-        state = { ...state, tickets: [...state.tickets, { screeningId: id, exchangeable: false, refundable: false }] }
+      if (!state.tickets.some((t) => t.screening.id === id)) {
+        state = { ...state, tickets: [...state.tickets, ticket(id)] }
       }
     },
     async removeTicket(id) {
       await wait(80)
       signedIn()
-      state = { ...state, tickets: state.tickets.filter((t) => t.screeningId !== id) }
+      state = { ...state, tickets: state.tickets.filter((t) => t.screening.id !== id) }
     },
   }
 }

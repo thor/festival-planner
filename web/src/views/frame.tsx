@@ -1,4 +1,4 @@
-import { ArrowsLeftRightIcon, CalendarBlankIcon, FilmStripIcon, StackIcon } from "@phosphor-icons/react"
+import { ArrowsLeftRightIcon, CalendarBlankIcon, FilmStripIcon, StackIcon, TicketIcon } from "@phosphor-icons/react"
 import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
@@ -8,12 +8,15 @@ import { NavIcon } from "./parts"
 export function FrameView({
   festival,
   slug,
+  letGo,
   account,
   tray,
   children,
 }: {
   festival: string
   slug: string
+  /** Tickets to let go, for the nav count. */
+  letGo: number
   account: ReactNode
   tray: ReactNode
   children: ReactNode
@@ -33,6 +36,7 @@ export function FrameView({
           <NavIcon to={`/${slug}`} icon={FilmStripIcon} label="Programme" />
           <NavIcon to={`/${slug}/week`} icon={CalendarBlankIcon} label="Week" />
           <NavIcon to={`/${slug}/drafts`} icon={StackIcon} label="Drafts" />
+          <NavIcon to={`/${slug}/tickets`} icon={TicketIcon} label="Tickets" count={letGo} countLabel={`${letGo} to let go`} />
           <NavIcon to={`/${slug}/compare`} icon={ArrowsLeftRightIcon} label="Compare" />
         </nav>
         {account}

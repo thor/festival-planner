@@ -94,7 +94,43 @@ export interface WeekVM {
   count: number
   days: WeekDayVM[]
   ticks: { label: string; left: number }[]
-  flags: string[]
+  /** Tickets to let go, counted here and listed on the Tickets page. */
+  letGo: number
+  ticketsHref: string
+  problems: ProblemVM[]
+  programmeHref: string
+}
+
+/** Something wrong with the Schedule itself, and the one thing to do. */
+export interface ProblemVM {
+  id: string
+  title: string
+  action: "Solve again" | "Release"
+  /** Already done in the pending Change Set. */
+  on: boolean
+  onAct: () => void
+}
+
+export interface TicketVM {
+  id: string
+  title: string
+  href: string
+  when: string
+  venue: string
+  /** Why it is here and what the ticket allows: "Not scheduled", "Refundable". */
+  notes: string[]
+  /** Let go only: put it back in the Schedule, through the tray. */
+  onKeep?: () => void
+  keeping?: boolean
+  /** Let go only: the User no longer holds it. */
+  onGone?: () => void
+  /** Withdrawn only: where to ask for a refund. */
+  festivalHref?: string | null
+}
+
+export interface TicketsVM {
+  letGo: TicketVM[]
+  held: TicketVM[]
   programmeHref: string
 }
 

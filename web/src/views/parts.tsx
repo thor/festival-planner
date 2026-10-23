@@ -66,14 +66,29 @@ export function Action({
   )
 }
 
-export function NavIcon({ to, icon: Glyph, label, end }: { to: string; icon: Icon; label: string; end?: boolean }) {
+export function NavIcon({
+  to,
+  icon: Glyph,
+  label,
+  end,
+  count = 0,
+  countLabel,
+}: {
+  to: string
+  icon: Icon
+  label: string
+  end?: boolean
+  /** Things to do there; shown as a small ultramarine number. */
+  count?: number
+  countLabel?: string
+}) {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <Link
             to={to}
-            aria-label={label}
+            aria-label={count > 0 && countLabel ? `${label}, ${countLabel}` : label}
             data-end={end}
             className="flex h-10 items-center gap-2 border-l border-ink px-3 text-sm hover:bg-haze md:px-4"
           />
@@ -81,6 +96,11 @@ export function NavIcon({ to, icon: Glyph, label, end }: { to: string; icon: Ico
       >
         <Glyph size={20} weight="light" />
         <span className="hidden md:inline">{label}</span>
+        {count > 0 && (
+          <span aria-hidden className="-ml-1 flex h-4 min-w-4 items-center justify-center bg-stamp px-1 text-xs leading-none text-stamp-ink">
+            {count}
+          </span>
+        )}
       </TooltipTrigger>
       <TooltipContent className="md:hidden">{label}</TooltipContent>
     </Tooltip>

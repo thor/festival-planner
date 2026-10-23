@@ -38,7 +38,7 @@ export function useEntryModels(festival: Festival | null | undefined, planning: 
   const inputs = planning?.inputs ?? emptyInputs
   const signedIn = !!planning
   const scheduled = new Set(planning?.activeSchedule?.screenings.map((s) => s.id))
-  const tickets = new Set(planning?.tickets.map((t) => t.screeningId))
+  const tickets = new Set(planning?.tickets.map((t) => t.screening.id))
 
   const ticket = useMutation({
     mutationFn: ({ id, has }: { id: ScreeningId; has: boolean }) =>

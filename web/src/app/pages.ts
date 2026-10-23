@@ -17,6 +17,7 @@ import { usePorts } from "./ports"
 import { keys, useDraft, useFestival, usePlanning, useProgramme } from "./queries"
 import { entryHref, metaOf, useEntryModels } from "./screenings"
 import { useSignedIn } from "./session"
+import { useTicketModels } from "./tickets"
 import type {
   CompareVM,
   DiffRowVM,
@@ -27,6 +28,7 @@ import type {
   Load,
   ProgrammeVM,
   ScreeningVM,
+  TicketsVM,
   TrayVM,
   WeekVM,
 } from "./view-models"
@@ -43,8 +45,18 @@ function useFestivalData(slug: string) {
 }
 
 export function useFrame(slug: string) {
-  const festival = useFestival(slug)
-  return { festival: festival.data?.name ?? "", slug }
+  const { festival, programme, planning } = useFestivalData(slug)
+  const tickets = useTicketModels(festival.data, planning.data, programme.data)
+  return { festival: festival.data?.name ?? "", slug, letGo: tickets.letGo.length }
+}
+
+export function useTicketsPage(slug: string): Load<TicketsVM> {
+  const { festival, programme, planning } = useFestivalData(slug)
+  const tickets = useTicketModels(festival.data, planning.data, programme.data)
+  if (festival.isPending || planning.isPending || programme.isPending) return loading
+  if (!festival.data) return missing("No such festival.")
+  if (!planning.data) return missing("Sign in to see tickets.")
+  return ready({ letGo: tickets.letGo, held: tickets.held, programmeHref: `/${festival.data.slug}` })
 }
 
 export function useProgrammePage(slug: string, day: string | null): Load<ProgrammeVM> {
@@ -96,14 +108,15 @@ function selectedViewing(screenings: ScreeningVM[]) {
 }
 
 export function useWeekPage(slug: string): Load<WeekVM> & { signedIn: boolean } {
-  const { festival, planning } = useFestivalData(slug)
+  const { festival, programme, planning } = useFestivalData(slug)
   const signedIn = useSignedIn()
+  const ticketModels = useTicketModels(festival.data, planning.data, programme.data)
   if (festival.isPending || (signedIn && planning.isPending)) return { ...loading, signedIn }
   if (!festival.data) return { ...missing("No such festival."), signedIn }
   const f = festival.data
   const p = planning.data
   const schedule = p?.activeSchedule
-  const tickets = new Set(p?.tickets.map((t) => t.screeningId))
+  const tickets = new Set(p?.tickets.map((t) => t.screening.id))
   const committed = new Set(p?.inputs.screeningCommitments)
   const films = new Set(p?.inputs.filmCommitments)
   return {
@@ -113,7 +126,9 @@ export function useWeekPage(slug: string): Load<WeekVM> & { signedIn: boolean } 
       count: schedule?.screenings.length ?? 0,
       programmeHref: `/${f.slug}`,
       ticks: hourTicks(),
-      flags: p?.flags.map((x) => x.message) ?? [],
+      letGo: ticketModels.letGo.length,
+      ticketsHref: `/${f.slug}/tickets`,
+      problems: ticketModels.problems,
       days: layDays(f, schedule?.screenings ?? []).map((row) => ({
         key: row.day,
         number: dayNumber(row.day),

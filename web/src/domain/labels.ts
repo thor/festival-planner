@@ -2,6 +2,7 @@
 
 import { verbOf, type ItemVerb } from "./change-set"
 import type { ChangeSetItem, ProgrammeEntry, Screening } from "./model"
+import type { LetGoReason } from "./tickets"
 import { clock, dayKey, shortDay } from "./time"
 
 export interface Lookup {
@@ -18,6 +19,11 @@ export function lookupOf(entries: ProgrammeEntry[], timeZone: string): Lookup {
 
 export function when(s: Screening, timeZone: string): string {
   return `${shortDay(dayKey(s.startTime, timeZone))} ${clock(s.startTime, timeZone)}`
+}
+
+export const letGoWord: Record<LetGoReason, string> = {
+  withdrawn: "Withdrawn",
+  notScheduled: "Not scheduled",
 }
 
 export const verbWord: Record<ItemVerb, string> = {

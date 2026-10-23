@@ -2,7 +2,17 @@
 
 import { Navigate, Outlet, useParams, useSearchParams } from "react-router"
 
-import { useComparePage, useDraftPage, useDraftsPage, useFilmPage, useFrame, useProgrammePage, useTray, useWeekPage } from "@/app/pages"
+import {
+  useComparePage,
+  useDraftPage,
+  useDraftsPage,
+  useFilmPage,
+  useFrame,
+  useProgrammePage,
+  useTicketsPage,
+  useTray,
+  useWeekPage,
+} from "@/app/pages"
 import { useFestivals } from "@/app/queries"
 import { useSession } from "@/app/session"
 import type { Load } from "@/app/view-models"
@@ -13,6 +23,7 @@ import { FilmView } from "@/views/film"
 import { FrameView } from "@/views/frame"
 import { Loading, Missing } from "@/views/parts"
 import { ProgrammeView } from "@/views/programme"
+import { TicketsView } from "@/views/tickets"
 import { TrayView } from "@/views/tray"
 import { WeekView } from "@/views/week"
 
@@ -40,6 +51,7 @@ export function Frame() {
     <FrameView
       festival={frame.festival}
       slug={frame.slug}
+      letGo={frame.letGo}
       account={<AccountView signedIn={session.signedIn} hint={session.hint} onSubmit={session.onSubmit} onSignOut={session.signOut} />}
       tray={<TrayView vm={tray} />}
     >
@@ -84,4 +96,8 @@ export function DraftPage() {
 export function Compare() {
   const slug = useSlug()
   return <Show load={useComparePage(slug)} render={(vm) => <CompareView vm={vm} programmeHref={`/${slug}`} />} />
+}
+
+export function Tickets() {
+  return <Show load={useTicketsPage(useSlug())} render={(vm) => <TicketsView vm={vm} />} />
 }

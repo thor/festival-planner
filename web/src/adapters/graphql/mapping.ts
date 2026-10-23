@@ -160,7 +160,7 @@ export function flagOf(f: PlanningData["flags"][number]): Flag {
   return {
     kind: f.kind,
     message: f.message,
-    screeningId: (f.screening?.id ?? null) as ScreeningId | null,
+    screening: f.screening ? screeningOf(f.screening) : null,
     programmeEntryId: (f.programmeEntry?.id ?? null) as ProgrammeEntryId | null,
   }
 }

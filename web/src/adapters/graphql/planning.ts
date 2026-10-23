@@ -1,5 +1,5 @@
 import { PortError, type PortProblem } from "@/domain/errors"
-import type { ComparisonPair, ScreeningId } from "@/domain/model"
+import type { ComparisonPair } from "@/domain/model"
 import type { PlanningPort } from "@/domain/ports"
 
 import type { Run } from "./client"
@@ -51,7 +51,7 @@ export function graphqlPlanning(run: Run): PlanningPort {
         inputs: inputsOf(p.inputs),
         flags: p.flags.map(flagOf),
         tickets: viewer.tickets.map((t) => ({
-          screeningId: t.screening.id as ScreeningId,
+          screening: screeningOf(t.screening),
           exchangeable: t.exchangeable,
           refundable: t.refundable,
         })),
