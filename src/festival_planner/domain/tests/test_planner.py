@@ -14,6 +14,7 @@ from festival_planner.domain.festival import Festival, FestivalId
 from festival_planner.domain.planner import (
     DraftNotAcceptableError,
     DraftStillSolvingError,
+    DraftView,
     NotFoundError,
     Planner,
     PlanningError,
@@ -106,11 +107,13 @@ def weights(**w: float) -> ChangeSet:
 
 def test_a_new_draft_is_solved_and_diffed_against_nothing(uow):
     notifier = RecordingNotifier()
-    view = planner(uow, notifier=notifier).create_draft(U, SLUG, weights(b=2.0))
+    p = planner(uow, notifier=notifier)
+    view = p.create_draft(U, SLUG, weights(b=2.0))
     assert view.draft.status is DraftStatus.READY
     assert view.draft.screening_ids == frozenset({"b", "c"})
     assert not view.stale
-    assert view.diff is not None and view.diff.added == frozenset({"b", "c"})
+    draft_diff = p.draft_diff(U, view.draft.id)
+    assert draft_diff is not None and draft_diff.added == frozenset({"b", "c"})
     assert [d.id for d in notifier.solved] == [view.draft.id]
 
 
@@ -178,7 +181,8 @@ def test_resolving_a_stale_draft_rebases_it(uow):
     assert resolved.draft.change_set == weights(d=2.0)
     assert len(resolved.draft.notes) == 1
     assert resolved.draft.screening_ids == frozenset({"b", "d"})
-    assert resolved.diff is not None and resolved.diff.added == frozenset({"d"})
+    draft_diff = p.draft_diff(U, resolved.draft.id)
+    assert draft_diff is not None and draft_diff.added == frozenset({"d"})
     assert p.accept(U, second.draft.id).number == 2
 
 
@@ -297,7 +301,8 @@ def test_tickets_flags_and_dropped_ticket_warnings(uow):
         ("UNSCHEDULED_TICKET", "a")
     ]
     view = p.create_draft(U, SLUG, weights(a=3.0))
-    assert view.diff is not None and view.diff.dropped_tickets == frozenset({"b"})
+    draft_diff = p.draft_diff(U, view.draft.id)
+    assert draft_diff is not None and draft_diff.dropped_tickets == frozenset({"b"})
     p.remove_ticket(U, ScreeningId("a"))
     assert p.tickets(U) == (Ticket(screening_id=ScreeningId("b"), refundable=True),)
 
@@ -397,3 +402,67 @@ class RaisingNotifier:
 def test_a_failing_notifier_does_not_fail_the_solved_draft(uow):
     view = planner(uow, notifier=RaisingNotifier()).create_draft(U, SLUG)
     assert view.draft.status is DraftStatus.READY
+
+
+def test_a_draft_view_has_no_diff_until_asked():
+    assert "diff" not in DraftView.model_fields
+
+
+def test_draft_diff_of_a_ready_draft(uow):
+    p = planner(uow)
+    view = p.create_draft(
+        U,
+        SLUG,
+        ChangeSet(
+            items=(
+                AddScreeningCommitment(screening_id=ScreeningId("c")),
+                *weights(b=2.0).items,
+            )
+        ),
+    )
+    draft_diff = p.draft_diff(U, view.draft.id)
+    assert draft_diff is not None
+    assert draft_diff.added == frozenset({ScreeningId("b"), ScreeningId("c")})
+
+
+def test_draft_diff_of_a_solving_draft_is_none(uow):
+    p = planner(uow, jobs=DeferredJobRunner())
+    view = p.create_draft(U, SLUG)
+    assert view.draft.status is DraftStatus.SOLVING
+    assert p.draft_diff(U, view.draft.id) is None
+
+
+def test_draft_diff_of_another_users_draft_is_not_found(uow):
+    p = planner(uow)
+    view = p.create_draft(U, SLUG)
+    with pytest.raises(NotFoundError):
+        p.draft_diff(UserId("someone-else"), view.draft.id)
+
+
+def test_a_schedule_is_found_by_id_for_its_user(uow):
+    p = planner(uow)
+    schedule = p.accept(U, p.create_draft(U, SLUG, weights(b=2.0)).draft.id)
+    assert p.schedule(U, schedule.id) == schedule
+
+
+def test_another_users_schedule_is_not_found(uow):
+    p = planner(uow)
+    schedule = p.accept(U, p.create_draft(U, SLUG, weights(b=2.0)).draft.id)
+    with pytest.raises(NotFoundError):
+        p.schedule(UserId("someone-else"), schedule.id)
+    with pytest.raises(NotFoundError):
+        p.schedule(U, ScheduleId("nope"))
+
+
+def test_inputs_are_the_accepted_inputs(uow):
+    p = planner(uow)
+    assert p.inputs(U, SLUG) == PlanningInputs()
+    p.accept(
+        U,
+        p.create_draft(
+            U,
+            SLUG,
+            ChangeSet(items=(AddScreeningCommitment(screening_id=ScreeningId("a")),)),
+        ).draft.id,
+    )
+    assert p.inputs(U, SLUG).screening_commitments == frozenset({ScreeningId("a")})

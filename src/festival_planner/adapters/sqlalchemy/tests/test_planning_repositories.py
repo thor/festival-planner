@@ -216,6 +216,15 @@ def test_lookups_by_id(stored):
         ] == ["e"]
 
 
+def test_a_schedule_by_id(stored):
+    with stored as uow:
+        uow.planning.save_schedule(schedule("one", 1))
+        uow.commit()
+    with stored as uow:
+        assert uow.planning.schedule(ScheduleId("one")) == schedule("one", 1)
+        assert uow.planning.schedule(ScheduleId("nope")) is None
+
+
 def test_a_schedule_number_taken_by_another_unit_of_work_conflicts(stored):
     with stored as uow:
         uow.planning.save_schedule(schedule("first", 1))

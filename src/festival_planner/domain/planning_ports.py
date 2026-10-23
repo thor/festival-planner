@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from .drafts import Draft, DraftId, Schedule
+from .drafts import Draft, DraftId, Schedule, ScheduleId
 from .festival import FestivalId
 from .ingestion import UnitOfWork
 from .planning import PlanningInputs, Ticket
@@ -43,6 +43,8 @@ class PlanningRepository(Protocol):
         """Raises `ConflictError` if a concurrent write took the same (User,
         Festival, number)."""
         ...
+
+    def schedule(self, schedule_id: ScheduleId) -> Schedule | None: ...
 
     def draft(self, draft_id: DraftId, *, for_update: bool = False) -> Draft | None:
         """With `for_update`, lock the Draft until the unit of work ends, where

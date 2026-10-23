@@ -143,9 +143,9 @@ def _print_view(s: _Session, view: DraftView) -> None:
         console.print(f"  {escape(reason)}", soft_wrap=True)
     for note in draft.notes:
         console.print(f"  Note: {escape(note)}", soft_wrap=True)
-    if view.diff is None:
+    d = s.planner.draft_diff(s.user_id, draft.id)
+    if d is None:
         return
-    d = view.diff
     console.print(
         f"  +{len(d.added)} −{len(d.removed)}  score {d.score_delta:+.2f}",
         soft_wrap=True,
@@ -188,14 +188,15 @@ def drafts(
         if not views:
             console.print("No drafts")
         for view in views:
-            d = view.draft
-            line = f"{d.id}  {d.status}"
+            draft = view.draft
+            line = f"{draft.id}  {draft.status}"
             if view.stale:
                 line += "  stale"
-            if view.diff:
+            draft_diff = s.planner.draft_diff(s.user_id, draft.id)
+            if draft_diff:
                 line += (
-                    f"  +{len(view.diff.added)} −{len(view.diff.removed)}"
-                    f"  score {view.diff.score_delta:+.2f}"
+                    f"  +{len(draft_diff.added)} −{len(draft_diff.removed)}"
+                    f"  score {draft_diff.score_delta:+.2f}"
                 )
             console.print(line, soft_wrap=True)
 

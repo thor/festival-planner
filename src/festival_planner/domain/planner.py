@@ -19,7 +19,7 @@ from .insights import (
     suggest_comparisons,
 )
 from .jobs import Job, JobRunner
-from .planning import Ticket
+from .planning import PlanningInputs, Ticket
 from .planning_ports import ConflictError, DraftSolvedNotifier, PlanningUnitOfWork
 from .programme import FilmId, ScreeningId
 from .solving import ScheduleSolver, SolveRequest, SolveResult, SolveStatus
@@ -51,8 +51,6 @@ class DraftStillSolvingError(PlanningError):
 class DraftView(Value):
     draft: Draft
     stale: bool
-    diff: DraftDiff | None = None
-    """For READY Drafts: the Draft against the current Active Schedule."""
 
 
 class Planner:
@@ -200,6 +198,19 @@ class Planner:
                 self._view(uow, d) for d in uow.planning.drafts(user_id, festival.id)
             )
 
+    def draft_diff(self, user_id: UserId, draft_id: DraftId) -> DraftDiff | None:
+        """The Draft against the current Active Schedule; `None` unless READY."""
+        with self._uow() as uow:
+            draft = _owned_draft(uow, user_id, draft_id)
+            if draft.status is not DraftStatus.READY:
+                return None
+            request = self._request(
+                uow, draft.user_id, draft.festival_id, draft.change_set
+            )
+            return diff(
+                request, draft.screening_ids, uow.tickets.tickets(draft.user_id)
+            )
+
     def solve_request(self, user_id: UserId, draft_id: DraftId) -> SolveRequest:
         """The request a Draft is solved from, e.g. to replay it in the CLI."""
         with self._uow() as uow:
@@ -225,6 +236,19 @@ class Planner:
         with self._uow() as uow:
             festival = _festival(uow, festival_slug)
             return uow.planning.schedules(user_id, festival.id)
+
+    def schedule(self, user_id: UserId, schedule_id: ScheduleId) -> Schedule:
+        with self._uow() as uow:
+            schedule = uow.planning.schedule(schedule_id)
+            if schedule is None or schedule.user_id != user_id:
+                raise NotFoundError(f"No schedule {schedule_id!r}")
+            return schedule
+
+    def inputs(self, user_id: UserId, festival_slug: str) -> PlanningInputs:
+        """The User's accepted inputs for a Festival."""
+        with self._uow() as uow:
+            festival = _festival(uow, festival_slug)
+            return uow.planning.inputs(user_id, festival.id)
 
     def flags(self, user_id: UserId, festival_slug: str) -> tuple[Flag, ...]:
         with self._uow() as uow:
@@ -388,15 +412,7 @@ class Planner:
 
     def _view(self, uow: PlanningUnitOfWork, draft: Draft) -> DraftView:
         active = uow.planning.active_schedule(draft.user_id, draft.festival_id)
-        draft_diff = None
-        if draft.status is DraftStatus.READY:
-            request = self._request(
-                uow, draft.user_id, draft.festival_id, draft.change_set
-            )
-            draft_diff = diff(
-                request, draft.screening_ids, uow.tickets.tickets(draft.user_id)
-            )
-        return DraftView(draft=draft, stale=draft.is_stale(active), diff=draft_diff)
+        return DraftView(draft=draft, stale=draft.is_stale(active))
 
     def _request(
         self,

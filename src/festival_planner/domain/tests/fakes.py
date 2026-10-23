@@ -300,6 +300,9 @@ class _Planning:
             raise ConflictError(f"Schedule number {schedule.number} exists")
         self.s.schedules[schedule.id] = schedule
 
+    def schedule(self, schedule_id: ScheduleId) -> Schedule | None:
+        return self.s.schedules.get(schedule_id)
+
     def draft(self, draft_id: DraftId, *, for_update: bool = False) -> Draft | None:
         return self.s.drafts.get(draft_id)
 

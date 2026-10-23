@@ -160,6 +160,10 @@ class SqlAlchemyPlanningRepository:
         self._session.add(row)
         _flush_or_conflict(self._session)
 
+    def schedule(self, schedule_id: ScheduleId) -> Schedule | None:
+        row = self._session.get(ScheduleRow, schedule_id)
+        return None if row is None else _schedule(row)
+
     def draft(self, draft_id: DraftId, *, for_update: bool = False) -> Draft | None:
         row = self._session.get(DraftRow, draft_id, with_for_update=for_update)
         return None if row is None else _draft(row)
