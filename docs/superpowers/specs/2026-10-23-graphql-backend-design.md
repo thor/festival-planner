@@ -157,11 +157,12 @@ providers).
 - **Comparison**: "A over B", a change-set item and Preference; one per
   unordered pair, the latest replacing the earlier. `formulate` fits
   Bradley–Terry strengths (deterministic MM iteration, weak prior) over the
-  compared Programme Entries and adds `comparison_weight` (default 0.5) times
-  the centred log-strength to their weights. A query suggests up to N pairs
-  that conflicted in the latest `READY` Draft where exactly one was
-  scheduled, not yet compared, closest weights first; conflicts are
-  recomputed with `formulate`, not stored.
+  compared Programme Entries and adds `comparison_weight` (default 0.5, never
+  negative) times the centred log-strength to their weights. A query
+  suggests up to N pairs that conflicted in the latest `READY` Draft (else
+  the Active Schedule) where exactly one was scheduled, not yet compared,
+  closest weights first; conflicts are recomputed with `formulate`, not
+  stored.
 - **Ticket**: one per (User, Screening) with `exchangeable` and `refundable`
   flags; never commits; kept and flagged when its Screening is Withdrawn.
 
@@ -218,7 +219,7 @@ Each step is its own plan and leaves working, tested software:
    database. Decided 2026-10-23 (see *Persistence and ingestion* above and
    [ADR-0005](../../adr/0005-aware-datetimes-with-festival-time-zone.md)).
    Organization moves to step 5 and Film external ids to step 6.
-3. **Planning use-cases**: Drafts as change sets, accept, Stale, diff,
+3. **Planning use-cases** (done 2026-10-23, plan `2026-10-23-planning-use-cases.md`): Drafts as change sets, accept, Stale, diff,
    Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
    Also: deterministic solving (CP-SAT seed and tie-break, so Draft diffs
    don't show noise), change-set validation for contradictory inputs, a
@@ -234,6 +235,13 @@ Each step is its own plan and leaves working, tested software:
    GraphQL types and inputs. Pydantic is approved in the domain if need be
    (ADR-0001), so domain models may become Pydantic models where that lets
    Strawberry derive types directly.
+   From step 3: the server calls `Planner.resume_solving()` once at startup
+   (the CLI currently does it on every command) and shuts the
+   `ThreadPoolJobRunner` down in its lifespan; `create_draft`/`resolve` block
+   up to `wait_seconds`, so run them off the event loop; a subscription-backed
+   `DraftSolvedNotifier` is called on a worker thread and must hand off with
+   `loop.call_soon_threadsafe`; Draft diffs are computed eagerly in
+   `DraftView` and should become a lazy field.
 5. **Curation**: Organizations, Memberships, Admin, Curations, Curator Notes,
    Suggested Schedules (signed in and anonymous), curation weight in
    Preferences and the adopt-a-Curation change-set item.
