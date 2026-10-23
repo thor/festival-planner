@@ -195,6 +195,42 @@ mise exec -- festival-planner ingest venues
 mise exec -- festival-planner ingest programme filmfrasor --year 2025 [--refresh]
 ```
 
+## API server and tokens
+
+The GraphQL API serves the festival data and planning at `/graphql` (GET
+opens GraphiQL). Festival data is public. Planning needs a bearer token from
+an issuer the server trusts, read as a JSON list from
+`FESTIVAL_PLANNER_ISSUERS`.
+
+For local use, the CLI is its own token issuer (see
+`docs/adr/0006-local-token-issuer-is-a-cli.md`). Its tokens have issuer
+`local`, so a token for your OS user is the same User as the `plan` commands.
+
+```bash
+# Create the local issuer's keypair (once). It prints an
+# `export FESTIVAL_PLANNER_ISSUERS=...` line; keep it (e.g. in .envrc) and
+# run it in the shell that serves.
+mise exec -- festival-planner token init
+export FESTIVAL_PLANNER_ISSUERS='[{"issuer":"local",...}]'  # the printed line
+
+# Serve the API on http://127.0.0.1:8000/graphql (see --help for options)
+mise exec -- festival-planner serve
+
+# Mint a token for your OS user (or --subject NAME), valid 30 days (--days)
+TOKEN=$(mise exec -- festival-planner token issue)
+
+curl -s http://127.0.0.1:8000/graphql \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"query": "{ viewer { issuer subject } festivals { slug name } }"}'
+
+# Write the GraphQL schema (SDL); schema.graphql in the repo is this output
+mise exec -- festival-planner export-schema schema.graphql
+```
+
+Without an `Authorization` header you are signed out: `viewer` is `null` and
+mutations return `NotSignedIn`. A bad or expired token gets HTTP 401.
+
 ## Standalone Scraper Script
 
 You can also run the scraper independently:
@@ -248,6 +284,9 @@ class MyFestivalScraper(BaseScraper):
 ```bash
 mise exec -- pytest
 ```
+
+If your shell sets `FORCE_COLOR`, some CLI tests see ANSI codes and fail; run
+`env -u FORCE_COLOR mise exec -- uv run pytest` instead.
 
 ### Code Formatting
 

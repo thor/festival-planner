@@ -200,6 +200,22 @@ providers).
 - Mutations take a single `input` and return a union of success and typed
   errors.
 - DataLoaders on every relation.
+- A Change Set item as input is one `@oneOf` input, `ChangeSetItemInput`, with
+  one field per item kind. Zero or two fields set is a GraphQL validation
+  error; an item with a bad value is an `INVALID_ITEM` problem.
+- Typed errors: `NotSignedIn`, `NotFound`, `InvalidChangeSet` (a list of
+  problems with a code and the items involved), `DraftStillSolving` and
+  `DraftNotAcceptable`.
+- Inputs take a plain `ID` and decode it themselves. A garbage, wrong-type or
+  unknown id gives `null` from `node` and `planning`, `NotFound` from a
+  mutation, and an `UNKNOWN_ID` problem inside a Change Set; never a GraphQL
+  error. Another User's Draft or Schedule is `null` or `NotFound` too.
+- GraphQL enums such as `DraftStatus` and `FlagKind` are API-side copies of
+  the domain enums, mapped by value (ADR-0001).
+- No `Authorization` header means signed out: festival data still works,
+  `viewer` is `null` and mutations return `NotSignedIn`. A header that is not
+  `Bearer <token>`, or a token that fails verification, gets HTTP 401 with
+  `WWW-Authenticate: Bearer error="invalid_token"`.
 
 ## Out of scope for now
 
@@ -227,7 +243,7 @@ Each step is its own plan and leaves working, tested software:
    a bare User keyed on (issuer, subject) with the CLI acting as a local
    User, and a minimal `plan` CLI. Preferences stay Pydantic. Decided
    2026-10-23.
-4. **GraphQL API and auth**: distinct id types (`NewType`) before the
+4. **GraphQL API and auth** (done 2026-10-23, plan `2026-10-23-graphql-api-and-auth.md`): distinct id types (`NewType`) before the
    global-id mapping; Strawberry schema over the use-cases,
    `TokenVerifier` adapters, local token issuer, SDL export. Evaluate
    Strawberry's Pydantic integration
@@ -242,6 +258,20 @@ Each step is its own plan and leaves working, tested software:
    `DraftSolvedNotifier` is called on a worker thread and must hand off with
    `loop.call_soon_threadsafe`; Draft diffs are computed eagerly in
    `DraftView` and should become a lazy field.
+   Outcome: Strawberry's Pydantic integration is not used (nested models,
+   `Mapping` fields, the Change Set union as input and global ids do not
+   map), so GraphQL types are hand-written, served by Starlette with every
+   domain call off the event loop, and the SDL is committed as
+   `schema.graphql`. Bearer JWTs are verified with
+   PyJWT (`pyjwt[crypto]>=2.15`) against issuers from
+   `FESTIVAL_PLANNER_ISSUERS`, whose `jwks_uri` must be http(s); the local
+   issuer is a CLI with the reserved `iss` `"local"`
+   ([ADR-0006](../../adr/0006-local-token-issuer-is-a-cli.md)). Clients poll
+   `node(id:)` for a solving Draft, and Draft diffs are a lazy field.
+   For step 5: Curation types and mutations follow the same patterns;
+   `ProgrammeEntry.festival` is missing because the domain value has no
+   `festival_id`; subscriptions and the `call_soon_threadsafe` hand-off are
+   still open, and so is a sign-in path for a frontend.
 5. **Curation**: Organizations, Memberships, Admin, Curations, Curator Notes,
    Suggested Schedules (signed in and anonymous), curation weight in
    Preferences and the adopt-a-Curation change-set item.
