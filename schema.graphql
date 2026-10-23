@@ -1,0 +1,10 @@
+type Query {
+  """The signed-in User; null when signed out."""
+  viewer: Viewer
+}
+
+"""The signed-in User."""
+type Viewer {
+  issuer: String!
+  subject: String!
+}

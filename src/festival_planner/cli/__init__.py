@@ -9,6 +9,7 @@ from .db import app as db_app
 from .ingest import app as ingest_app
 from .plan import app as plan_app
 from .scrape import app as scrape
+from .serve import app as serve_app
 from .set_weight import app as set_weight
 from .solve import app as solve
 from .token import app as token_app
@@ -24,6 +25,7 @@ app.add_typer(db_app, name="db")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(plan_app, name="plan")
 app.add_typer(token_app, name="token")
+app.add_typer(serve_app)
 
 console = Console()
 logger = get_logger(__name__)

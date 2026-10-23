@@ -18,6 +18,10 @@ dependencies = [
     "sqlalchemy>=2.0.40",
     "alembic>=1.16",
     "pyjwt[crypto]>=2.15",
+    "strawberry-graphql>=0.336",
+    "starlette>=0.40",
+    "uvicorn>=0.30",
+    "anyio>=4.0",
 ]
 
 [project.scripts]
@@ -32,6 +36,7 @@ packages = ["src/festival_planner"]
 
 [tool.uv]
 dev-dependencies = [
+    "httpx2>=2.16",
     "pytest>=8.0.0",
     "ruff>=0.3.0",
     "types-pyyaml>=6.0.12.20250915",

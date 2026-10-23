@@ -27,8 +27,9 @@ class ThreadPoolJobRunner:
     def submit(self, work: Callable[[], None]) -> _FutureJob:
         return _FutureJob(self._pool.submit(_logging_failures, work))
 
-    def shutdown(self, wait: bool = True) -> None:
-        self._pool.shutdown(wait=wait)
+    def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
+        """Stop taking work. `cancel_futures` drops work not yet started."""
+        self._pool.shutdown(wait=wait, cancel_futures=cancel_futures)
 
 
 def _logging_failures(work: Callable[[], None]) -> None:

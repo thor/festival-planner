@@ -46,3 +46,22 @@ def test_thread_pool_survives_failing_work(caplog):
     finally:
         runner.shutdown()
     assert "ZeroDivisionError" in caplog.text
+
+
+def test_shutdown_can_cancel_queued_work():
+    started = threading.Event()
+    release = threading.Event()
+    second_ran = threading.Event()
+
+    def blocking() -> None:
+        started.set()
+        release.wait(5)
+
+    runner = ThreadPoolJobRunner(max_workers=1)
+    first = runner.submit(blocking)
+    runner.submit(second_ran.set)
+    assert started.wait(5)
+    runner.shutdown(wait=False, cancel_futures=True)
+    release.set()
+    assert first.wait(5) is True
+    assert not second_ran.wait(0.1)

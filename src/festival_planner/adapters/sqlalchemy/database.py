@@ -65,3 +65,10 @@ def migrate(engine: Engine, revision: str = "head") -> None:
             command.upgrade(alembic_config(connection), revision)
     finally:
         alembic_logger.setLevel(level)
+
+
+def open_database(database: str | None) -> Engine:
+    """An engine on the resolved database, migrated to the latest schema."""
+    engine = create_engine_for(resolve_database_url(database))
+    migrate(engine)
+    return engine
