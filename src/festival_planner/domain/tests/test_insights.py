@@ -1,7 +1,6 @@
 import pytest
 
 from festival_planner.domain.insights import (
-    ComparisonSuggestion,
     FlagKind,
     diff,
     flags,

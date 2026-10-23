@@ -153,7 +153,9 @@ def inferred_seen(
     dismissed: frozenset[ScreeningId],
     now: datetime.datetime,
 ) -> frozenset[FilmId]:
-    """Films Seen because a Screening in an Active Schedule has ended."""
+    """Films Seen because a Screening in an Active Schedule has ended.
+
+    Callers pass the Screenings of the User's Active Schedules."""
     return frozenset(
         entries[s.programme_entry_id].film_id
         for s in screenings
