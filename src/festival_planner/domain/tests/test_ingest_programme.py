@@ -46,7 +46,12 @@ def show(start="18:00", end="20:00", venue="Vika Kino", **kw) -> SourceScreening
     )
 
 
-def entry(key="film/a", title="A", year=2025, *screenings) -> SourceEntry:
+def entry(
+    key: str = "film/a",
+    title: str = "A",
+    year: int | None = 2025,
+    *screenings: SourceScreening,
+) -> SourceEntry:
     return SourceEntry(
         source_key=key, title=title, year=year, screenings=screenings or (show(),)
     )

@@ -3,6 +3,7 @@
 import copy
 import itertools
 from collections.abc import Callable, Iterable, Mapping
+from types import TracebackType
 from typing import Self
 
 from festival_planner.domain.festival import Festival, FestivalSeries
@@ -50,7 +51,12 @@ class InMemoryUnitOfWork:
         self.programme = _Programme(self._work)
         return self
 
-    def __exit__(self, *exc: object) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
         del self._work
 
     def commit(self) -> None:

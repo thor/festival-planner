@@ -170,11 +170,17 @@ class UnitOfWork(Protocol):
     """Port: one transaction over the repositories. Leaving the context
     without `commit()` rolls back."""
 
-    festivals: FestivalRepository
-    venues: VenueRepository
-    routes: RouteRepository
-    films: FilmRepository
-    programme: ProgrammeRepository
+    # Read-only, so implementations may expose their concrete repositories.
+    @property
+    def festivals(self) -> FestivalRepository: ...
+    @property
+    def venues(self) -> VenueRepository: ...
+    @property
+    def routes(self) -> RouteRepository: ...
+    @property
+    def films(self) -> FilmRepository: ...
+    @property
+    def programme(self) -> ProgrammeRepository: ...
 
     def __enter__(self) -> Self: ...
     def __exit__(
