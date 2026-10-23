@@ -30,10 +30,15 @@ Sign in with the account icon. Paste a token from
 
 ```bash
 pnpm test        # domain rules
+pnpm check       # tsc, oxlint, oxfmt --check; writes nothing
+pnpm format      # oxfmt
+pnpm lint:fix    # oxlint --fix
 pnpm build       # types and bundle
-pnpm lint
 pnpm schema      # regenerate GraphQL types after schema.graphql changes
 ```
+
+From the repo root: `mise run web:check`, or `mise run web:fix` to
+format and fix. `mise run fix` covers the Python side too.
 
 ## Pages
 

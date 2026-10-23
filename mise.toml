@@ -35,9 +35,39 @@ outputs = ["src/**/*.py"]
 description = "Format with ruff"
 
 [tasks.fix]
-depends = ["format", "check"]
+depends = ["format", "check", "web:fix"]
 sources = ["src/**/*.py"]
 description = "Format, then lint and fix"
+
+[tasks."web:typecheck"]
+run = "pnpm typecheck"
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Type-check the web app with tsc"
+
+[tasks."web:lint"]
+run = "pnpm lint:fix"
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Lint and fix the web app with oxlint"
+
+[tasks."web:format"]
+run = "pnpm format"
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Format the web app with oxfmt"
+
+[tasks."web:fix"]
+run = ["pnpm format", "pnpm lint:fix", "pnpm typecheck"]
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Format, lint and fix, then type-check the web app"
+
+[tasks."web:check"]
+run = "pnpm check"
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Type-check, lint and check formatting of the web app, no writes"
 
 # Serve
 
