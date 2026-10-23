@@ -67,7 +67,7 @@ def flags(
         Flag(
             kind=FlagKind.WITHDRAWN_COMMITMENT,
             target_id=i,
-            message=f"Committed Screening {i!r} was withdrawn",
+            message="A committed Screening was withdrawn",
         )
         for i in inputs.screening_commitments & gone
     ]
@@ -75,7 +75,7 @@ def flags(
         Flag(
             kind=FlagKind.WITHDRAWN_COMMITMENT,
             target_id=e,
-            message=f"Every Screening of committed programme entry {e!r} was withdrawn",
+            message="Every Screening of a committed Programme Entry was withdrawn",
         )
         for e in inputs.film_commitments
         if by_entry.get(e) and all(s.withdrawn for s in by_entry[e])
@@ -89,7 +89,7 @@ def flags(
                 Flag(
                     kind=FlagKind.WITHDRAWN_TICKET,
                     target_id=i,
-                    message=f"Ticketed Screening {i!r} was withdrawn",
+                    message="A ticketed Screening was withdrawn",
                 )
             )
         elif i not in active:
@@ -97,14 +97,14 @@ def flags(
                 Flag(
                     kind=FlagKind.UNSCHEDULED_TICKET,
                     target_id=i,
-                    message=f"Ticketed Screening {i!r} is not in the Active Schedule",
+                    message="A ticketed Screening is not in the Active Schedule",
                 )
             )
     found += [
         Flag(
             kind=FlagKind.WITHDRAWN_IN_SCHEDULE,
             target_id=i,
-            message=f"Scheduled Screening {i!r} was withdrawn",
+            message="A scheduled Screening was withdrawn",
         )
         for i in active & gone
     ]

@@ -477,7 +477,7 @@ def test_flags_and_comparison_suggestions(deps: ApiDependencies, client: TestCli
     assert planning["flags"] == [
         {
             "kind": "UNSCHEDULED_TICKET",
-            "message": "Ticketed Screening 'b' is not in the Active Schedule",
+            "message": "A ticketed Screening is not in the Active Schedule",
             "screening": {"id": _sid("b")},
             "programmeEntry": None,
         }
