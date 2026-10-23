@@ -76,8 +76,12 @@ class Planner:
     # --- Drafts ------------------------------------------------------------
 
     def create_draft(
-        self, user_id: UserId, festival_slug: str, change_set: ChangeSet = ChangeSet()
+        self,
+        user_id: UserId,
+        festival_slug: str,
+        change_set: ChangeSet | None = None,
     ) -> DraftView:
+        change_set = change_set or ChangeSet()
         with self._uow() as uow:
             festival = _festival(uow, festival_slug)
             check(
@@ -102,7 +106,7 @@ class Planner:
     def resolve(self, user_id: UserId, draft_id: DraftId) -> DraftView:
         """Solve again against the current Active Schedule and inputs."""
         with self._uow() as uow:
-            draft = _owned_draft(uow, user_id, draft_id)
+            draft = _owned_draft(uow, user_id, draft_id, for_update=True)
             if draft.status is DraftStatus.SOLVING:
                 raise PlanningError(f"Draft {draft_id!r} is still solving")
             change_set, notes = rebase(
@@ -132,7 +136,7 @@ class Planner:
     def accept(self, user_id: UserId, draft_id: DraftId) -> Schedule:
         """Apply the Change Set and make the Draft's Schedule Active, atomically."""
         with self._uow() as uow:
-            draft = _owned_draft(uow, user_id, draft_id)
+            draft = _owned_draft(uow, user_id, draft_id, for_update=True)
             if draft.status is not DraftStatus.READY:
                 raise DraftNotAcceptableError(
                     f"Draft {draft_id!r} is {draft.status}, not READY"
@@ -162,7 +166,7 @@ class Planner:
 
     def discard(self, user_id: UserId, draft_id: DraftId) -> None:
         with self._uow() as uow:
-            _owned_draft(uow, user_id, draft_id)
+            _owned_draft(uow, user_id, draft_id, for_update=True)
             uow.planning.delete_draft(draft_id)
             uow.commit()
 
@@ -288,7 +292,24 @@ class Planner:
         )
 
     def _solve(self, draft_id: DraftId, attempt: int) -> None:
-        """The solve job: read, solve outside any transaction, write."""
+        """The solve job; never raises, a broken job leaves the Draft FAILED."""
+        try:
+            self._solve_attempt(draft_id, attempt)
+        except Exception as e:
+            logger.exception("Solve job for draft %s broke", draft_id)
+            try:
+                self._finish(
+                    draft_id,
+                    attempt,
+                    DraftStatus.FAILED,
+                    SolveResult(status=SolveStatus.UNKNOWN),
+                    (f"The solve job failed: {e}",),
+                )
+            except Exception:
+                logger.exception("Could not mark draft %s as failed", draft_id)
+
+    def _solve_attempt(self, draft_id: DraftId, attempt: int) -> None:
+        """Read, solve outside any transaction, write."""
         with self._uow() as uow:
             draft = uow.planning.draft(draft_id)
             if draft is None or draft.attempt != attempt:
@@ -314,8 +335,19 @@ class Planner:
             if status is DraftStatus.FAILED
             else ()
         )
+        self._finish(draft_id, attempt, status, result, reasons)
+
+    def _finish(
+        self,
+        draft_id: DraftId,
+        attempt: int,
+        status: DraftStatus,
+        result: SolveResult,
+        reasons: tuple[str, ...],
+    ) -> None:
+        """Write the outcome unless the Draft was discarded or re-solved meanwhile."""
         with self._uow() as uow:
-            current = uow.planning.draft(draft_id)
+            current = uow.planning.draft(draft_id, for_update=True)
             if current is None or current.attempt != attempt:
                 return
             solved = current.model_copy(
@@ -397,8 +429,14 @@ def _festival(uow: PlanningUnitOfWork, slug: str) -> Festival:
     return festival
 
 
-def _owned_draft(uow: PlanningUnitOfWork, user_id: UserId, draft_id: DraftId) -> Draft:
-    draft = uow.planning.draft(draft_id)
+def _owned_draft(
+    uow: PlanningUnitOfWork,
+    user_id: UserId,
+    draft_id: DraftId,
+    *,
+    for_update: bool = False,
+) -> Draft:
+    draft = uow.planning.draft(draft_id, for_update=for_update)
     if draft is None or draft.user_id != user_id:
         raise NotFoundError(f"No draft {draft_id!r}")
     return draft

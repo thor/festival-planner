@@ -141,8 +141,8 @@ class SqlAlchemyPlanningRepository:
         self._session.add(row)
         self._session.flush()
 
-    def draft(self, draft_id: str) -> Draft | None:
-        row = self._session.get(DraftRow, draft_id)
+    def draft(self, draft_id: str, *, for_update: bool = False) -> Draft | None:
+        row = self._session.get(DraftRow, draft_id, with_for_update=for_update)
         return None if row is None else _draft(row)
 
     def drafts(self, user_id: str, festival_id: str) -> tuple[Draft, ...]:

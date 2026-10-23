@@ -25,8 +25,8 @@ from .fakes import (
     DeferredJobRunner,
     FailingSolver,
     GreedySolver,
-    InMemoryUnitOfWork,
     InlineJobRunner,
+    InMemoryUnitOfWork,
     RecordingNotifier,
     TickingClock,
     sequential_ids,
@@ -66,14 +66,19 @@ def uow() -> InMemoryUnitOfWork:
 
 
 def planner(
-    uow, *, solver=None, jobs=None, notifier=None, start=at("09:00")
+    uow,
+    *,
+    solver=None,
+    jobs=None,
+    notifier=None,
+    start: datetime.datetime | None = None,
 ) -> Planner:
     return Planner(
         lambda: uow,
         solver or GreedySolver(),
         jobs or InlineJobRunner(),
         notifier or RecordingNotifier(),
-        clock=TickingClock(start),
+        clock=TickingClock(start or at("09:00")),
         new_id=sequential_ids(),
     )
 
@@ -181,8 +186,7 @@ def test_results_of_a_superseded_solve_are_ignored(uow):
     view = p.create_draft("u", SLUG)
     jobs.run_all()
     p.resolve("u", view.draft.id)  # attempt 2 pending
-    first_job_again = lambda: p._solve(view.draft.id, 1)  # noqa: E731
-    first_job_again()
+    p._solve(view.draft.id, 1)
     assert p.draft("u", view.draft.id).draft.status is DraftStatus.SOLVING
     jobs.run_all()
     assert p.draft("u", view.draft.id).draft.status is DraftStatus.READY
@@ -209,7 +213,7 @@ def test_infeasible_and_failed_drafts(uow):
 def test_other_users_drafts_are_not_found(uow):
     p = planner(uow)
     view = p.create_draft("u", SLUG)
-    for action in (p.draft, p.accept, p.discard, p.resolve):
+    for action in (p.draft, p.accept, p.discard, p.resolve, p.solve_request):
         with pytest.raises(NotFoundError):
             action("someone-else", view.draft.id)
 
@@ -294,3 +298,27 @@ def test_the_solve_request_reflects_the_change_set(uow):
     assert request.screening_commitments == frozenset({"a"})
     assert request.time_zone == ZONE
     assert request.now is not None and request.now.tzinfo is not None
+
+
+def test_a_draft_discarded_before_its_solve_runs_stays_gone(uow):
+    jobs = DeferredJobRunner()
+    notifier = RecordingNotifier()
+    p = planner(uow, jobs=jobs, notifier=notifier)
+    view = p.create_draft("u", SLUG)
+    p.discard("u", view.draft.id)
+    jobs.run_all()
+    assert p.drafts("u", SLUG) == ()
+    assert notifier.solved == []
+
+
+def test_a_job_that_breaks_outside_the_solver_fails_the_draft(uow):
+    jobs = DeferredJobRunner()
+    notifier = RecordingNotifier()
+    p = planner(uow, jobs=jobs, notifier=notifier)
+    view = p.create_draft("u", SLUG)
+    uow.stored.festivals.clear()  # the request can no longer be built
+    jobs.run_all()
+    failed = p.draft("u", view.draft.id).draft
+    assert failed.status is DraftStatus.FAILED
+    assert "failed" in failed.reasons[0]
+    assert [d.id for d in notifier.solved] == [view.draft.id]

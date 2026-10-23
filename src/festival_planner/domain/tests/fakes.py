@@ -238,7 +238,7 @@ class _Planning:
     def save_schedule(self, schedule: Schedule) -> None:
         self.s.schedules[schedule.id] = schedule
 
-    def draft(self, draft_id: str) -> Draft | None:
+    def draft(self, draft_id: str, *, for_update: bool = False) -> Draft | None:
         return self.s.drafts.get(draft_id)
 
     def drafts(self, user_id: str, festival_id: str) -> tuple[Draft, ...]:
