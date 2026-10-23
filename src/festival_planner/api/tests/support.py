@@ -46,6 +46,17 @@ class FakeVerifier:
             raise InvalidTokenError("unknown token") from None
 
 
+def _readers_of(uow: InMemoryUnitOfWork) -> InMemoryUnitOfWork:
+    """A fresh unit of work over `uow`'s stored state.
+
+    DataLoaders read on several worker threads at once, and one fake unit of
+    work cannot be entered twice concurrently. Reads need no shared instance.
+    """
+    reader = InMemoryUnitOfWork()
+    reader.stored = uow.stored
+    return reader
+
+
 def dependencies(
     uow: InMemoryUnitOfWork,
     *,
@@ -64,7 +75,7 @@ def dependencies(
     )
     return ApiDependencies(
         planner=planner,
-        programme=ProgrammeQueries(lambda: uow),
+        programme=ProgrammeQueries(lambda: _readers_of(uow)),
         verifier=FakeVerifier(tokens),
         users=lambda i: user_for(uow, i.issuer, i.subject),
     )

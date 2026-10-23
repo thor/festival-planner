@@ -1,6 +1,188 @@
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""Something belonging to a Screening beyond the film."""
+type Event {
+  description: String!
+
+  """Null when the Event happens within the Screening."""
+  startTime: DateTime
+  endTime: DateTime
+}
+
+"""A single edition of a film festival."""
+type Festival implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  slug: String!
+  name: String!
+  startDate: Date!
+  endDate: Date!
+
+  """An IANA time zone, e.g. "Europe/Oslo"."""
+  timeZone: String!
+  series: FestivalSeries
+
+  """By title."""
+  programmeEntries(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): ProgrammeEntryConnection!
+
+  """By start time."""
+  screenings(
+    includeWithdrawn: Boolean! = false
+
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): ScreeningConnection!
+}
+
+"""The recurring identity that groups Festivals."""
+type FestivalSeries {
+  slug: String!
+  name: String!
+}
+
+"""A cinematic work, independent of any Festival."""
+type Film implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  title: String!
+  year: Int
+}
+
+"""An object with a Globally Unique ID"""
+interface Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+}
+
+"""Information to aid in pagination."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Film as presented in one Festival's programme."""
+type ProgrammeEntry implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  title: String!
+  year: Int
+  country: String
+  url: String
+  film: Film!
+
+  """By start time."""
+  screenings(includeWithdrawn: Boolean! = false): [Screening!]!
+}
+
+"""A connection to a list of items."""
+type ProgrammeEntryConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [ProgrammeEntryEdge!]!
+}
+
+"""An edge in a connection."""
+type ProgrammeEntryEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ProgrammeEntry!
+}
+
 type Query {
+  """By start date, then slug."""
+  festivals: [Festival!]!
+  festival(slug: String!): Festival
+
+  """By name."""
+  venues: [Venue!]!
+
+  """The node with this id; null if the id is garbage or unknown."""
+  node(id: ID!): Node
+
+  """Each id's node, or null, in the order given."""
+  nodes(ids: [ID!]!): [Node]!
+
   """The signed-in User; null when signed out."""
   viewer: Viewer
+}
+
+"""A single showing of a Programme Entry at a given time and Venue."""
+type Screening implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  startTime: DateTime!
+  endTime: DateTime!
+  auditorium: String
+  ticketUrl: String
+  events: [Event!]!
+
+  """Whether the Screening is no longer in the programme."""
+  withdrawn: Boolean!
+  programmeEntry: ProgrammeEntry!
+  venue: Venue!
+}
+
+"""A connection to a list of items."""
+type ScreeningConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [ScreeningEdge!]!
+}
+
+"""An edge in a connection."""
+type ScreeningEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Screening!
+}
+
+"""A fixed physical place where Screenings take place."""
+type Venue implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  name: String!
 }
 
 """The signed-in User."""
