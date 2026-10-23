@@ -11,7 +11,7 @@ import {
   useProgrammePage,
   useTicketsPage,
   useTray,
-  useWeekPage,
+  useSchedulePage,
 } from "@/app/pages"
 import { useFestivals } from "@/app/queries"
 import { useSession } from "@/app/session"
@@ -25,7 +25,7 @@ import { Loading, Missing } from "@/views/parts"
 import { ProgrammeView } from "@/views/programme"
 import { TicketsView } from "@/views/tickets"
 import { TrayView } from "@/views/tray"
-import { WeekView } from "@/views/week"
+import { ScheduleView } from "@/views/schedule"
 
 function Show<T>({
   load,
@@ -104,10 +104,10 @@ export function Film() {
   )
 }
 
-export function Week() {
-  const load = useWeekPage(useSlug())
-  if (!load.signedIn) return <Missing message="Sign in to see your week." />
-  return <Show load={load} render={(vm) => <WeekView vm={vm} />} />
+export function SchedulePage() {
+  const load = useSchedulePage(useSlug())
+  if (!load.signedIn) return <Missing message="Sign in to see your schedule." />
+  return <Show load={load} render={(vm) => <ScheduleView vm={vm} />} />
 }
 
 export function Drafts() {

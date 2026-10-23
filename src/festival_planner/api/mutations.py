@@ -241,7 +241,7 @@ class Mutation:
             return _no_screening(input.screening_id)
         return TicketResult(ticket=Ticket.from_domain(ticket))
 
-    @strawberry.mutation(description="Give up a Ticket for a Screening.")
+    @strawberry.mutation(description="Mark a Ticket gone: the User no longer holds it.")
     async def remove_ticket(
         self, info: Info, input: ScreeningInput
     ) -> ScreeningMutationResult:

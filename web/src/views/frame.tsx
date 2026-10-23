@@ -46,7 +46,11 @@ export function FrameView({
         </Link>
         <nav aria-label="Main" className="flex">
           <NavIcon to={`/${slug}`} icon={FilmStripIcon} label="Programme" />
-          <NavIcon to={`/${slug}/week`} icon={CalendarBlankIcon} label="Week" />
+          <NavIcon
+            to={`/${slug}/schedule`}
+            icon={CalendarBlankIcon}
+            label="Schedule"
+          />
           <NavIcon to={`/${slug}/drafts`} icon={StackIcon} label="Drafts" />
           <NavIcon
             to={`/${slug}/tickets`}

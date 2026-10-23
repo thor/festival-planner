@@ -48,7 +48,7 @@ import type {
   ScreeningVM,
   TicketsVM,
   TrayVM,
-  WeekVM,
+  ScheduleVM,
 } from "./view-models"
 
 const loading = { state: "loading" } as const
@@ -144,9 +144,9 @@ function selectedViewing(screenings: ScreeningVM[]) {
   )
 }
 
-export function useWeekPage(
+export function useSchedulePage(
   slug: string
-): Load<WeekVM> & { signedIn: boolean } {
+): Load<ScheduleVM> & { signedIn: boolean } {
   const { festival, programme, planning } = useFestivalData(slug)
   const signedIn = useSignedIn()
   const ticketModels = useTicketModels(
@@ -281,7 +281,7 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
     mutationFn: () => port.acceptDraft(id),
     onSuccess: () => {
       void settle()
-      void navigate(`/${slug}/week`)
+      void navigate(`/${slug}/schedule`)
     },
   })
   const discard = useMutation({

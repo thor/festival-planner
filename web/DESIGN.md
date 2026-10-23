@@ -43,7 +43,7 @@ Sentimental Value          ...
 
 Film: the title fills the width. Below, the screenings as rows.
 
-Week: one row per day. A big day numeral at left, then a track from 10 to
+Schedule: one row per Festival Day. A big day numeral at left, then a track from 10 to
 24 with one block per screening, width by running time.
 
 ```

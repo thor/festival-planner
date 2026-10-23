@@ -326,7 +326,7 @@ type Mutation {
   """Record that the User holds a Ticket for a Screening."""
   recordTicket(input: RecordTicketInput!): RecordTicketResult!
 
-  """Give up a Ticket for a Screening."""
+  """Mark a Ticket gone: the User no longer holds it."""
   removeTicket(input: ScreeningInput!): ScreeningMutationResult!
 
   """Mark a Film Seen by hand."""

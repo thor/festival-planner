@@ -1,14 +1,14 @@
 import { TicketIcon, WarningIcon } from "@phosphor-icons/react"
 import { Link } from "react-router"
 
-import type { WeekVM } from "@/app/view-models"
+import type { ScheduleVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 
 import { Page } from "./parts"
 
-export function WeekView({ vm }: { vm: WeekVM }) {
+export function ScheduleView({ vm }: { vm: ScheduleVM }) {
   if (vm.number === null) {
     return (
       <Page className="py-16">
@@ -128,7 +128,7 @@ export function WeekView({ vm }: { vm: WeekVM }) {
 }
 
 /** One quiet line per thing to do; details live on the Tickets page. */
-function Notices({ vm }: { vm: WeekVM }) {
+function Notices({ vm }: { vm: ScheduleVM }) {
   if (vm.letGo === 0 && vm.problems.length === 0) return null
   return (
     <ul className="border-b border-ink">

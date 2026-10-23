@@ -1,5 +1,5 @@
 // Tickets and Schedule problems as view models, shared by the Tickets page,
-// the week's notice line and the nav count.
+// the Schedule page's notice line and the nav count.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router"

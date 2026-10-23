@@ -44,7 +44,8 @@ format and fix. `mise run fix` covers the Python side too.
 
 - `/:slug` programme, filter by day
 - `/:slug/film/:id` one film, its screenings, tickets
-- `/:slug/week` the Active Schedule as day tracks
+- `/:slug/schedule` the Active Schedule as day tracks
+- `/:slug/tickets` tickets to let go, then the ones held
 - `/:slug/drafts` and `/:slug/drafts/:id` diff, accept, discard, solve again
 - `/:slug/compare` which would you rather see
 

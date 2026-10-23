@@ -16,7 +16,7 @@ import {
   Home,
   Programme,
   Tickets,
-  Week,
+  SchedulePage,
 } from "@/routes/routes"
 
 createRoot(document.getElementById("root")!).render(
@@ -30,7 +30,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path=":slug" element={<Frame />}>
                 <Route index element={<Programme />} />
                 <Route path="film/:entryId" element={<Film />} />
-                <Route path="week" element={<Week />} />
+                <Route path="schedule" element={<SchedulePage />} />
                 <Route path="drafts" element={<Drafts />} />
                 <Route path="drafts/:draftId" element={<DraftPage />} />
                 <Route path="compare" element={<Compare />} />

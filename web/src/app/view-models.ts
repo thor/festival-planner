@@ -82,17 +82,17 @@ export interface BlockVM {
   withdrawn: boolean
 }
 
-export interface WeekDayVM {
+export interface ScheduleDayVM {
   key: string
   number: string
   weekday: string
   blocks: BlockVM[]
 }
 
-export interface WeekVM {
+export interface ScheduleVM {
   number: number | null
   count: number
-  days: WeekDayVM[]
+  days: ScheduleDayVM[]
   ticks: { label: string; left: number }[]
   /** Tickets to let go, counted here and listed on the Tickets page. */
   letGo: number
