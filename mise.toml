@@ -2,32 +2,69 @@
 python = "3.13"
 uv = "latest"
 
+# CLI
+
 [tasks.festival-planner]
 run = "uv run festival-planner"
-description = "Run the festival planner"
+description = "Run the CLI"
 
 [tasks.solve]
 run = "uv run festival-planner solve"
-description = "Solve the festival planner"
+description = "Solve a schedule from the YAML files"
 
 [tasks.scrape]
 run = "uv run festival-planner scrape"
-description = "Scrape the festival planner"
+description = "Scrape the film festival programme(s)"
+
+# Quality
 
 [tasks.test]
 run = "uv run pytest"
-description = "Run the test suite"
+description = "Run the tests"
 
 [tasks.check]
 run = "uv run ruff check --fix"
 sources = ["src/**/*.py"]
 outputs = ["src/**/*.py"]
+description = "Lint and fix with ruff"
 
 [tasks.format]
 run = "uv run ruff format"
 sources = ["src/**/*.py"]
 outputs = ["src/**/*.py"]
+description = "Format with ruff"
 
 [tasks.fix]
 depends = ["format", "check"]
 sources = ["src/**/*.py"]
+description = "Format, then lint and fix"
+
+# Serve
+
+[tasks.api]
+run = "uv run festival-planner serve"
+description = "Serve the API on :8000 (needs FESTIVAL_PLANNER_ISSUERS)"
+
+[tasks."web:install"]
+run = "pnpm install"
+dir = "{{config_root}}/web"
+sources = ["web/package.json", "web/pnpm-lock.yaml"]
+outputs = ["web/node_modules/.modules.yaml"]
+description = "Install web dependencies"
+
+[tasks.web]
+run = "pnpm dev"
+dir = "{{config_root}}/web"
+depends = ["web:install"]
+description = "Serve the web app on sample data"
+
+[tasks."web:api"]
+run = "pnpm dev"
+dir = "{{config_root}}/web"
+env = { VITE_ADAPTER = "graphql" }
+depends = ["web:install"]
+description = "Serve the web app against the API"
+
+[tasks.dev]
+depends = ["api", "web:api"]
+description = "Serve the API and the web app together"

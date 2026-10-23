@@ -6,3 +6,11 @@
 .venv/
 schedule*.md
 .cursor/screenshots/
+
+# Node
+node_modules/
+web/dist/
+*.tsbuildinfo
+
+# Local mise overrides
+mise.local.toml
