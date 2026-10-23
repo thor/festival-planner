@@ -229,7 +229,11 @@ _COLLECTIONS: dict[type, tuple[str, bool]] = {
 
 def _collection_id(item: ChangeSetItem) -> str:
     """The Screening or Programme Entry a commitment or Excluded item is about."""
-    return getattr(item, "screening_id", None) or getattr(item, "programme_entry_id")
+    if (screening_id := getattr(item, "screening_id", None)) is not None:
+        return screening_id
+    if (programme_entry_id := getattr(item, "programme_entry_id", None)) is not None:
+        return programme_entry_id
+    raise TypeError(f"{item.kind} is about no Screening or Programme Entry")
 
 
 def _target(item: ChangeSetItem) -> tuple[str, ...]:

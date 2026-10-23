@@ -40,9 +40,9 @@ PROGRAMME = ProgrammeIndex.of(
 
 
 def codes(
-    change_set: ChangeSet, base: PlanningInputs = PlanningInputs()
+    change_set: ChangeSet, base: PlanningInputs | None = None
 ) -> list[ProblemCode]:
-    return [p.code for p in problems(change_set, base, PROGRAMME)]
+    return [p.code for p in problems(change_set, base or PlanningInputs(), PROGRAMME)]
 
 
 def cs(*items) -> ChangeSet:

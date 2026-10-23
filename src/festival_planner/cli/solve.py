@@ -344,8 +344,9 @@ def save_schedule_to_file(rows: list[ScheduledRow], filepath: Path) -> None:
                     f.write(f"- **Auditorium**: {screening.auditorium}\n")
                 if row.entry.country:
                     f.write(f"- **Country**: {row.entry.country}\n")
-                for event in screening.events:
-                    f.write(f"- **Event**: {event.description}\n")
+                f.writelines(
+                    f"- **Event**: {event.description}\n" for event in screening.events
+                )
                 f.write(f"- **Weight**: {row.weight:+.1f}\n")
                 f.write("\n")
 

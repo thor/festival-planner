@@ -4,15 +4,14 @@ import typer
 from rich.console import Console
 
 from .._logging import configure_logging, get_logger
-
-from .scrape import app as scrape
-from .solve import app as solve
 from .add_seen import app as add_seen
-from .set_weight import app as set_weight
-from .validate import app as validate
 from .db import app as db_app
 from .ingest import app as ingest_app
 from .plan import app as plan_app
+from .scrape import app as scrape
+from .set_weight import app as set_weight
+from .solve import app as solve
+from .validate import app as validate
 
 app = typer.Typer(help="Festival Planner - Optimize your film festival schedule")
 app.add_typer(scrape)

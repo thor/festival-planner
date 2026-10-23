@@ -4,8 +4,8 @@ import json
 import pytest
 
 from festival_planner.adapters.json_files.solve_request import (
-    dump_solve_request,
     UnsupportedFormatError,
+    dump_solve_request,
     load_solve_request,
 )
 from festival_planner.domain.planning import Preferences
