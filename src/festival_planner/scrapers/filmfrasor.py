@@ -14,10 +14,22 @@ from hishel.httpx import SyncCacheTransport
 from pydantic import ValidationError
 
 from .._logging import get_logger
-from ..models import Film, FilmList
+from ..models import Film, FilmDetails, FilmList
 from .base import BaseScraper
 
 logger = get_logger(__name__)
+
+
+# Labels in .entry-technical, Norwegian and English, by field.
+TECHNICAL_LABELS: dict[str, tuple[str, ...]] = {
+    "age_limit": ("aldersgrense", "age limit", "age rating"),
+    "language": ("språk", "language"),
+    "subtitles": ("undertekst", "subtitles"),
+    "runtime": ("spilletid", "running time", "runtime", "duration"),
+    "original_title": ("originaltittel", "original title"),
+    "genre": ("sjanger", "genre"),
+    "director": ("regissør", "director"),
+}
 
 
 class _SuccessfulResponseFilter(BaseFilter[Response]):
@@ -256,6 +268,7 @@ class FilmfrasorScraper(BaseScraper):
 
             # Extract country and year
             country, year = self._extract_country_and_year(soup)
+            details = self._extract_details(soup)
 
             # Extract screening times
             # Look for elements that contain screening information
@@ -288,6 +301,7 @@ class FilmfrasorScraper(BaseScraper):
                             cinema=cinema,
                             auditorium=auditorium,
                             special_notes=special_notes,
+                            details=details,
                         )
                         screenings.append(screening)
                         logger.debug("Added screening", **screening.model_dump())
@@ -332,6 +346,67 @@ class FilmfrasorScraper(BaseScraper):
             return title_text
 
         return None
+
+    def _extract_details(self, soup: BeautifulSoup) -> FilmDetails:
+        """What the film page says about the film beyond its screenings.
+
+        The tagline and synopsis are paragraphs of .entry-main-text. Facts are
+        label/value paragraphs in .entry-technical ("<span>Språk</span>
+        Spansk"); the page repeats that block, so the first value wins. Images
+        of related films sit in .entry-related and are skipped.
+        """
+        main = soup.find(class_="entry-main-text")
+        tagline = main.find(class_="tagline") if main else None
+        paragraphs = (
+            [
+                p.get_text(" ", strip=True)
+                for p in main.find_all("p", recursive=False)
+                if "tagline" not in (p.get("class") or [])
+            ]
+            if main
+            else []
+        )
+
+        facts: dict[str, str] = {}
+        imdb_url = None
+        for p in soup.select(".entry-technical p"):
+            label = p.find("span")
+            if label is None:
+                continue
+            key = label.get_text(" ", strip=True).lower()
+            if imdb_url is None:
+                link = p.find("a", href=re.compile(r"imdb\.com"))
+                imdb_url = link["href"] if link else None
+            value_tag = p.find(class_="age_limit_technical")
+            if value_tag is not None:
+                value = value_tag.find(string=True, recursive=False) or ""
+            else:
+                value = "".join(t for t in p.find_all(string=True) if t.parent is p)
+            value = " ".join(value.split())
+            for field, labels in TECHNICAL_LABELS.items():
+                if key in labels and value:
+                    facts.setdefault(field, value)
+
+        def own_image(folder: str) -> str | None:
+            for img in soup.find_all("img", src=re.compile(folder)):
+                if img.find_parent(class_="entry-related") is None:
+                    return img["src"]
+            return None
+
+        return FilmDetails(
+            tagline=tagline.get_text(" ", strip=True) if tagline else None,
+            synopsis="\n\n".join(p for p in paragraphs if p) or None,
+            poster_url=own_image("/posters/"),
+            still_url=own_image("/filmbilder/"),
+            runtime_minutes=_minutes(facts.get("runtime")),
+            original_title=facts.get("original_title"),
+            director=facts.get("director"),
+            genre=facts.get("genre"),
+            language=facts.get("language"),
+            subtitles=facts.get("subtitles"),
+            age_limit=facts.get("age_limit"),
+            imdb_url=imdb_url,
+        )
 
     def _extract_country_and_year(self, soup: BeautifulSoup) -> tuple[str, int | None]:
         """Extract country and year information from the page.
@@ -581,3 +656,14 @@ class FilmfrasorScraper(BaseScraper):
                 found_notes.append(keyword)
 
         return ", ".join(found_notes) if found_notes else None
+
+
+def _minutes(text: str | None) -> int | None:
+    """Minutes in a running time such as "1t 18m", "2h" or "95 min"."""
+    hours = re.search(r"(\d+)\s*[th]", text or "")
+    minutes = re.search(r"(\d+)\s*m", text or "")
+    if not hours and not minutes:
+        return None
+    return (int(hours.group(1)) * 60 if hours else 0) + (
+        int(minutes.group(1)) if minutes else 0
+    )

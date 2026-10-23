@@ -50,6 +50,9 @@ pending changes, the count of tickets to let go. Nothing else gets colour.
 Struck-through grain means excluded or withdrawn; a dashed outline marks a
 withdrawn block.
 
+Film stills and posters are printed in silver, never in colour: colour is
+kept for what is yours.
+
 One word where one will do. Buttons say what happens. Problems say what to
 do next, empty pages point to the next step, and no id is ever shown.
 
@@ -84,7 +87,11 @@ Sirāt                Fri 30  18:00  Vika 2   + ×
 Sentimental Value    ...
 ```
 
-The film page lets the title fill the width, with the screenings beneath.
+The film page lets the title fill the width, with the festival's one line
+under it and the screenings beneath. A still from the film sits between
+them, letterboxed like a cinema screen. Below the screenings, the
+festival's own words on the left and its facts on the right. Programme rows
+carry that one line too.
 
 The schedule is one row per festival day: the day’s numeral, then a track
 across the schedule’s hours with a block per screening, its width the running

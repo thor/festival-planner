@@ -13,6 +13,7 @@ from festival_planner.domain.festival import (
     FestivalSeriesId,
 )
 from festival_planner.domain.programme import (
+    EntryDetails,
     Event,
     Film,
     FilmId,
@@ -46,6 +47,14 @@ ENTRY = ProgrammeEntry(
     year=2023,
     country="FI",
     url="https://x",
+    details=EntryDetails(
+        tagline="Two lonely people.",
+        synopsis="One.\n\nTwo.",
+        poster_url="https://x/poster.jpg",
+        runtime_minutes=81,
+        director="Aki Kaurismäki",
+        age_limit="9",
+    ),
 )
 SCREENING = Screening(
     id=ScreeningId("sc"),

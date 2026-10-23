@@ -28,6 +28,24 @@ def build_normalization_map(cinema_aliases: dict[str, list[str]]) -> dict[str, s
     return normalization_map
 
 
+class FilmDetails(BaseModel):
+    """What a festival's film page says about the film, as it says it."""
+
+    tagline: str | None = None
+    synopsis: str | None = None
+    """Paragraphs separated by blank lines."""
+    poster_url: str | None = None
+    still_url: str | None = None
+    runtime_minutes: int | None = None
+    original_title: str | None = None
+    director: str | None = None
+    genre: str | None = None
+    language: str | None = None
+    subtitles: str | None = None
+    age_limit: str | None = None
+    imdb_url: str | None = None
+
+
 class Film(BaseModel):
     """Represents a film screening at a festival."""
 
@@ -49,6 +67,9 @@ class Film(BaseModel):
     )
     special_notes: str | None = Field(
         default=None, description="Special event information (Q&A, premiere, etc.)"
+    )
+    details: FilmDetails | None = Field(
+        default=None, description="The film page's description of the film"
     )
     preference_weight: float = Field(
         default=1.0,

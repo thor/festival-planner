@@ -12,7 +12,7 @@ from ...domain.ingestion import (
     SourceScreening,
     SourceSeries,
 )
-from ...domain.programme import Event, title_key
+from ...domain.programme import EntryDetails, Event, title_key
 from ...models import Film
 from ...scrapers.filmfrasor import FilmfrasorScraper
 
@@ -83,6 +83,11 @@ def _entry(key: str, rows: list[Film], zone: zoneinfo.ZoneInfo) -> SourceEntry:
         year=first.year,
         country=first.country,
         url=first.url,
+        details=(
+            EntryDetails(**first.details.model_dump())
+            if first.details
+            else EntryDetails()
+        ),
         screenings=tuple(
             SourceScreening(
                 venue_name=r.cinema,

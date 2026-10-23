@@ -69,6 +69,20 @@ export function entryOf(e: EntryData): ProgrammeEntry {
     year: e.year,
     country: e.country,
     url: e.url,
+    details: {
+      tagline: e.tagline,
+      synopsis: e.synopsis,
+      posterUrl: e.posterUrl,
+      stillUrl: e.stillUrl,
+      runtimeMinutes: e.runtimeMinutes,
+      originalTitle: e.originalTitle,
+      director: e.director,
+      genre: e.genre,
+      language: e.language,
+      subtitles: e.subtitles,
+      ageLimit: e.ageLimit,
+      imdbUrl: e.imdbUrl,
+    },
     screenings: e.screenings.map(screeningOf),
   }
 }

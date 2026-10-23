@@ -115,6 +115,19 @@ class ProgrammeEntryRow(Base):
     year: Mapped[int | None] = mapped_column(Integer)
     country: Mapped[str | None] = mapped_column(String)
     url: Mapped[str | None] = mapped_column(String)
+    # Details: what the Festival says about the film.
+    tagline: Mapped[str | None] = mapped_column(Text)
+    synopsis: Mapped[str | None] = mapped_column(Text)
+    poster_url: Mapped[str | None] = mapped_column(String)
+    still_url: Mapped[str | None] = mapped_column(String)
+    runtime_minutes: Mapped[int | None] = mapped_column(Integer)
+    original_title: Mapped[str | None] = mapped_column(String)
+    director: Mapped[str | None] = mapped_column(String)
+    genre: Mapped[str | None] = mapped_column(String)
+    language: Mapped[str | None] = mapped_column(String)
+    subtitles: Mapped[str | None] = mapped_column(String)
+    age_limit: Mapped[str | None] = mapped_column(String)
+    imdb_url: Mapped[str | None] = mapped_column(String)
     __table_args__ = (UniqueConstraint("festival_id", "source_key"),)
 
 

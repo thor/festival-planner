@@ -128,6 +128,43 @@ const films: Row[] = [
   ["Left-Handed Girl", 2025, "Taiwan", 108, ["4 13:45 1", "8 18:30 3"]],
 ]
 
+/** Directors, and a line on a few. No synopses: nothing here is made up. */
+const about: Record<string, [director: string, tagline?: string]> = {
+  Sirāt: [
+    "Oliver Laxe",
+    "A father and his son search for a missing daughter at raves in the Moroccan desert.",
+  ],
+  "Sentimental Value": [
+    "Joachim Trier",
+    "Two sisters, and the film director father who left them.",
+  ],
+  "The Secret Agent": [
+    "Kleber Mendonça Filho",
+    "Recife, 1977: a man tries to outrun his past.",
+  ],
+  "It Was Just an Accident": [
+    "Jafar Panahi",
+    "A man believes he has found the guard who tortured him in prison.",
+  ],
+  "No Other Choice": [
+    "Park Chan-wook",
+    "Laid off from the paper mill, a man sets out to remove his rivals for a new job.",
+  ],
+  Resurrection: ["Bi Gan"],
+  "Sound of Falling": ["Mascha Schilinski"],
+  Magellan: ["Lav Diaz"],
+  "Dry Leaf": ["Alexandre Koberidze"],
+  Romería: ["Carla Simón"],
+  "Two Prosecutors": ["Sergei Loznitsa"],
+  "Young Mothers": ["Jean-Pierre Dardenne, Luc Dardenne"],
+  "Kontinental '25": ["Radu Jude"],
+  "Father Mother Sister Brother": ["Jim Jarmusch"],
+  "The Mastermind": ["Kelly Reichardt"],
+  "Blue Moon": ["Richard Linklater"],
+  "The Voice of Hind Rajab": ["Kaouther Ben Hania"],
+  "Left-Handed Girl": ["Shih-Ching Tsou"],
+}
+
 /** Wall-clock time in Oslo on festival day `day`, as an instant. */
 function instant(day: number, time: string, plusMinutes = 0): string {
   const [h, m] = time.split(":").map(Number)
@@ -169,6 +206,20 @@ export const programme: ProgrammeEntry[] = films
       year,
       country,
       url: null,
+      details: {
+        tagline: about[title]?.[1] ?? null,
+        synopsis: null,
+        posterUrl: null,
+        stillUrl: null,
+        runtimeMinutes: minutes,
+        originalTitle: null,
+        director: about[title]?.[0] ?? null,
+        genre: null,
+        language: null,
+        subtitles: null,
+        ageLimit: null,
+        imdbUrl: null,
+      },
       screenings,
     }
   })

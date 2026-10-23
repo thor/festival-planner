@@ -62,6 +62,8 @@ export interface EntryVM {
   meta: string[]
   /** "More", "Most" or "Less"; null when usual. */
   interestWord: string | null
+  /** One line on the film, in the Festival's words. */
+  tagline: string | null
   marks: Marks
   screenings: ScreeningVM[]
   onCommit?: () => void
@@ -84,8 +86,29 @@ export interface ProgrammeVM {
   entries: EntryVM[]
 }
 
+/** A labelled fact about a film: "Director", "Kelly Reichardt". */
+export interface FactVM {
+  label: string
+  value: string
+  href?: string
+}
+
+export interface ImageVM {
+  src: string
+  alt: string
+}
+
 export interface FilmVM {
   title: string
+  tagline: string | null
+  /** A frame from the film; else its poster; else nothing. */
+  still: ImageVM | null
+  poster: ImageVM | null
+  /** The Festival's description, in paragraphs. */
+  paragraphs: string[]
+  /** Who wrote it, when they sign it. */
+  credit: string | null
+  facts: FactVM[]
   interest: InterestVM
   /** The selected viewing, while it can be bought; null once a ticket is held. */
   buy: ScreeningVM | null
@@ -248,6 +271,7 @@ export interface DraftListItemVM {
 export interface CompareSideVM {
   title: string
   meta: string[]
+  tagline: string | null
   onPick: () => void
 }
 

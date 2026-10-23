@@ -6,7 +6,8 @@ from festival_planner.adapters.filmfrasor.programme_source import (
     FilmfrasorProgrammeSource,
     programme_from_films,
 )
-from festival_planner.models import Film, FilmList
+from festival_planner.domain.programme import EntryDetails
+from festival_planner.models import Film, FilmDetails, FilmList
 
 
 def row(
@@ -112,3 +113,20 @@ def test_fetch_scrapes_the_year_with_the_known_venue_names(monkeypatch):
     assert kwargs["cache_dir"] == Path("/tmp/cache")
     assert kwargs["force_refresh"] is False
     assert list(kwargs["known_venue_names"]) == ["Vika Kino"]
+
+
+def test_the_entry_takes_the_film_pages_details():
+    described = row().model_copy(
+        update={
+            "details": FilmDetails(tagline="Two lonely people.", runtime_minutes=81)
+        }
+    )
+    [entry] = programme_from_films([described, row(start=21)], 2025).entries
+    assert entry.details == EntryDetails(
+        tagline="Two lonely people.", runtime_minutes=81
+    )
+
+
+def test_an_entry_without_details_has_empty_ones():
+    [entry] = programme_from_films([row()], 2025).entries
+    assert entry.details == EntryDetails()

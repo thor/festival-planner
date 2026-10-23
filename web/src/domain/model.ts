@@ -48,6 +48,24 @@ export interface Screening {
   withdrawn: boolean
 }
 
+/** What a Festival says about a film, in its own words and language. */
+export interface EntryDetails {
+  tagline: string | null
+  /** Paragraphs separated by blank lines. */
+  synopsis: string | null
+  posterUrl: string | null
+  /** A frame from the film, wider than tall. */
+  stillUrl: string | null
+  runtimeMinutes: number | null
+  originalTitle: string | null
+  director: string | null
+  genre: string | null
+  language: string | null
+  subtitles: string | null
+  ageLimit: string | null
+  imdbUrl: string | null
+}
+
 export interface ProgrammeEntry {
   id: ProgrammeEntryId
   filmId: FilmId
@@ -55,6 +73,7 @@ export interface ProgrammeEntry {
   year: number | null
   country: string | null
   url: string | null
+  details: EntryDetails
   screenings: Screening[]
 }
 

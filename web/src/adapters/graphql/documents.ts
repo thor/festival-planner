@@ -43,6 +43,18 @@ export const EntryFields = graphql(
       year
       country
       url
+      tagline
+      synopsis
+      posterUrl
+      stillUrl
+      runtimeMinutes
+      originalTitle
+      director
+      genre
+      language
+      subtitles
+      ageLimit
+      imdbUrl
       film {
         id
       }

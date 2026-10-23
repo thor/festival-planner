@@ -50,7 +50,10 @@ export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
                 >
                   {e.title}
                 </Link>
-                <div className="mt-3 flex gap-4">
+                {e.tagline && (
+                  <p className="mt-3 line-clamp-2 max-w-[52ch]">{e.tagline}</p>
+                )}
+                <div className="mt-2 flex gap-4">
                   <Meta items={e.meta} />
                   {e.interestWord && (
                     <span className="text-stamp">{e.interestWord}</span>

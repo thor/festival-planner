@@ -427,6 +427,26 @@ type ProgrammeEntry implements Node {
   year: Int
   country: String
   url: String
+
+  """One line on the film, in the Festival's words."""
+  tagline: String
+
+  """The Festival's description; paragraphs separated by blank lines."""
+  synopsis: String
+  posterUrl: String
+
+  """A frame from the film, wider than tall."""
+  stillUrl: String
+  runtimeMinutes: Int
+  originalTitle: String
+
+  """As the Festival names them."""
+  director: String
+  genre: String
+  language: String
+  subtitles: String
+  ageLimit: String
+  imdbUrl: String
   film: Film!
 
   """By start time."""

@@ -116,16 +116,47 @@ class ProgrammeEntry(relay.Node):
     year: int | None
     country: str | None
     url: str | None
+    tagline: str | None = strawberry.field(
+        description="One line on the film, in the Festival's words."
+    )
+    synopsis: str | None = strawberry.field(
+        description="The Festival's description; paragraphs separated by blank lines."
+    )
+    poster_url: str | None
+    still_url: str | None = strawberry.field(
+        description="A frame from the film, wider than tall."
+    )
+    runtime_minutes: int | None
+    original_title: str | None
+    director: str | None = strawberry.field(description="As the Festival names them.")
+    genre: str | None
+    language: str | None
+    subtitles: str | None
+    age_limit: str | None
+    imdb_url: str | None
     film_id: strawberry.Private[p.FilmId]
 
     @classmethod
     def from_domain(cls, value: p.ProgrammeEntry) -> Self:
+        d = value.details
         return cls(
             id=value.id,
             title=value.title,
             year=value.year,
             country=value.country,
             url=value.url,
+            tagline=d.tagline,
+            synopsis=d.synopsis,
+            poster_url=d.poster_url,
+            still_url=d.still_url,
+            runtime_minutes=d.runtime_minutes,
+            original_title=d.original_title,
+            director=d.director,
+            genre=d.genre,
+            language=d.language,
+            subtitles=d.subtitles,
+            age_limit=d.age_limit,
+            imdb_url=d.imdb_url,
             film_id=value.film_id,
         )
 

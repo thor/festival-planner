@@ -11,7 +11,7 @@ import {
   toggleScreeningCommitment,
   toggleScreeningExclusion,
 } from "@/domain/change-set"
-import { when } from "@/domain/labels"
+import { runtimeWord, splitSynopsis, when } from "@/domain/labels"
 import type {
   Festival,
   Planning,
@@ -26,7 +26,7 @@ import { useNow } from "./now"
 import { usePorts } from "./ports"
 import { entryInterest, entryInterestWord, usePreferences } from "./preferences"
 import { keys } from "./queries"
-import type { EntryVM, ScreeningVM } from "./view-models"
+import type { EntryVM, FactVM, ScreeningVM } from "./view-models"
 
 export function entryHref(festival: Festival, entry: { id: string }) {
   return `/${festival.slug}/film/${encodeURIComponent(entry.id)}`
@@ -39,6 +39,36 @@ export function metaOf(entry: ProgrammeEntry): string[] {
 }
 
 export { when }
+
+/** Year, country and running time, for the Film page. */
+export function longMetaOf(entry: ProgrammeEntry): string[] {
+  const minutes = entry.details.runtimeMinutes
+  return [...metaOf(entry), ...(minutes ? [runtimeWord(minutes)] : [])]
+}
+
+/** The Festival's facts, under our labels; the values stay in its words. */
+export function factsOf(entry: ProgrammeEntry): FactVM[] {
+  const d = entry.details
+  const fact = (label: string, value: string | null): FactVM[] =>
+    value ? [{ label, value }] : []
+  const retitled =
+    d.originalTitle &&
+    d.originalTitle.toLocaleLowerCase() !== entry.title.toLocaleLowerCase()
+  return [
+    ...fact("Director", d.director),
+    ...fact("Original title", retitled ? d.originalTitle : null),
+    ...fact("Genre", d.genre),
+    ...fact("Language", d.language),
+    ...fact("Subtitles", d.subtitles),
+    ...fact("Age limit", d.ageLimit),
+    ...(d.imdbUrl ? [{ label: "Links", value: "IMDb", href: d.imdbUrl }] : []),
+  ]
+}
+
+/** The Festival's description in paragraphs, and who signed it. */
+export function synopsisOf(entry: ProgrammeEntry) {
+  return splitSynopsis(entry.details.synopsis)
+}
 
 /** Builds Screening and Programme Entry view models with their actions. */
 export function useEntryModels(
@@ -105,6 +135,7 @@ export function useEntryModels(
     href: entryHref(festival!, e),
     meta: metaOf(e),
     interestWord: entryInterestWord(e, prefs),
+    tagline: e.details.tagline,
     marks: entryMarks(e.id, inputs, set),
     screenings: e.screenings.filter(only ?? (() => true)).map(screening),
     onCommit: signedIn

@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from festival_planner.scrapers.filmfrasor import (
     FilmfrasorScraper,
     _AsciiHeadersTransport,
+    _minutes,
 )
 
 FILM_LIST = """
@@ -181,3 +182,76 @@ def test_non_ascii_response_headers_are_percent_encoded():
         "<https://www.filmfrasor.no/no/film/2026/adri%C3%A1n>; rel=canonical"
     )
     assert response.text == "ok"
+
+
+FILM_DETAILS = """
+<div class="header-content">
+  <img src="https://festivalkontoret.s3.amazonaws.com/filmbilder/2025-Festival/_articleFullWidth/Noviembre.jpg" alt="">
+</div>
+<div class="outer_wrapper">
+  <img src="https://festivalkontoret.s3.amazonaws.com/posters/2025/_posterTransform/Noviembre.jpg" alt="">
+  <section class="entry-main-text">
+    <p class="tagline">Denne intense thrilleren gjenforteller stormingen av Justispalasset.</p>
+    <p>Palasset rommer landets høyesterett.</p>
+    <p>Resultatet er et klaustrofobisk kammerspill. </p>
+  </section>
+  <section class="entry-technical main">
+    <p class="age_line"><span>Aldersgrense</span><span class="age_limit_technical">15 <img class="age_tooltip" src="/graphics/question_icon.svg"/> <span class="age_reason">Grafisk vold.</span></span></p>
+    <p><span>Språk</span>
+      Spansk
+    </p>
+    <p><span>Undertekst</span>
+      Engelsk
+    </p>
+    <p><span>Spilletid</span> 1t 18m</p>
+    <p><span>Originaltittel</span> Noviembre</p>
+    <p><span>Sjanger</span>Thriller</p>
+    <p><span>Regissør</span> Tomás Corredor</p>
+    <p><span>Lenker</span><span class="technical-links">
+      <a href="https://www.imdb.com/title/tt18274520/" target="_blank">IMDb</a>
+    </span></p>
+  </section>
+  <section class="entry-technical">
+    <p><span>Språk</span> Annet</p>
+  </section>
+  <section class="entry-related">
+    <a class="card film"><img src="https://festivalkontoret.s3.amazonaws.com/posters/2025/_posterTransform/Other.jpg"></a>
+  </section>
+</div>
+"""
+
+
+def test_details_from_the_film_page(scraper):
+    details = scraper._extract_details(soup(FILM_DETAILS))
+    assert details.tagline == (
+        "Denne intense thrilleren gjenforteller stormingen av Justispalasset."
+    )
+    assert details.synopsis == (
+        "Palasset rommer landets høyesterett.\n\n"
+        "Resultatet er et klaustrofobisk kammerspill."
+    )
+    assert details.poster_url is not None and details.poster_url.endswith(
+        "/Noviembre.jpg"
+    )
+    assert details.still_url is not None and "/filmbilder/" in details.still_url
+    assert (details.runtime_minutes, details.age_limit) == (78, "15")
+    assert (details.language, details.subtitles) == ("Spansk", "Engelsk")
+    assert (details.original_title, details.genre, details.director) == (
+        "Noviembre",
+        "Thriller",
+        "Tomás Corredor",
+    )
+    assert details.imdb_url == "https://www.imdb.com/title/tt18274520/"
+
+
+def test_a_page_without_details_has_none(scraper):
+    details = scraper._extract_details(soup(ENTRY_INFO))
+    assert details.model_dump(exclude_none=True) == {}
+
+
+@pytest.mark.parametrize(
+    ("text", "minutes"),
+    [("1t 18m", 78), ("2h", 120), ("95 min", 95), ("1 h 5 min", 65), ("", None)],
+)
+def test_running_time(text, minutes):
+    assert _minutes(text) == minutes

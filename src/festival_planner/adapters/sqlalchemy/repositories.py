@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from ...domain.festival import Festival, FestivalId, FestivalSeries, FestivalSeriesId
 from ...domain.programme import (
+    EntryDetails,
     Event,
     Film,
     FilmId,
@@ -290,6 +291,19 @@ class SqlAlchemyProgrammeRepository:
         row.year = entry.year
         row.country = entry.country
         row.url = entry.url
+        details = entry.details
+        row.tagline = details.tagline
+        row.synopsis = details.synopsis
+        row.poster_url = details.poster_url
+        row.still_url = details.still_url
+        row.runtime_minutes = details.runtime_minutes
+        row.original_title = details.original_title
+        row.director = details.director
+        row.genre = details.genre
+        row.language = details.language
+        row.subtitles = details.subtitles
+        row.age_limit = details.age_limit
+        row.imdb_url = details.imdb_url
         self._session.add(row)
         self._session.flush()
 
@@ -337,6 +351,20 @@ def _entry(row: ProgrammeEntryRow) -> ProgrammeEntry:
         year=row.year,
         country=row.country,
         url=row.url,
+        details=EntryDetails(
+            tagline=row.tagline,
+            synopsis=row.synopsis,
+            poster_url=row.poster_url,
+            still_url=row.still_url,
+            runtime_minutes=row.runtime_minutes,
+            original_title=row.original_title,
+            director=row.director,
+            genre=row.genre,
+            language=row.language,
+            subtitles=row.subtitles,
+            age_limit=row.age_limit,
+            imdb_url=row.imdb_url,
+        ),
     )
 
 

@@ -144,3 +144,35 @@ export const changeWord: Record<Exclude<Change, "kept">, string> = {
   in: "In",
   out: "Out",
 }
+
+/** "1 h 18 min", "45 min", "2 h". */
+export function runtimeWord(minutes: number): string {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (!h) return `${m} min`
+  return m ? `${h} h ${m} min` : `${h} h`
+}
+
+/**
+ * A Festival's description as paragraphs, and who wrote it: Festivals often
+ * sign it with a short name on a line of its own.
+ */
+export function splitSynopsis(text: string | null): {
+  paragraphs: string[]
+  credit: string | null
+} {
+  const paragraphs = (text ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+  const last = paragraphs.at(-1)
+  const signed =
+    paragraphs.length > 1 &&
+    !!last &&
+    last.length <= 40 &&
+    !/[.!?:]$/.test(last)
+  return {
+    paragraphs: signed ? paragraphs.slice(0, -1) : paragraphs,
+    credit: signed ? last! : null,
+  }
+}

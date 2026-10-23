@@ -46,6 +46,24 @@ class Venue(Value):
         return key in {venue_name_key(n) for n in (self.name, *self.aliases)}
 
 
+class EntryDetails(Value):
+    """What a Festival says about a film, in its own words and language."""
+
+    tagline: str | None = None
+    synopsis: str | None = None
+    """Paragraphs separated by blank lines."""
+    poster_url: str | None = None
+    still_url: str | None = None
+    runtime_minutes: int | None = None
+    original_title: str | None = None
+    director: str | None = None
+    genre: str | None = None
+    language: str | None = None
+    subtitles: str | None = None
+    age_limit: str | None = None
+    imdb_url: str | None = None
+
+
 class ProgrammeEntry(Value):
     """A Film as presented in one Festival's programme."""
 
@@ -55,6 +73,7 @@ class ProgrammeEntry(Value):
     year: int | None = None
     country: str | None = None
     url: str | None = None
+    details: EntryDetails = EntryDetails()
 
 
 class Event(Value):

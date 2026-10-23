@@ -83,6 +83,9 @@ function Side({
       <span className="title block text-[clamp(3rem,9vw,8rem)] group-hover:text-stamp group-disabled:group-hover:text-inherit">
         {side.title}
       </span>
+      {side.tagline && (
+        <span className="mt-4 block max-w-[52ch] text-lg">{side.tagline}</span>
+      )}
       <Meta items={side.meta} className="mt-3" />
     </button>
   )

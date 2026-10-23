@@ -16,6 +16,7 @@ from festival_planner.domain.festival import (
     FestivalSeriesId,
 )
 from festival_planner.domain.programme import (
+    EntryDetails,
     Event,
     Film,
     FilmId,
@@ -65,6 +66,18 @@ def _entry(title: str, year: int) -> tuple[Film, ProgrammeEntry]:
 
 FILM_BANANA, BANANA = _entry("Banana", 2029)
 FILM_APPLE, APPLE = _entry("apple", 2030)
+APPLE = APPLE.model_copy(
+    update={
+        "details": EntryDetails(
+            tagline="Crisp.",
+            synopsis="One.\n\nTwo.",
+            poster_url="https://fest.example/apple.jpg",
+            runtime_minutes=95,
+            original_title="Pomme",
+            imdb_url="https://www.imdb.com/title/tt1/",
+        )
+    }
+)
 FILM_CHERRY, CHERRY = _entry("Cherry", 2028)
 
 TALK = Event(description="Q&A", start_time=_at(20), end_time=_at(21))
@@ -316,3 +329,31 @@ def test_films_of_many_entries_load_in_one_batch(monkeypatch: pytest.MonkeyPatch
     ]
     assert titles == ["apple", "Banana", "Cherry"]
     assert calls == [frozenset({FILM_APPLE.id, FILM_BANANA.id, FILM_CHERRY.id})]
+
+
+def test_an_entry_shows_what_the_festival_says_about_it(client: TestClient):
+    query = """
+    query ($id: ID!) {
+      node(id: $id) {
+        ... on ProgrammeEntry {
+          tagline synopsis posterUrl stillUrl runtimeMinutes originalTitle
+          director genre language subtitles ageLimit imdbUrl
+        }
+      }
+    }
+    """
+    data = gql(client, query, {"id": encode("ProgrammeEntry", APPLE.id)})
+    assert data["node"] == {
+        "tagline": "Crisp.",
+        "synopsis": "One.\n\nTwo.",
+        "posterUrl": "https://fest.example/apple.jpg",
+        "stillUrl": None,
+        "runtimeMinutes": 95,
+        "originalTitle": "Pomme",
+        "director": None,
+        "genre": None,
+        "language": None,
+        "subtitles": None,
+        "ageLimit": None,
+        "imdbUrl": "https://www.imdb.com/title/tt1/",
+    }

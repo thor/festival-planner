@@ -15,6 +15,7 @@ from pydantic import AwareDatetime, Field, model_validator
 
 from .festival import Festival, FestivalId, FestivalSeries, FestivalSeriesId
 from .programme import (
+    EntryDetails,
     Event,
     Film,
     FilmId,
@@ -73,6 +74,7 @@ class SourceEntry(Value):
     year: int | None = None
     country: str | None = None
     url: str | None = None
+    details: EntryDetails = EntryDetails()
     screenings: tuple[SourceScreening, ...] = ()
 
 
@@ -428,6 +430,7 @@ def ingest_programme(
                 year=described.year,
                 country=described.country,
                 url=described.url,
+                details=described.details,
             )
             if entry != old:
                 uow.programme.save_entry(festival.id, described.source_key, entry)

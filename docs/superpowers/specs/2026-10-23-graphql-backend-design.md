@@ -37,7 +37,11 @@ providers).
   Seen and Enrichment attach to Films.
 - **Programme Entry** is a Film as presented by one Festival; its
   festival-supplied information is primary for display. Screenings and
-  Curations point at Programme Entries.
+  Curations point at Programme Entries. Its details are what the Festival
+  says about the film, in the Festival's language: tagline, synopsis,
+  poster and still URLs, running time, original title, director, genre,
+  language, subtitles, age limit and IMDb link. Images are linked, not
+  stored.
 - **Screening**: one showing of a Programme Entry at a Venue (optional
   Auditorium), with optional ticket URL.
 - **Event**: belongs to one Screening (e.g. director talk, debate, award

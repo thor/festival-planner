@@ -38,7 +38,14 @@ import {
   usePlanning,
   useProgramme,
 } from "./queries"
-import { entryHref, metaOf, useEntryModels } from "./screenings"
+import {
+  entryHref,
+  factsOf,
+  longMetaOf,
+  metaOf,
+  synopsisOf,
+  useEntryModels,
+} from "./screenings"
 import { useSignedIn } from "./session"
 import { useTicketModels } from "./tickets"
 import type {
@@ -146,14 +153,25 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
   if (!festival.data || !entry) return missing("No such film.")
   const vm = models.entry(entry)
   const selected = selectedViewing(vm.screenings)
+  const { stillUrl, posterUrl } = entry.details
   return ready({
     title: entry.title,
+    tagline: entry.details.tagline,
+    still: stillUrl
+      ? { src: stillUrl, alt: `A still from ${entry.title}` }
+      : null,
+    poster:
+      posterUrl && !stillUrl
+        ? { src: posterUrl, alt: `The poster for ${entry.title}` }
+        : null,
+    ...synopsisOf(entry),
+    facts: factsOf(entry),
     interest: models.interest(entry),
     buy:
       !vm.screenings.some((s) => s.ticket) && selected?.buyHref
         ? selected
         : null,
-    meta: metaOf(entry),
+    meta: longMetaOf(entry),
     url: entry.url,
     entry: vm,
     backHref: `/${festival.data.slug}`,
@@ -448,11 +466,13 @@ export function useComparePage(slug: string): Load<CompareVM> {
           a: {
             title: pair.scheduled.title,
             meta: metaOf(pair.scheduled),
+            tagline: pair.scheduled.details.tagline,
             onPick: pick("a", pair.scheduled.id, pair.other.id),
           },
           b: {
             title: pair.other.title,
             meta: metaOf(pair.other),
+            tagline: pair.other.details.tagline,
             onPick: pick("b", pair.other.id, pair.scheduled.id),
           },
         }

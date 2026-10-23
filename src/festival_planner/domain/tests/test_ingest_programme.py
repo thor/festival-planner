@@ -13,7 +13,7 @@ from festival_planner.domain.ingestion import (
     UnknownVenuesError,
     ingest_programme,
 )
-from festival_planner.domain.programme import Event, Venue, VenueId
+from festival_planner.domain.programme import EntryDetails, Event, Venue, VenueId
 
 from .builders import at
 from .fakes import InMemoryUnitOfWork
@@ -99,6 +99,17 @@ def test_entry_ids_survive_a_title_correction(uow):
     report = ingest_programme(uow, programme(entry(title="A, revised")), new_id=ids())
     [(_, _, new)] = uow.stored.entries.values()
     assert new.id == old.id and new.title == "A, revised"
+    assert report.entries_updated == 1
+
+
+def test_details_update_in_place(uow):
+    ingest_programme(uow, programme(entry()), new_id=ids())
+    described = entry().model_copy(
+        update={"details": EntryDetails(tagline="New words.", runtime_minutes=95)}
+    )
+    report = ingest_programme(uow, programme(described), new_id=ids())
+    [(_, _, stored)] = uow.stored.entries.values()
+    assert stored.details == EntryDetails(tagline="New words.", runtime_minutes=95)
     assert report.entries_updated == 1
 
 
