@@ -7,7 +7,17 @@ import { composePorts } from "@/app/composition"
 import { PortsProvider } from "@/app/ports"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { Compare, DraftPage, Drafts, Film, Frame, Home, Programme, Tickets, Week } from "@/routes/routes"
+import {
+  Compare,
+  DraftPage,
+  Drafts,
+  Film,
+  Frame,
+  Home,
+  Programme,
+  Tickets,
+  Week,
+} from "@/routes/routes"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -31,5 +41,5 @@ createRoot(document.getElementById("root")!).render(
         </TooltipProvider>
       </PortsProvider>
     </ThemeProvider>
-  </StrictMode>,
+  </StrictMode>
 )

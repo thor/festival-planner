@@ -18,9 +18,20 @@ export function adapterName(): AdapterName {
 export function composePorts(name: AdapterName = adapterName()): Ports {
   if (name === "graphql") {
     const session = browserSession()
-    const run = graphqlClient(import.meta.env.VITE_GRAPHQL_URL ?? "/graphql", session)
-    return { session, programme: graphqlProgramme(run), planning: graphqlPlanning(run) }
+    const run = graphqlClient(
+      import.meta.env.VITE_GRAPHQL_URL ?? "/graphql",
+      session
+    )
+    return {
+      session,
+      programme: graphqlProgramme(run),
+      planning: graphqlPlanning(run),
+    }
   }
   const session = memorySession()
-  return { session, programme: memoryProgramme(), planning: memoryPlanning(session) }
+  return {
+    session,
+    programme: memoryProgramme(),
+    planning: memoryPlanning(session),
+  }
 }

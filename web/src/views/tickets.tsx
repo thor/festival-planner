@@ -12,7 +12,10 @@ export function TicketsView({ vm }: { vm: TicketsVM }) {
     return (
       <Page className="py-16">
         <p className="text-xl">No tickets.</p>
-        <Link to={vm.programmeHref} className="mt-4 inline-block underline underline-offset-4">
+        <Link
+          to={vm.programmeHref}
+          className="mt-4 inline-block underline underline-offset-4"
+        >
           Programme
         </Link>
       </Page>
@@ -29,9 +32,16 @@ export function TicketsView({ vm }: { vm: TicketsVM }) {
         </Section>
       )}
       {vm.held.length > 0 && (
-        <Section title="Held" count={vm.held.length} className={cn(vm.letGo.length > 0 && "mt-12")}>
+        <Section
+          title="Held"
+          count={vm.held.length}
+          className={cn(vm.letGo.length > 0 && "mt-12")}
+        >
           {vm.held.map((t) => (
-            <li key={t.id} className="grid gap-1 border-b border-ink py-4 md:grid-cols-[1fr_auto] md:items-baseline md:gap-8">
+            <li
+              key={t.id}
+              className="grid gap-1 border-b border-ink py-4 md:grid-cols-[1fr_auto] md:items-baseline md:gap-8"
+            >
               <Link to={t.href} className="title text-2xl hover:text-stamp">
                 {t.title}
               </Link>
@@ -82,7 +92,10 @@ function LetGoRow({ t }: { t: TicketVM }) {
   return (
     <li className="grid gap-4 border-b border-ink py-6 md:grid-cols-[1fr_auto] md:items-end md:gap-10">
       <div>
-        <Link to={t.href} className="title text-3xl hover:text-stamp md:text-4xl">
+        <Link
+          to={t.href}
+          className="title text-3xl hover:text-stamp md:text-4xl"
+        >
           {t.title}
         </Link>
         <div className="mt-3">
@@ -103,17 +116,28 @@ function LetGoRow({ t }: { t: TicketVM }) {
             variant="outline"
             aria-pressed={t.keeping}
             onClick={t.onKeep}
-            className={cn(action, t.keeping && "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85")}
+            className={cn(
+              action,
+              t.keeping &&
+                "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85"
+            )}
           >
             Keep
           </Button>
         )}
         {t.festivalHref && (
-          <ExternalLink href={t.festivalHref} className={cn(buttonVariants({ variant: "outline" }), action)}>
+          <ExternalLink
+            href={t.festivalHref}
+            className={cn(buttonVariants({ variant: "outline" }), action)}
+          >
             Festival page
           </ExternalLink>
         )}
-        <Button onClick={t.onGone} disabled={!t.onGone} className="h-10 px-5 text-base">
+        <Button
+          onClick={t.onGone}
+          disabled={!t.onGone}
+          className="h-10 px-5 text-base"
+        >
           Gone
         </Button>
       </div>

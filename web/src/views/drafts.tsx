@@ -29,11 +29,12 @@ export function DraftListView({ drafts }: { drafts: DraftListItemVM[] }) {
       <ol>
         {drafts.map((d) => (
           <li key={d.id} className="border-b border-ink">
-            <Link to={d.href} className="grid grid-cols-[4rem_1fr_auto] items-baseline gap-4 py-4 hover:bg-haze">
+            <Link
+              to={d.href}
+              className="grid grid-cols-[4rem_1fr_auto] items-baseline gap-4 py-4 hover:bg-haze"
+            >
               <span>{d.created}</span>
-              <span>
-                {d.stale ? "Out of date" : statusWord[d.status]}
-              </span>
+              <span>{d.stale ? "Out of date" : statusWord[d.status]}</span>
               <span className="text-grain">
                 {d.changes} {d.changes === 1 ? "change" : "changes"}
               </span>
@@ -54,7 +55,9 @@ export function DraftView({ vm }: { vm: DraftVM }) {
           {vm.status === "solving" ? (
             <Spinner label="Solving" />
           ) : (
-            <h1 className="text-xl">{vm.stale ? "Out of date" : statusWord[vm.status]}</h1>
+            <h1 className="text-xl">
+              {vm.stale ? "Out of date" : statusWord[vm.status]}
+            </h1>
           )}
           {vm.scoreDelta && (
             <span aria-label="Score change" className="text-xl text-grain">
@@ -63,15 +66,31 @@ export function DraftView({ vm }: { vm: DraftVM }) {
           )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="h-10 px-4 text-base" disabled={vm.busy} onClick={vm.onDiscard}>
+          <Button
+            variant="outline"
+            className="h-10 px-4 text-base"
+            disabled={vm.busy}
+            onClick={vm.onDiscard}
+          >
             Discard
           </Button>
-          {(vm.stale || vm.status === "failed" || vm.status === "infeasible") && (
-            <Button variant="outline" className="h-10 px-4 text-base" disabled={vm.busy} onClick={vm.onResolve}>
+          {(vm.stale ||
+            vm.status === "failed" ||
+            vm.status === "infeasible") && (
+            <Button
+              variant="outline"
+              className="h-10 px-4 text-base"
+              disabled={vm.busy}
+              onClick={vm.onResolve}
+            >
               Solve again
             </Button>
           )}
-          <Button className="h-10 px-5 text-base" disabled={!canAccept} onClick={vm.onAccept}>
+          <Button
+            className="h-10 px-5 text-base"
+            disabled={!canAccept}
+            onClick={vm.onAccept}
+          >
             Accept
           </Button>
         </div>
@@ -87,7 +106,8 @@ export function DraftView({ vm }: { vm: DraftVM }) {
       {vm.droppedTickets > 0 && (
         <p className="flex items-center gap-2 border-b border-ink py-3">
           <TicketIcon size={18} weight="light" />
-          Frees {vm.droppedTickets} {vm.droppedTickets === 1 ? "ticket" : "tickets"}.
+          Frees {vm.droppedTickets}{" "}
+          {vm.droppedTickets === 1 ? "ticket" : "tickets"}.
         </p>
       )}
 
@@ -110,20 +130,48 @@ export function DraftView({ vm }: { vm: DraftVM }) {
   )
 }
 
-function DiffList({ rows, sign, empty }: { rows: DiffRowVM[]; sign: "plus" | "minus"; empty: string }) {
+function DiffList({
+  rows,
+  sign,
+  empty,
+}: {
+  rows: DiffRowVM[]
+  sign: "plus" | "minus"
+  empty: string
+}) {
   const Glyph = sign === "plus" ? PlusIcon : MinusIcon
   return (
     <ul aria-label={sign === "plus" ? "Added" : "Removed"}>
-      {rows.length === 0 && <li className="border-b border-ink py-4 text-grain">{empty}</li>}
+      {rows.length === 0 && (
+        <li className="border-b border-ink py-4 text-grain">{empty}</li>
+      )}
       {rows.map((r) => (
-        <li key={r.id} className="grid grid-cols-[1.5rem_1fr] gap-x-3 border-b border-ink py-4">
-          <Glyph size={20} weight="light" className={cn("mt-1", sign === "plus" && "text-stamp")} />
+        <li
+          key={r.id}
+          className="grid grid-cols-[1.5rem_1fr] gap-x-3 border-b border-ink py-4"
+        >
+          <Glyph
+            size={20}
+            weight="light"
+            className={cn("mt-1", sign === "plus" && "text-stamp")}
+          />
           <div>
-            <p className={cn("title text-2xl", sign === "minus" && "text-grain")}>{r.title}</p>
+            <p
+              className={cn("title text-2xl", sign === "minus" && "text-grain")}
+            >
+              {r.title}
+            </p>
             <p className="mt-2 flex items-center gap-4 text-grain">
               <span>{r.when}</span>
               <span>{r.venue}</span>
-              {r.ticket && <TicketIcon size={16} weight="bold" aria-label="Ticket" className="text-ink" />}
+              {r.ticket && (
+                <TicketIcon
+                  size={16}
+                  weight="bold"
+                  aria-label="Ticket"
+                  className="text-ink"
+                />
+              )}
             </p>
           </div>
         </li>

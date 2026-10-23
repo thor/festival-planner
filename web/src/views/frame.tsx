@@ -1,4 +1,10 @@
-import { ArrowsLeftRightIcon, CalendarBlankIcon, FilmStripIcon, StackIcon, TicketIcon } from "@phosphor-icons/react"
+import {
+  ArrowsLeftRightIcon,
+  CalendarBlankIcon,
+  FilmStripIcon,
+  StackIcon,
+  TicketIcon,
+} from "@phosphor-icons/react"
 import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
@@ -25,19 +31,35 @@ export function FrameView({
   const [dock, setDock] = useState<HTMLElement | null>(null)
   return (
     <div className="min-h-svh">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-screen focus:p-2">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-screen focus:p-2"
+      >
         Skip to content
       </a>
       <header className="sticky top-0 z-20 flex h-10 items-stretch border-b border-ink bg-screen">
-        <Link to={`/${slug}`} className="flex min-w-0 flex-1 items-center px-4 text-lg md:px-8">
+        <Link
+          to={`/${slug}`}
+          className="flex min-w-0 flex-1 items-center px-4 text-lg md:px-8"
+        >
           <span className="truncate">{festival}</span>
         </Link>
         <nav aria-label="Main" className="flex">
           <NavIcon to={`/${slug}`} icon={FilmStripIcon} label="Programme" />
           <NavIcon to={`/${slug}/week`} icon={CalendarBlankIcon} label="Week" />
           <NavIcon to={`/${slug}/drafts`} icon={StackIcon} label="Drafts" />
-          <NavIcon to={`/${slug}/tickets`} icon={TicketIcon} label="Tickets" count={letGo} countLabel={`${letGo} to let go`} />
-          <NavIcon to={`/${slug}/compare`} icon={ArrowsLeftRightIcon} label="Compare" />
+          <NavIcon
+            to={`/${slug}/tickets`}
+            icon={TicketIcon}
+            label="Tickets"
+            count={letGo}
+            countLabel={`${letGo} to let go`}
+          />
+          <NavIcon
+            to={`/${slug}/compare`}
+            icon={ArrowsLeftRightIcon}
+            label="Compare"
+          />
         </nav>
         {account}
       </header>

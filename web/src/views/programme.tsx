@@ -9,10 +9,24 @@ import { ScreeningRow } from "./screening-row"
 export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
   return (
     <Page>
-      <nav aria-label="Days" className="sticky top-10 z-10 flex overflow-x-auto border-x border-b border-ink bg-screen">
-        <DayLink href={vm.allHref} current={vm.allCurrent} number="All" weekday="" />
+      <nav
+        aria-label="Days"
+        className="sticky top-10 z-10 flex overflow-x-auto border-x border-b border-ink bg-screen"
+      >
+        <DayLink
+          href={vm.allHref}
+          current={vm.allCurrent}
+          number="All"
+          weekday=""
+        />
         {vm.days.map((d) => (
-          <DayLink key={d.key} href={d.href} current={d.current} number={d.number} weekday={d.weekday} />
+          <DayLink
+            key={d.key}
+            href={d.href}
+            current={d.current}
+            number={d.number}
+            weekday={d.weekday}
+          />
         ))}
       </nav>
 
@@ -31,7 +45,7 @@ export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
                   className={cn(
                     "title block text-3xl hover:text-stamp md:text-5xl",
                     e.marks.committed && "text-stamp",
-                    e.marks.excluded && "line-through decoration-1",
+                    e.marks.excluded && "line-through decoration-1"
                   )}
                 >
                   {e.title}
@@ -51,18 +65,30 @@ export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
   )
 }
 
-function DayLink({ href, current, number, weekday }: { href: string; current: boolean; number: string; weekday: string }) {
+function DayLink({
+  href,
+  current,
+  number,
+  weekday,
+}: {
+  href: string
+  current: boolean
+  number: string
+  weekday: string
+}) {
   return (
     <Link
       to={href}
       aria-current={current ? "page" : undefined}
       className={cn(
         "flex min-w-14 shrink-0 flex-col items-center border-r border-ink px-3 py-2 last:border-r-0 hover:bg-haze",
-        current && "bg-ink text-screen hover:bg-ink",
+        current && "bg-ink text-screen hover:bg-ink"
       )}
     >
       <span className="text-xl">{number}</span>
-      <span className={cn("text-xs text-grain", current && "text-screen/70")}>{weekday || " "}</span>
+      <span className={cn("text-xs text-grain", current && "text-screen/70")}>
+        {weekday || " "}
+      </span>
     </Link>
   )
 }

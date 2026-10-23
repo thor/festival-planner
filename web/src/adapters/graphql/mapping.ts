@@ -34,7 +34,9 @@ type ScreeningData = ResultOf<typeof ScreeningFields>
 type EntryData = ResultOf<typeof EntryFields>
 type ChangeSetData = ResultOf<typeof ChangeSetFields>
 type DraftData = ResultOf<typeof DraftFields>
-type PlanningData = NonNullable<NonNullable<ResultOf<typeof PlanningQuery>["viewer"]>["planning"]>
+type PlanningData = NonNullable<
+  NonNullable<ResultOf<typeof PlanningQuery>["viewer"]>["planning"]
+>
 
 export function festivalOf(f: FestivalData): Festival {
   return { ...f, id: f.id as FestivalId }
@@ -69,7 +71,8 @@ export function entryOf(e: EntryData): ProgrammeEntry {
 
 export function itemOf(i: ChangeSetData): ChangeSetItem {
   const s = (x: { screening: { id: string } }) => x.screening.id as ScreeningId
-  const e = (x: { programmeEntry: { id: string } }) => x.programmeEntry.id as ProgrammeEntryId
+  const e = (x: { programmeEntry: { id: string } }) =>
+    x.programmeEntry.id as ProgrammeEntryId
   switch (i.__typename) {
     case "AddScreeningCommitment":
       return { kind: "addScreeningCommitment", screeningId: s(i) }
@@ -94,13 +97,17 @@ export function itemOf(i: ChangeSetData): ChangeSetItem {
         otherId: i.other.id as ProgrammeEntryId,
       }
     case "SetBuffer":
-      return i.venue ? { kind: "other", label: "Venue buffer" } : { kind: "setBuffer", minutes: i.minutes }
+      return i.venue
+        ? { kind: "other", label: "Venue buffer" }
+        : { kind: "setBuffer", minutes: i.minutes }
     default:
       return { kind: "other", label: i.__typename }
   }
 }
 
-type ItemInput = NonNullable<VariablesOf<typeof CreateDraftMutation>["input"]["changeSet"]>[number]
+type ItemInput = NonNullable<
+  VariablesOf<typeof CreateDraftMutation>["input"]["changeSet"]
+>[number]
 
 /** Items the API takes. "other" items came from the API and are not sent back. */
 export function itemInputOf(item: ChangeSetItem): ItemInput | null {
@@ -116,13 +123,26 @@ export function itemInputOf(item: ChangeSetItem): ItemInput | null {
     case "addFilmCommitment":
       return { addFilmCommitment: { programmeEntryId: item.programmeEntryId } }
     case "releaseFilmCommitment":
-      return { releaseFilmCommitment: { programmeEntryId: item.programmeEntryId } }
+      return {
+        releaseFilmCommitment: { programmeEntryId: item.programmeEntryId },
+      }
     case "addExcludedProgrammeEntry":
-      return { addExcludedProgrammeEntry: { programmeEntryId: item.programmeEntryId } }
+      return {
+        addExcludedProgrammeEntry: { programmeEntryId: item.programmeEntryId },
+      }
     case "removeExcludedProgrammeEntry":
-      return { removeExcludedProgrammeEntry: { programmeEntryId: item.programmeEntryId } }
+      return {
+        removeExcludedProgrammeEntry: {
+          programmeEntryId: item.programmeEntryId,
+        },
+      }
     case "recordComparison":
-      return { recordComparison: { preferredId: item.preferredId, otherId: item.otherId } }
+      return {
+        recordComparison: {
+          preferredId: item.preferredId,
+          otherId: item.otherId,
+        },
+      }
     case "setBuffer":
       return { setBuffer: { minutes: item.minutes } }
     case "other":
@@ -153,7 +173,11 @@ export function scheduleOf(s: {
   acceptedAt: string
   screenings: ScreeningData[]
 }): Schedule {
-  return { ...s, id: s.id as ScheduleId, screenings: s.screenings.map(screeningOf) }
+  return {
+    ...s,
+    id: s.id as ScheduleId,
+    screenings: s.screenings.map(screeningOf),
+  }
 }
 
 export function flagOf(f: PlanningData["flags"][number]): Flag {
@@ -168,9 +192,13 @@ export function flagOf(f: PlanningData["flags"][number]): Flag {
 export function inputsOf(i: PlanningData["inputs"]) {
   return {
     bufferMinutes: i.preferences.bufferMinutes,
-    screeningCommitments: i.screeningCommitments.map((s) => s.id as ScreeningId),
+    screeningCommitments: i.screeningCommitments.map(
+      (s) => s.id as ScreeningId
+    ),
     filmCommitments: i.filmCommitments.map((e) => e.id as ProgrammeEntryId),
     excludedScreenings: i.excludedScreenings.map((s) => s.id as ScreeningId),
-    excludedProgrammeEntries: i.excludedProgrammeEntries.map((e) => e.id as ProgrammeEntryId),
+    excludedProgrammeEntries: i.excludedProgrammeEntries.map(
+      (e) => e.id as ProgrammeEntryId
+    ),
   }
 }

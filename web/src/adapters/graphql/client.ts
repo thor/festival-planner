@@ -1,4 +1,9 @@
-import { Client, fetchExchange, type AnyVariables, type TypedDocumentNode } from "@urql/core"
+import {
+  Client,
+  fetchExchange,
+  type AnyVariables,
+  type TypedDocumentNode,
+} from "@urql/core"
 
 import { PortError } from "@/domain/errors"
 import type { SessionPort } from "@/domain/ports"
@@ -6,7 +11,7 @@ import type { SessionPort } from "@/domain/ports"
 export type Run = <Data, Variables extends AnyVariables>(
   document: TypedDocumentNode<Data, Variables>,
   variables: Variables,
-  kind?: "query" | "mutation",
+  kind?: "query" | "mutation"
 ) => Promise<Data>
 
 /**
@@ -40,9 +45,13 @@ export function graphqlClient(url: string, session: SessionPort): Run {
       kind === "query"
         ? await client.query(document, variables).toPromise()
         : await client.mutation(document, variables).toPromise()
-    if (result.error?.networkError instanceof PortError) throw result.error.networkError
+    if (result.error?.networkError instanceof PortError)
+      throw result.error.networkError
     if (result.error || !result.data) {
-      throw new PortError({ kind: "unreachable", message: result.error?.message ?? "No data" })
+      throw new PortError({
+        kind: "unreachable",
+        message: result.error?.message ?? "No data",
+      })
     }
     return result.data
   }

@@ -41,7 +41,7 @@ export interface ScreeningMarks {
 export function screeningMarks(
   id: ScreeningId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): ScreeningMarks {
   const s = { screeningId: id }
   const addC = has(set, { kind: "addScreeningCommitment", ...s })
@@ -66,7 +66,7 @@ export interface EntryMarks {
 export function entryMarks(
   id: ProgrammeEntryId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): EntryMarks {
   const e = { programmeEntryId: id }
   const addC = has(set, { kind: "addFilmCommitment", ...e })
@@ -90,7 +90,7 @@ function flip(
   set: ChangeSet,
   was: boolean,
   on: ChangeSetItem,
-  off: ChangeSetItem,
+  off: ChangeSetItem
 ): ChangeSet {
   if (has(set, on)) return without(set, on)
   if (has(set, off)) return without(set, off)
@@ -100,7 +100,7 @@ function flip(
 export function toggleScreeningCommitment(
   id: ScreeningId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): ChangeSet {
   const s = { screeningId: id }
   const marks = screeningMarks(id, inputs, set)
@@ -108,16 +108,17 @@ export function toggleScreeningCommitment(
     set,
     inputs.screeningCommitments.includes(id),
     { kind: "addScreeningCommitment", ...s },
-    { kind: "releaseScreeningCommitment", ...s },
+    { kind: "releaseScreeningCommitment", ...s }
   )
-  if (!marks.committed && marks.excluded) next = toggleScreeningExclusion(id, inputs, next)
+  if (!marks.committed && marks.excluded)
+    next = toggleScreeningExclusion(id, inputs, next)
   return next
 }
 
 export function toggleScreeningExclusion(
   id: ScreeningId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): ChangeSet {
   const s = { screeningId: id }
   const marks = screeningMarks(id, inputs, set)
@@ -125,16 +126,17 @@ export function toggleScreeningExclusion(
     set,
     inputs.excludedScreenings.includes(id),
     { kind: "addExcludedScreening", ...s },
-    { kind: "removeExcludedScreening", ...s },
+    { kind: "removeExcludedScreening", ...s }
   )
-  if (!marks.excluded && marks.committed) next = toggleScreeningCommitment(id, inputs, next)
+  if (!marks.excluded && marks.committed)
+    next = toggleScreeningCommitment(id, inputs, next)
   return next
 }
 
 export function toggleFilmCommitment(
   id: ProgrammeEntryId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): ChangeSet {
   const e = { programmeEntryId: id }
   const marks = entryMarks(id, inputs, set)
@@ -142,16 +144,17 @@ export function toggleFilmCommitment(
     set,
     inputs.filmCommitments.includes(id),
     { kind: "addFilmCommitment", ...e },
-    { kind: "releaseFilmCommitment", ...e },
+    { kind: "releaseFilmCommitment", ...e }
   )
-  if (!marks.committed && marks.excluded) next = toggleFilmExclusion(id, inputs, next)
+  if (!marks.committed && marks.excluded)
+    next = toggleFilmExclusion(id, inputs, next)
   return next
 }
 
 export function toggleFilmExclusion(
   id: ProgrammeEntryId,
   inputs: PlanningInputs,
-  set: ChangeSet,
+  set: ChangeSet
 ): ChangeSet {
   const e = { programmeEntryId: id }
   const marks = entryMarks(id, inputs, set)
@@ -159,9 +162,10 @@ export function toggleFilmExclusion(
     set,
     inputs.excludedProgrammeEntries.includes(id),
     { kind: "addExcludedProgrammeEntry", ...e },
-    { kind: "removeExcludedProgrammeEntry", ...e },
+    { kind: "removeExcludedProgrammeEntry", ...e }
   )
-  if (!marks.excluded && marks.committed) next = toggleFilmCommitment(id, inputs, next)
+  if (!marks.excluded && marks.committed)
+    next = toggleFilmCommitment(id, inputs, next)
   return next
 }
 
@@ -169,13 +173,13 @@ export function toggleFilmExclusion(
 export function recordComparison(
   preferredId: ProgrammeEntryId,
   otherId: ProgrammeEntryId,
-  set: ChangeSet,
+  set: ChangeSet
 ): ChangeSet {
   const pair = new Set([preferredId, otherId])
   const kept = set.filter(
     (i) =>
       i.kind !== "recordComparison" ||
-      !(pair.has(i.preferredId) && pair.has(i.otherId)),
+      !(pair.has(i.preferredId) && pair.has(i.otherId))
   )
   return [...kept, { kind: "recordComparison", preferredId, otherId }]
 }
@@ -185,7 +189,14 @@ export function removeAt(index: number, set: ChangeSet): ChangeSet {
 }
 
 /** The verb an item performs, for an icon and a word. */
-export type ItemVerb = "commit" | "release" | "exclude" | "include" | "prefer" | "buffer" | "other"
+export type ItemVerb =
+  | "commit"
+  | "release"
+  | "exclude"
+  | "include"
+  | "prefer"
+  | "buffer"
+  | "other"
 
 export function verbOf(item: ChangeSetItem): ItemVerb {
   switch (item.kind) {

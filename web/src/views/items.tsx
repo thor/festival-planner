@@ -27,7 +27,12 @@ export function ItemLine({ item }: { item: ItemVM }) {
   const Glyph = verbIcon[item.verb]
   return (
     <li className="flex items-center gap-3 border-b border-haze py-2 last:border-b-0">
-      <Glyph size={18} weight="light" aria-label={item.word} className="shrink-0" />
+      <Glyph
+        size={18}
+        weight="light"
+        aria-label={item.word}
+        className="shrink-0"
+      />
       <span className="min-w-0 flex-1 truncate">{item.subject}</span>
       {item.onRemove && (
         <button

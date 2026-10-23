@@ -7,7 +7,13 @@ import {
   toggleScreeningCommitment,
   toggleScreeningExclusion,
 } from "./change-set"
-import type { Festival, FestivalId, PlanningInputs, ProgrammeEntryId, ScreeningId } from "./model"
+import type {
+  Festival,
+  FestivalId,
+  PlanningInputs,
+  ProgrammeEntryId,
+  ScreeningId,
+} from "./model"
 import { clock, dayKey, festivalDays, minuteOfDay } from "./time"
 import { layDays } from "./timeline"
 
@@ -23,7 +29,10 @@ describe("change set", () => {
   })
 
   it("releases an accepted commitment instead of adding a no-op", () => {
-    const inputs: PlanningInputs = { ...emptyInputs, screeningCommitments: [s1] }
+    const inputs: PlanningInputs = {
+      ...emptyInputs,
+      screeningCommitments: [s1],
+    }
     expect(toggleScreeningCommitment(s1, inputs, [])).toEqual([
       { kind: "releaseScreeningCommitment", screeningId: s1 },
     ])
@@ -32,13 +41,21 @@ describe("change set", () => {
   it("never leaves a Screening committed and excluded", () => {
     const committed = toggleScreeningCommitment(s1, emptyInputs, [])
     const excluded = toggleScreeningExclusion(s1, emptyInputs, committed)
-    expect(excluded).toEqual([{ kind: "addExcludedScreening", screeningId: s1 }])
-    expect(screeningMarks(s1, emptyInputs, excluded)).toEqual({ committed: false, excluded: true, pending: true })
+    expect(excluded).toEqual([
+      { kind: "addExcludedScreening", screeningId: s1 },
+    ])
+    expect(screeningMarks(s1, emptyInputs, excluded)).toEqual({
+      committed: false,
+      excluded: true,
+      pending: true,
+    })
   })
 
   it("keeps one Comparison per pair, latest wins", () => {
     const set = recordComparison(b, a, recordComparison(a, b, []))
-    expect(set).toEqual([{ kind: "recordComparison", preferredId: b, otherId: a }])
+    expect(set).toEqual([
+      { kind: "recordComparison", preferredId: b, otherId: a },
+    ])
   })
 })
 
@@ -59,11 +76,17 @@ describe("time", () => {
   })
 
   it("counts after-midnight minutes past 24h on the screening's day", () => {
-    expect(minuteOfDay("2026-10-24T22:30:00Z", "2026-10-24", "Europe/Oslo")).toBe(24 * 60 + 30)
+    expect(
+      minuteOfDay("2026-10-24T22:30:00Z", "2026-10-24", "Europe/Oslo")
+    ).toBe(24 * 60 + 30)
   })
 
   it("lists every Festival day", () => {
-    expect(festivalDays(festival)).toEqual(["2026-10-24", "2026-10-25", "2026-10-26"])
+    expect(festivalDays(festival)).toEqual([
+      "2026-10-24",
+      "2026-10-25",
+      "2026-10-26",
+    ])
   })
 })
 

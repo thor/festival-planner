@@ -17,11 +17,16 @@ export function useSession() {
   return {
     signedIn,
     /** The memory adapter takes any token. */
-    hint: adapterName() === "memory" ? "Any text works here." : "festival-planner token issue",
+    hint:
+      adapterName() === "memory"
+        ? "Any text works here."
+        : "festival-planner token issue",
     /** For a form with a `token` field. */
     onSubmit(event: FormEvent<HTMLFormElement>) {
       event.preventDefault()
-      session.signIn(String(new FormData(event.currentTarget).get("token") ?? ""))
+      session.signIn(
+        String(new FormData(event.currentTarget).get("token") ?? "")
+      )
       void reset()
     },
     signOut() {

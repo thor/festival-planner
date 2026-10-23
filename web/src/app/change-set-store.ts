@@ -16,14 +16,17 @@ function subscribe(listener: () => void) {
 }
 
 export function usePendingChangeSet(festivalId: FestivalId | undefined) {
-  const set = useSyncExternalStore(subscribe, () => (festivalId && sets.get(festivalId)) || empty)
+  const set = useSyncExternalStore(
+    subscribe,
+    () => (festivalId && sets.get(festivalId)) || empty
+  )
   const update = useCallback(
     (change: (set: ChangeSet) => ChangeSet) => {
       if (!festivalId) return
       sets.set(festivalId, change(sets.get(festivalId) ?? empty))
       listeners.forEach((l) => l())
     },
-    [festivalId],
+    [festivalId]
   )
   return [set, update] as const
 }

@@ -3,7 +3,10 @@
 export type PortProblem =
   | { kind: "notSignedIn" }
   | { kind: "notFound" }
-  | { kind: "invalidChangeSet"; problems: { message: string; items: number[] }[] }
+  | {
+      kind: "invalidChangeSet"
+      problems: { message: string; items: number[] }[]
+    }
   | { kind: "draftNotAcceptable"; message: string }
   | { kind: "draftStillSolving" }
   | { kind: "unreachable"; message: string }

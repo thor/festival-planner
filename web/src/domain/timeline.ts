@@ -18,8 +18,13 @@ export interface DayRow {
   placed: Placed[]
 }
 
-export function byDay(festival: Festival, screenings: Screening[]): Map<DayKey, Screening[]> {
-  const days = new Map<DayKey, Screening[]>(festivalDays(festival).map((d) => [d, []]))
+export function byDay(
+  festival: Festival,
+  screenings: Screening[]
+): Map<DayKey, Screening[]> {
+  const days = new Map<DayKey, Screening[]>(
+    festivalDays(festival).map((d) => [d, []])
+  )
   for (const s of screenings) {
     const key = dayKey(s.startTime, festival.timeZone)
     if (!days.has(key)) days.set(key, [])
@@ -41,7 +46,11 @@ export function layDays(festival: Festival, screenings: Screening[]): DayRow[] {
       const start = minuteOfDay(screening.startTime, day, festival.timeZone)
       const end = minuteOfDay(screening.endTime, day, festival.timeZone)
       const left = clamp((start - TRACK_START) / span)
-      return { screening, left, width: clamp((end - TRACK_START) / span) - left }
+      return {
+        screening,
+        left,
+        width: clamp((end - TRACK_START) / span) - left,
+      }
     }),
   }))
 }

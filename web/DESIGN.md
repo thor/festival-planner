@@ -7,13 +7,13 @@ films, four or five venues. The job: see the week, change it, accept it.
 
 Colour. A silver screen, black ink, one stamp of ultramarine.
 
-| Name   | Light     | Dark      | Use                                   |
-| ------ | --------- | --------- | ------------------------------------- |
-| screen | `#E9EBEC` | `#000000` | background                            |
-| ink    | `#000000` | `#E9EBEC` | text, every border                    |
-| grain  | `#5F656B` | `#8A9096` | secondary text, withdrawn, excluded   |
-| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track                 |
-| stamp  | `#2323C8` | `#8C8CFF` | yours: committed, ticket, focus ring  |
+| Name   | Light     | Dark      | Use                                  |
+| ------ | --------- | --------- | ------------------------------------ |
+| screen | `#E9EBEC` | `#000000` | background                           |
+| ink    | `#000000` | `#E9EBEC` | text, every border                   |
+| grain  | `#5F656B` | `#8A9096` | secondary text, withdrawn, excluded  |
+| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track                |
+| stamp  | `#2323C8` | `#8C8CFF` | yours: committed, ticket, focus ring |
 
 Type. Two serifs that never swap roles.
 

@@ -49,7 +49,11 @@ export function clock(instant: Instant, timeZone: string): string {
 }
 
 /** Minutes since local midnight; after-midnight screenings count past 24h. */
-export function minuteOfDay(instant: Instant, day: DayKey, timeZone: string): number {
+export function minuteOfDay(
+  instant: Instant,
+  day: DayKey,
+  timeZone: string
+): number {
   const p = parts(instant, timeZone)
   const shift = dayKey(instant, timeZone) > day ? 24 * 60 : 0
   return shift + p.hour * 60 + p.minute
@@ -74,9 +78,10 @@ export function dayNumber(day: DayKey): string {
 
 /** "Fri" */
 export function weekday(day: DayKey): string {
-  return new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(
-    new Date(`${day}T12:00:00Z`),
-  )
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${day}T12:00:00Z`))
 }
 
 /** "Fri 10" */

@@ -13,14 +13,25 @@ import {
   RemoveTicketMutation,
   ResolveDraftMutation,
 } from "./documents"
-import { draftOf, entryOf, flagOf, inputsOf, itemInputOf, scheduleOf, screeningOf } from "./mapping"
+import {
+  draftOf,
+  entryOf,
+  flagOf,
+  inputsOf,
+  itemInputOf,
+  scheduleOf,
+  screeningOf,
+} from "./mapping"
 
 type Failure =
   | { __typename: "NotSignedIn" }
   | { __typename: "NotFound" }
   | { __typename: "DraftStillSolving" }
   | { __typename: "DraftNotAcceptable"; message?: string }
-  | { __typename: "InvalidChangeSet"; problems?: { message: string; items: number[] }[] }
+  | {
+      __typename: "InvalidChangeSet"
+      problems?: { message: string; items: number[] }[]
+    }
 
 /** Turn a mutation's error member into a PortError. */
 function fail(result: Failure): never {
@@ -28,8 +39,14 @@ function fail(result: Failure): never {
     NotSignedIn: { kind: "notSignedIn" },
     NotFound: { kind: "notFound" },
     DraftStillSolving: { kind: "draftStillSolving" },
-    DraftNotAcceptable: { kind: "draftNotAcceptable", message: "message" in result ? (result.message ?? "") : "" },
-    InvalidChangeSet: { kind: "invalidChangeSet", problems: "problems" in result ? (result.problems ?? []) : [] },
+    DraftNotAcceptable: {
+      kind: "draftNotAcceptable",
+      message: "message" in result ? (result.message ?? "") : "",
+    },
+    InvalidChangeSet: {
+      kind: "invalidChangeSet",
+      problems: "problems" in result ? (result.problems ?? []) : [],
+    },
   }
   throw new PortError(problems[result.__typename])
 }
@@ -55,9 +72,10 @@ export function graphqlPlanning(run: Run): PlanningPort {
           exchangeable: t.exchangeable,
           refundable: t.refundable,
         })),
-        suggestions: p.comparisonSuggestions.map(
-          (s): ComparisonPair => ({ scheduled: entryOf(s.scheduled), other: entryOf(s.other) }),
-        ),
+        suggestions: p.comparisonSuggestions.map((s): ComparisonPair => ({
+          scheduled: entryOf(s.scheduled),
+          other: entryOf(s.other),
+        })),
       }
     },
     async draft(id) {
@@ -76,31 +94,51 @@ export function graphqlPlanning(run: Run): PlanningPort {
       const { createDraft: r } = await run(
         CreateDraftMutation,
         { input: { festivalId, changeSet: items } },
-        "mutation",
+        "mutation"
       )
       if (r.__typename !== "DraftResult") fail(r)
       return draftOf(r.draft)
     },
     async resolveDraft(id) {
-      const { resolveDraft: r } = await run(ResolveDraftMutation, { input: { draftId: id } }, "mutation")
+      const { resolveDraft: r } = await run(
+        ResolveDraftMutation,
+        { input: { draftId: id } },
+        "mutation"
+      )
       if (r.__typename !== "DraftResult") fail(r as Failure)
       return draftOf(r.draft)
     },
     async acceptDraft(id) {
-      const { acceptDraft: r } = await run(AcceptDraftMutation, { input: { draftId: id } }, "mutation")
+      const { acceptDraft: r } = await run(
+        AcceptDraftMutation,
+        { input: { draftId: id } },
+        "mutation"
+      )
       if (r.__typename !== "ScheduleResult") fail(r as Failure)
       return scheduleOf(r.schedule)
     },
     async discardDraft(id) {
-      const { discardDraft: r } = await run(DiscardDraftMutation, { input: { draftId: id } }, "mutation")
+      const { discardDraft: r } = await run(
+        DiscardDraftMutation,
+        { input: { draftId: id } },
+        "mutation"
+      )
       ok(r.__typename, "Discarded", r)
     },
     async recordTicket(id) {
-      const { recordTicket: r } = await run(RecordTicketMutation, { input: { screeningId: id } }, "mutation")
+      const { recordTicket: r } = await run(
+        RecordTicketMutation,
+        { input: { screeningId: id } },
+        "mutation"
+      )
       ok(r.__typename, "TicketResult", r)
     },
     async removeTicket(id) {
-      const { removeTicket: r } = await run(RemoveTicketMutation, { input: { screeningId: id } }, "mutation")
+      const { removeTicket: r } = await run(
+        RemoveTicketMutation,
+        { input: { screeningId: id } },
+        "mutation"
+      )
       ok(r.__typename, "ScreeningResult", r)
     },
   }

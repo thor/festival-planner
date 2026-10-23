@@ -2,7 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query"
 
-import type { DraftId, Festival, FestivalId, ProgrammeEntryId } from "@/domain/model"
+import type {
+  DraftId,
+  Festival,
+  FestivalId,
+  ProgrammeEntryId,
+} from "@/domain/model"
 
 import { usePorts } from "./ports"
 import { useSignedIn } from "./session"
@@ -18,12 +23,18 @@ export const keys = {
 
 export function useFestivals() {
   const { programme } = usePorts()
-  return useQuery({ queryKey: keys.festivals, queryFn: () => programme.festivals() })
+  return useQuery({
+    queryKey: keys.festivals,
+    queryFn: () => programme.festivals(),
+  })
 }
 
 export function useFestival(slug: string) {
   const { programme } = usePorts()
-  return useQuery({ queryKey: keys.festival(slug), queryFn: () => programme.festival(slug) })
+  return useQuery({
+    queryKey: keys.festival(slug),
+    queryFn: () => programme.festival(slug),
+  })
 }
 
 export function useProgramme(festival: Festival | null | undefined) {

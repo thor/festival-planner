@@ -7,14 +7,32 @@ import { useNavigate } from "react-router"
 
 import { recordComparison, removeAt, type ChangeSet } from "@/domain/change-set"
 import { describeProblem, problemOf } from "@/domain/errors"
-import { describeItem, lookupOf, signed, when, type Lookup } from "@/domain/labels"
-import type { Draft, DraftId, Festival, ProgrammeEntryId, Screening } from "@/domain/model"
+import {
+  describeItem,
+  lookupOf,
+  signed,
+  when,
+  type Lookup,
+} from "@/domain/labels"
+import type {
+  Draft,
+  DraftId,
+  Festival,
+  ProgrammeEntryId,
+  Screening,
+} from "@/domain/model"
 import { clock, dayKey, dayNumber, festivalDays, weekday } from "@/domain/time"
 import { hourTicks, layDays } from "@/domain/timeline"
 
 import { usePendingChangeSet } from "./change-set-store"
 import { usePorts } from "./ports"
-import { keys, useDraft, useFestival, usePlanning, useProgramme } from "./queries"
+import {
+  keys,
+  useDraft,
+  useFestival,
+  usePlanning,
+  useProgramme,
+} from "./queries"
 import { entryHref, metaOf, useEntryModels } from "./screenings"
 import { useSignedIn } from "./session"
 import { useTicketModels } from "./tickets"
@@ -47,25 +65,38 @@ function useFestivalData(slug: string) {
 export function useFrame(slug: string) {
   const { festival, programme, planning } = useFestivalData(slug)
   const tickets = useTicketModels(festival.data, planning.data, programme.data)
-  return { festival: festival.data?.name ?? "", slug, letGo: tickets.letGo.length }
+  return {
+    festival: festival.data?.name ?? "",
+    slug,
+    letGo: tickets.letGo.length,
+  }
 }
 
 export function useTicketsPage(slug: string): Load<TicketsVM> {
   const { festival, programme, planning } = useFestivalData(slug)
   const tickets = useTicketModels(festival.data, planning.data, programme.data)
-  if (festival.isPending || planning.isPending || programme.isPending) return loading
+  if (festival.isPending || planning.isPending || programme.isPending)
+    return loading
   if (!festival.data) return missing("No such festival.")
   if (!planning.data) return missing("Sign in to see tickets.")
-  return ready({ letGo: tickets.letGo, held: tickets.held, programmeHref: `/${festival.data.slug}` })
+  return ready({
+    letGo: tickets.letGo,
+    held: tickets.held,
+    programmeHref: `/${festival.data.slug}`,
+  })
 }
 
-export function useProgrammePage(slug: string, day: string | null): Load<ProgrammeVM> {
+export function useProgrammePage(
+  slug: string,
+  day: string | null
+): Load<ProgrammeVM> {
   const { festival, programme, planning } = useFestivalData(slug)
   const models = useEntryModels(festival.data, planning.data)
   if (festival.isPending || programme.isPending) return loading
   if (!festival.data) return missing("No such festival.")
   const f = festival.data
-  const onDay = (s: Screening) => !day || dayKey(s.startTime, f.timeZone) === day
+  const onDay = (s: Screening) =>
+    !day || dayKey(s.startTime, f.timeZone) === day
   const entries = (programme.data ?? [])
     .filter((e) => e.screenings.some(onDay))
     .map((e) => models.entry(e, onDay))
@@ -94,7 +125,10 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
   const selected = selectedViewing(vm.screenings)
   return ready({
     title: entry.title,
-    buy: !vm.screenings.some((s) => s.ticket) && selected?.buyHref ? selected : null,
+    buy:
+      !vm.screenings.some((s) => s.ticket) && selected?.buyHref
+        ? selected
+        : null,
     meta: metaOf(entry),
     url: entry.url,
     entry: vm,
@@ -104,14 +138,24 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
 
 /** The viewing in the Active Schedule, else the committed one. */
 function selectedViewing(screenings: ScreeningVM[]) {
-  return screenings.find((s) => s.scheduled && !s.marks.excluded) ?? screenings.find((s) => s.marks.committed)
+  return (
+    screenings.find((s) => s.scheduled && !s.marks.excluded) ??
+    screenings.find((s) => s.marks.committed)
+  )
 }
 
-export function useWeekPage(slug: string): Load<WeekVM> & { signedIn: boolean } {
+export function useWeekPage(
+  slug: string
+): Load<WeekVM> & { signedIn: boolean } {
   const { festival, programme, planning } = useFestivalData(slug)
   const signedIn = useSignedIn()
-  const ticketModels = useTicketModels(festival.data, planning.data, programme.data)
-  if (festival.isPending || (signedIn && planning.isPending)) return { ...loading, signedIn }
+  const ticketModels = useTicketModels(
+    festival.data,
+    planning.data,
+    programme.data
+  )
+  if (festival.isPending || (signedIn && planning.isPending))
+    return { ...loading, signedIn }
   if (!festival.data) return { ...missing("No such festival."), signedIn }
   const f = festival.data
   const p = planning.data
@@ -150,7 +194,11 @@ export function useWeekPage(slug: string): Load<WeekVM> & { signedIn: boolean } 
   }
 }
 
-function itemsOf(set: ChangeSet, lookup: Lookup, onRemove?: (index: number) => void): ItemVM[] {
+function itemsOf(
+  set: ChangeSet,
+  lookup: Lookup,
+  onRemove?: (index: number) => void
+): ItemVM[] {
   return set.map((item, i) => ({
     ...describeItem(item, lookup),
     onRemove: onRemove && (() => onRemove(i)),
@@ -177,7 +225,9 @@ export function useTray(slug: string): TrayVM {
       // Show it at once, then fetch its diff: createDraft does not return one.
       client.setQueryData(keys.draft(draft.id), draft)
       void client.invalidateQueries({ queryKey: keys.draft(draft.id) })
-      void client.invalidateQueries({ queryKey: keys.planning(draft.festivalId) })
+      void client.invalidateQueries({
+        queryKey: keys.planning(draft.festivalId),
+      })
       void navigate(`/${slug}/drafts/${encodeURIComponent(draft.id)}`)
     },
   })
@@ -213,7 +263,7 @@ export function useDraftsPage(slug: string): Load<DraftListItemVM[]> {
       stale: d.stale,
       changes: d.changeSet.length,
       created: clock(d.createdAt, tz),
-    })),
+    }))
   )
 }
 
@@ -265,7 +315,10 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
   return ready({
     status: statusOf(d),
     stale: d.stale,
-    scoreDelta: d.diff && Math.abs(d.diff.scoreDelta) >= 0.05 ? signed(d.diff.scoreDelta) : null,
+    scoreDelta:
+      d.diff && Math.abs(d.diff.scoreDelta) >= 0.05
+        ? signed(d.diff.scoreDelta)
+        : null,
     added: d.diff?.added.map(row) ?? [],
     removed: d.diff?.removed.map(row) ?? [],
     droppedTickets: d.diff?.droppedTickets.length ?? 0,
@@ -290,22 +343,29 @@ export function useComparePage(slug: string): Load<CompareVM> {
   const key = (a: string, b: string) => [a, b].sort().join("|")
   const done = new Set([
     ...skipped,
-    ...set.flatMap((i) => (i.kind === "recordComparison" ? [key(i.preferredId, i.otherId)] : [])),
+    ...set.flatMap((i) =>
+      i.kind === "recordComparison" ? [key(i.preferredId, i.otherId)] : []
+    ),
   ])
-  const open = planning.data.suggestions.filter((p) => !done.has(key(p.scheduled.id, p.other.id)))
+  const open = planning.data.suggestions.filter(
+    (p) => !done.has(key(p.scheduled.id, p.other.id))
+  )
   const pair = open[0]
-  const pick = (side: "a" | "b", preferred: ProgrammeEntryId, other: ProgrammeEntryId) => () => {
-    setPicked(side)
-    // Let the loser fade before the next pair.
-    setTimeout(() => {
-      update((cs) => recordComparison(preferred, other, cs))
-      setPicked(null)
-    }, 420)
-  }
+  const pick =
+    (side: "a" | "b", preferred: ProgrammeEntryId, other: ProgrammeEntryId) =>
+    () => {
+      setPicked(side)
+      // Let the loser fade before the next pair.
+      setTimeout(() => {
+        update((cs) => recordComparison(preferred, other, cs))
+        setPicked(null)
+      }, 420)
+    }
   return ready({
     picked,
     left: open.length,
-    onSkip: () => pair && setSkipped((s) => [...s, key(pair.scheduled.id, pair.other.id)]),
+    onSkip: () =>
+      pair && setSkipped((s) => [...s, key(pair.scheduled.id, pair.other.id)]),
     pair: pair
       ? {
           a: {

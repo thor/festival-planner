@@ -4,11 +4,17 @@ import type { ComponentProps, ReactNode } from "react"
 import { Link } from "react-router"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 /** A link that opens outside the app, in a new tab. */
-export function ExternalLink(props: Omit<ComponentProps<"a">, "target" | "rel">) {
+export function ExternalLink(
+  props: Omit<ComponentProps<"a">, "target" | "rel">
+) {
   return <a {...props} target="_blank" rel="noreferrer" />
 }
 
@@ -32,9 +38,13 @@ export function Action({
 }) {
   const classes = cn(
     "border-ink bg-transparent disabled:opacity-30 dark:border-ink dark:bg-transparent dark:hover:bg-haze",
-    on && tone === "stamp" && "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85 hover:text-stamp-ink dark:border-stamp dark:bg-stamp dark:hover:bg-stamp/85",
-    on && tone === "ink" && "bg-ink text-screen hover:bg-ink/85 hover:text-screen dark:bg-ink dark:hover:bg-ink/85",
-    className,
+    on &&
+      tone === "stamp" &&
+      "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85 hover:text-stamp-ink dark:border-stamp dark:bg-stamp dark:hover:bg-stamp/85",
+    on &&
+      tone === "ink" &&
+      "bg-ink text-screen hover:bg-ink/85 hover:text-screen dark:bg-ink dark:hover:bg-ink/85",
+    className
   )
   return (
     <Tooltip>
@@ -44,7 +54,10 @@ export function Action({
             <ExternalLink
               href={href}
               aria-label={label}
-              className={cn(buttonVariants({ variant: "outline", size: "icon" }), classes)}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "icon" }),
+                classes
+              )}
             />
           ) : (
             <Button
@@ -88,7 +101,9 @@ export function NavIcon({
         render={
           <Link
             to={to}
-            aria-label={count > 0 && countLabel ? `${label}, ${countLabel}` : label}
+            aria-label={
+              count > 0 && countLabel ? `${label}, ${countLabel}` : label
+            }
             data-end={end}
             className="flex h-10 items-center gap-2 border-l border-ink px-3 text-sm hover:bg-haze md:px-4"
           />
@@ -97,7 +112,10 @@ export function NavIcon({
         <Glyph size={20} weight="light" />
         <span className="hidden md:inline">{label}</span>
         {count > 0 && (
-          <span aria-hidden className="-ml-1 flex h-4 min-w-4 items-center justify-center bg-stamp px-1 text-xs leading-none text-stamp-ink">
+          <span
+            aria-hidden
+            className="-ml-1 flex h-4 min-w-4 items-center justify-center bg-stamp px-1 text-xs leading-none text-stamp-ink"
+          >
             {count}
           </span>
         )}
@@ -116,8 +134,23 @@ export function Spinner({ label }: { label: string }) {
   )
 }
 
-export function Page({ children, className }: { children: ReactNode; className?: string }) {
-  return <main className={cn("mx-auto w-full max-w-[90rem] px-4 pb-40 md:px-8", className)}>{children}</main>
+export function Page({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <main
+      className={cn(
+        "mx-auto w-full max-w-[90rem] px-4 pb-40 md:px-8",
+        className
+      )}
+    >
+      {children}
+    </main>
+  )
 }
 
 export function Loading() {
@@ -128,12 +161,23 @@ export function Loading() {
   )
 }
 
-export function Missing({ message, href, link }: { message: string; href?: string; link?: string }) {
+export function Missing({
+  message,
+  href,
+  link,
+}: {
+  message: string
+  href?: string
+  link?: string
+}) {
   return (
     <Page className="py-16">
       <p className="text-xl">{message}</p>
       {href && (
-        <Link to={href} className="mt-4 inline-block underline underline-offset-4">
+        <Link
+          to={href}
+          className="mt-4 inline-block underline underline-offset-4"
+        >
           {link}
         </Link>
       )}
@@ -142,7 +186,13 @@ export function Missing({ message, href, link }: { message: string; href?: strin
 }
 
 /** Year and country, spaced, never joined by dots. */
-export function Meta({ items, className }: { items: string[]; className?: string }) {
+export function Meta({
+  items,
+  className,
+}: {
+  items: string[]
+  className?: string
+}) {
   return (
     <p className={cn("flex gap-4 text-grain", className)}>
       {items.map((m) => (

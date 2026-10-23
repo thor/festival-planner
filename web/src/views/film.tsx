@@ -1,4 +1,9 @@
-import { ArrowSquareOutIcon, PlusIcon, TicketIcon, XIcon } from "@phosphor-icons/react"
+import {
+  ArrowSquareOutIcon,
+  PlusIcon,
+  TicketIcon,
+  XIcon,
+} from "@phosphor-icons/react"
 
 import type { EntryVM, FilmVM, ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
@@ -16,7 +21,7 @@ export function FilmView({ vm }: { vm: FilmVM }) {
           className={cn(
             "title text-[clamp(3.3rem,11vw,11rem)]",
             entry.marks.committed && "text-stamp",
-            entry.marks.excluded && "text-grain line-through decoration-2",
+            entry.marks.excluded && "text-grain line-through decoration-2"
           )}
         >
           {vm.title}
@@ -37,11 +42,17 @@ export function FilmView({ vm }: { vm: FilmVM }) {
           <>
             {/* Wide: beside the screenings, kept in view. */}
             <aside className="sticky top-14 hidden self-start pt-4 md:block">
-              <BuyTicket buy={vm.buy} className="max-w-sm flex-col items-start gap-1 px-5 py-4" />
+              <BuyTicket
+                buy={vm.buy}
+                className="max-w-sm flex-col items-start gap-1 px-5 py-4"
+              />
             </aside>
             {/* Narrow: along the bottom edge. */}
             <Docked>
-              <BuyTicket buy={vm.buy} className="h-14 items-center justify-between gap-4 px-4 md:hidden" />
+              <BuyTicket
+                buy={vm.buy}
+                className="h-14 items-center justify-between gap-4 px-4 md:hidden"
+              />
             </Docked>
           </>
         )}
@@ -50,9 +61,21 @@ export function FilmView({ vm }: { vm: FilmVM }) {
   )
 }
 
-function BuyTicket({ buy, className }: { buy: ScreeningVM; className: string }) {
+function BuyTicket({
+  buy,
+  className,
+}: {
+  buy: ScreeningVM
+  className: string
+}) {
   return (
-    <ExternalLink href={buy.buyHref!} className={cn("flex w-full bg-stamp text-stamp-ink hover:bg-stamp/85", className)}>
+    <ExternalLink
+      href={buy.buyHref!}
+      className={cn(
+        "flex w-full bg-stamp text-stamp-ink hover:bg-stamp/85",
+        className
+      )}
+    >
       <span className="flex items-center gap-3 text-lg">
         <TicketIcon size={22} weight="light" />
         Buy ticket
@@ -81,7 +104,14 @@ function FilmActions({ entry, url }: { entry: EntryVM; url: string | null }) {
         onClick={entry.onExclude}
         className="-ml-px"
       />
-      {url && <Action icon={ArrowSquareOutIcon} label="Festival page" href={url} className="-ml-px" />}
+      {url && (
+        <Action
+          icon={ArrowSquareOutIcon}
+          label="Festival page"
+          href={url}
+          className="-ml-px"
+        />
+      )}
     </div>
   )
 }

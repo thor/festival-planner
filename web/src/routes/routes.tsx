@@ -27,9 +27,18 @@ import { TicketsView } from "@/views/tickets"
 import { TrayView } from "@/views/tray"
 import { WeekView } from "@/views/week"
 
-function Show<T>({ load, render, back }: { load: Load<T>; render: (value: T) => React.ReactNode; back?: string }) {
+function Show<T>({
+  load,
+  render,
+  back,
+}: {
+  load: Load<T>
+  render: (value: T) => React.ReactNode
+  back?: string
+}) {
   if (load.state === "loading") return <Loading />
-  if (load.state === "missing") return <Missing message={load.message} href={back} link="Back" />
+  if (load.state === "missing")
+    return <Missing message={load.message} href={back} link="Back" />
   return render(load.value)
 }
 
@@ -39,7 +48,14 @@ export function Home() {
   const festivals = useFestivals()
   if (festivals.isPending) return <Loading />
   const first = festivals.data?.[0]
-  if (!first) return <Missing message={festivals.isError ? "Server unreachable." : "No festivals yet."} />
+  if (!first)
+    return (
+      <Missing
+        message={
+          festivals.isError ? "Server unreachable." : "No festivals yet."
+        }
+      />
+    )
   return <Navigate to={`/${first.slug}`} replace />
 }
 
@@ -52,7 +68,14 @@ export function Frame() {
       festival={frame.festival}
       slug={frame.slug}
       letGo={frame.letGo}
-      account={<AccountView signedIn={session.signedIn} hint={session.hint} onSubmit={session.onSubmit} onSignOut={session.signOut} />}
+      account={
+        <AccountView
+          signedIn={session.signedIn}
+          hint={session.hint}
+          onSubmit={session.onSubmit}
+          onSignOut={session.signOut}
+        />
+      }
       tray={<TrayView vm={tray} />}
     >
       <Outlet />
@@ -62,13 +85,22 @@ export function Frame() {
 
 export function Programme() {
   const [params] = useSearchParams()
-  return <Show load={useProgrammePage(useSlug(), params.get("day"))} render={(vm) => <ProgrammeView vm={vm} />} />
+  return (
+    <Show
+      load={useProgrammePage(useSlug(), params.get("day"))}
+      render={(vm) => <ProgrammeView vm={vm} />}
+    />
+  )
 }
 
 export function Film() {
   const slug = useSlug()
   return (
-    <Show load={useFilmPage(slug, useParams().entryId ?? "")} back={`/${slug}`} render={(vm) => <FilmView vm={vm} />} />
+    <Show
+      load={useFilmPage(slug, useParams().entryId ?? "")}
+      back={`/${slug}`}
+      render={(vm) => <FilmView vm={vm} />}
+    />
   )
 }
 
@@ -79,7 +111,12 @@ export function Week() {
 }
 
 export function Drafts() {
-  return <Show load={useDraftsPage(useSlug())} render={(drafts) => <DraftListView drafts={drafts} />} />
+  return (
+    <Show
+      load={useDraftsPage(useSlug())}
+      render={(drafts) => <DraftListView drafts={drafts} />}
+    />
+  )
 }
 
 export function DraftPage() {
@@ -95,9 +132,19 @@ export function DraftPage() {
 
 export function Compare() {
   const slug = useSlug()
-  return <Show load={useComparePage(slug)} render={(vm) => <CompareView vm={vm} programmeHref={`/${slug}`} />} />
+  return (
+    <Show
+      load={useComparePage(slug)}
+      render={(vm) => <CompareView vm={vm} programmeHref={`/${slug}`} />}
+    />
+  )
 }
 
 export function Tickets() {
-  return <Show load={useTicketsPage(useSlug())} render={(vm) => <TicketsView vm={vm} />} />
+  return (
+    <Show
+      load={useTicketsPage(useSlug())}
+      render={(vm) => <TicketsView vm={vm} />}
+    />
+  )
 }

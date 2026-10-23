@@ -18,8 +18,10 @@ const DAY = 86_400_000
 /** The next Friday, so the sample is always ahead of you. */
 function nextFriday(): Date {
   const today = new Date()
-  const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()))
-  return new Date(d.getTime() + (((5 - d.getUTCDay() + 7) % 7) || 7) * DAY)
+  const d = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  )
+  return new Date(d.getTime() + ((5 - d.getUTCDay() + 7) % 7 || 7) * DAY)
 }
 
 const first = nextFriday()
@@ -34,7 +36,10 @@ export const festival: Festival = {
   timeZone: ZONE,
 }
 
-const venue = (n: number, name: string): Venue => ({ id: `venue-${n}` as VenueId, name })
+const venue = (n: number, name: string): Venue => ({
+  id: `venue-${n}` as VenueId,
+  name,
+})
 
 export const venues = [
   venue(1, "Vika"),
@@ -44,14 +49,32 @@ export const venues = [
   venue(5, "Klingenberg"),
 ]
 
-type Row = [title: string, year: number, country: string, minutes: number, slots: string[]]
+type Row = [
+  title: string,
+  year: number,
+  country: string,
+  minutes: number,
+  slots: string[],
+]
 
 // Each slot: "day hh:mm venue": day 0 is the opening Friday.
 const films: Row[] = [
   ["Sirāt", 2025, "Spain", 115, ["0 18:00 0", "3 21:15 3", "7 14:30 1"]],
-  ["Sentimental Value", 2025, "Norway", 133, ["0 20:30 1", "2 16:00 0", "8 19:00 1"]],
+  [
+    "Sentimental Value",
+    2025,
+    "Norway",
+    133,
+    ["0 20:30 1", "2 16:00 0", "8 19:00 1"],
+  ],
   ["The Secret Agent", 2025, "Brazil", 158, ["1 19:00 0", "5 17:30 2"]],
-  ["It Was Just an Accident", 2025, "Iran", 103, ["1 16:15 3", "4 20:00 1", "9 13:00 0"]],
+  [
+    "It Was Just an Accident",
+    2025,
+    "Iran",
+    103,
+    ["1 16:15 3", "4 20:00 1", "9 13:00 0"],
+  ],
   ["Resurrection", 2025, "China", 160, ["2 19:30 2", "6 18:00 4"]],
   ["Sound of Falling", 2025, "Germany", 155, ["1 21:30 1", "7 18:45 3"]],
   ["No Other Choice", 2025, "South Korea", 139, ["3 18:00 1", "8 21:00 0"]],
@@ -61,7 +84,13 @@ const films: Row[] = [
   ["Two Prosecutors", 2025, "Ukraine", 118, ["3 15:30 2", "7 21:00 4"]],
   ["Young Mothers", 2025, "Belgium", 104, ["4 18:15 3", "9 19:30 1"]],
   ["Kontinental '25", 2025, "Romania", 109, ["5 20:15 0", "8 16:30 4"]],
-  ["Father Mother Sister Brother", 2025, "United States", 110, ["0 15:45 2", "6 15:00 1"]],
+  [
+    "Father Mother Sister Brother",
+    2025,
+    "United States",
+    110,
+    ["0 15:45 2", "6 15:00 1"],
+  ],
   ["The Mastermind", 2025, "United States", 110, ["1 13:30 4", "5 22:00 3"]],
   ["Blue Moon", 2025, "United States", 100, ["2 13:15 1", "7 16:15 0"]],
   ["The Voice of Hind Rajab", 2025, "Tunisia", 89, ["3 19:45 4", "6 17:30 3"]],
@@ -72,8 +101,12 @@ const films: Row[] = [
 function instant(day: number, time: string, plusMinutes = 0): string {
   const [h, m] = time.split(":").map(Number)
   const guess = first.getTime() + day * DAY + (h * 60 + m + plusMinutes) * 60000
-  const shown = new Date(new Date(guess).toLocaleString("en-US", { timeZone: ZONE }))
-  const asUtc = new Date(new Date(guess).toLocaleString("en-US", { timeZone: "UTC" }))
+  const shown = new Date(
+    new Date(guess).toLocaleString("en-US", { timeZone: ZONE })
+  )
+  const asUtc = new Date(
+    new Date(guess).toLocaleString("en-US", { timeZone: "UTC" })
+  )
   return new Date(guess - (shown.getTime() - asUtc.getTime())).toISOString()
 }
 
@@ -91,7 +124,10 @@ export const programme: ProgrammeEntry[] = films
         venue: venues[Number(v)],
         auditorium: null,
         ticketUrl: `https://tickets.example/ffs/${f + 1}-${s + 1}`,
-        events: f % 4 === 0 && s === 0 ? [{ description: "Director talk", startTime: null, endTime: null }] : [],
+        events:
+          f % 4 === 0 && s === 0
+            ? [{ description: "Director talk", startTime: null, endTime: null }]
+            : [],
         withdrawn: f === 10 && s === 1,
       }
     })

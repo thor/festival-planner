@@ -5,7 +5,13 @@ import type { Ports } from "@/domain/ports"
 
 const PortsContext = createContext<Ports | null>(null)
 
-export function PortsProvider({ ports, children }: { ports: Ports; children: ReactNode }) {
+export function PortsProvider({
+  ports,
+  children,
+}: {
+  ports: Ports
+  children: ReactNode
+}) {
   return (
     <PortsContext value={ports}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -20,5 +26,7 @@ export function usePorts(): Ports {
 }
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
+  defaultOptions: {
+    queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false },
+  },
 })

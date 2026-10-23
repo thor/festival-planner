@@ -51,22 +51,66 @@ export const EntryFields = graphql(
       }
     }
   `,
-  [ScreeningFields],
+  [ScreeningFields]
 )
 
 export const ChangeSetFields = graphql(`
   fragment ChangeSetFields on ChangeSetItem {
     __typename
-    ... on AddScreeningCommitment { screening { id } }
-    ... on ReleaseScreeningCommitment { screening { id } }
-    ... on AddExcludedScreening { screening { id } }
-    ... on RemoveExcludedScreening { screening { id } }
-    ... on AddFilmCommitment { programmeEntry { id } }
-    ... on ReleaseFilmCommitment { programmeEntry { id } }
-    ... on AddExcludedProgrammeEntry { programmeEntry { id } }
-    ... on RemoveExcludedProgrammeEntry { programmeEntry { id } }
-    ... on RecordComparison { preferred { id } other { id } }
-    ... on SetBuffer { minutes venue { id } }
+    ... on AddScreeningCommitment {
+      screening {
+        id
+      }
+    }
+    ... on ReleaseScreeningCommitment {
+      screening {
+        id
+      }
+    }
+    ... on AddExcludedScreening {
+      screening {
+        id
+      }
+    }
+    ... on RemoveExcludedScreening {
+      screening {
+        id
+      }
+    }
+    ... on AddFilmCommitment {
+      programmeEntry {
+        id
+      }
+    }
+    ... on ReleaseFilmCommitment {
+      programmeEntry {
+        id
+      }
+    }
+    ... on AddExcludedProgrammeEntry {
+      programmeEntry {
+        id
+      }
+    }
+    ... on RemoveExcludedProgrammeEntry {
+      programmeEntry {
+        id
+      }
+    }
+    ... on RecordComparison {
+      preferred {
+        id
+      }
+      other {
+        id
+      }
+    }
+    ... on SetBuffer {
+      minutes
+      venue {
+        id
+      }
+    }
   }
 `)
 
@@ -93,7 +137,7 @@ export const DraftFields = graphql(
       }
     }
   `,
-  [ChangeSetFields, ScreeningFields],
+  [ChangeSetFields, ScreeningFields]
 )
 
 export const FestivalsQuery = graphql(
@@ -104,7 +148,7 @@ export const FestivalsQuery = graphql(
       }
     }
   `,
-  [FestivalFields],
+  [FestivalFields]
 )
 
 export const FestivalQuery = graphql(
@@ -115,7 +159,7 @@ export const FestivalQuery = graphql(
       }
     }
   `,
-  [FestivalFields],
+  [FestivalFields]
 )
 
 export const ProgrammePageQuery = graphql(
@@ -138,7 +182,7 @@ export const ProgrammePageQuery = graphql(
       }
     }
   `,
-  [EntryFields],
+  [EntryFields]
 )
 
 export const EntryQuery = graphql(
@@ -151,7 +195,7 @@ export const EntryQuery = graphql(
       }
     }
   `,
-  [EntryFields],
+  [EntryFields]
 )
 
 export const PlanningQuery = graphql(
@@ -217,7 +261,7 @@ export const PlanningQuery = graphql(
       }
     }
   `,
-  [ScreeningFields, DraftFields, EntryFields],
+  [ScreeningFields, DraftFields, EntryFields]
 )
 
 export const DraftQuery = graphql(
@@ -242,7 +286,7 @@ export const DraftQuery = graphql(
       }
     }
   `,
-  [DraftFields, ScreeningFields],
+  [DraftFields, ScreeningFields]
 )
 
 export const CreateDraftMutation = graphql(
@@ -270,7 +314,7 @@ export const CreateDraftMutation = graphql(
       }
     }
   `,
-  [DraftFields],
+  [DraftFields]
 )
 
 export const ResolveDraftMutation = graphql(
@@ -292,7 +336,7 @@ export const ResolveDraftMutation = graphql(
       }
     }
   `,
-  [DraftFields],
+  [DraftFields]
 )
 
 export const AcceptDraftMutation = graphql(
@@ -317,7 +361,7 @@ export const AcceptDraftMutation = graphql(
       }
     }
   `,
-  [ScreeningFields],
+  [ScreeningFields]
 )
 
 export const DiscardDraftMutation = graphql(`

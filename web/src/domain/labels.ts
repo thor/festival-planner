@@ -13,7 +13,9 @@ export interface Lookup {
 
 export function lookupOf(entries: ProgrammeEntry[], timeZone: string): Lookup {
   const e = new Map(entries.map((x) => [x.id as string, x]))
-  const s = new Map(entries.flatMap((x) => x.screenings).map((x) => [x.id as string, x]))
+  const s = new Map(
+    entries.flatMap((x) => x.screenings).map((x) => [x.id as string, x])
+  )
   return { entry: (id) => e.get(id), screening: (id) => s.get(id), timeZone }
 }
 
