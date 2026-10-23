@@ -43,7 +43,7 @@ class Preferences(Value):
     event_weight: float = 0.0
     attend_events: bool = False
     transport_mode: TransportMode | None = None
-    comparison_weight: float = 0.5
+    comparison_weight: float = Field(default=0.5, ge=0)
     """How strongly Comparisons shift Programme Entry weights."""
     comparisons: tuple[Comparison, ...] = ()
 

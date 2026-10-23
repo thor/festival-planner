@@ -122,7 +122,7 @@ class SetTransportMode(Value):
 
 class SetComparisonWeight(Value):
     kind: Literal["set_comparison_weight"] = "set_comparison_weight"
-    weight: float | None
+    weight: float | None = Field(ge=0)
 
 
 class RecordComparison(Value):

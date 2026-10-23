@@ -8,6 +8,7 @@ from festival_planner.domain.change_sets import (
     ChangeSet,
     RecordComparison,
     SetBuffer,
+    SetComparisonWeight,
     SetDateRange,
     SetYearWeight,
 )
@@ -49,3 +50,12 @@ def test_a_date_range_cannot_end_before_it_starts():
 def test_negative_buffers_are_rejected():
     with pytest.raises(ValidationError):
         SetBuffer(minutes=-1)
+
+
+def test_set_comparison_weight_requires_a_non_negative_weight_or_none():
+    assert SetComparisonWeight(weight=None).weight is None
+    assert SetComparisonWeight(weight=0.0).weight == 0.0
+    with pytest.raises(ValidationError):
+        SetComparisonWeight(weight=-1.0)
+    with pytest.raises(ValidationError):
+        SetComparisonWeight.model_validate({})

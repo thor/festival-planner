@@ -88,3 +88,8 @@ def test_empty_planning_inputs_have_default_preferences():
 def test_tickets_are_neither_exchangeable_nor_refundable_by_default():
     ticket = Ticket(screening_id="s")
     assert (ticket.exchangeable, ticket.refundable) == (False, False)
+
+
+def test_a_negative_comparison_weight_is_rejected():
+    with pytest.raises(ValidationError):
+        Preferences(comparison_weight=-0.1)
