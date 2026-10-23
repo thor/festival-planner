@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 
 import { ItemLine } from "./items"
 import { Page, Place, Spinner } from "./parts"
-import { TimeAxis, Track, TrackBlock } from "./track"
+import { DayCell, TimeAxis, Track, TrackBlock } from "./track"
 
 const statusWord: Record<DraftVM["status"], string> = {
   solving: "Solving",
@@ -203,19 +203,16 @@ function DraftWeek({ week, ticks }: { week: DraftDayVM[]; ticks: Tick[] }) {
         {week.map((d) => (
           <li
             key={d.key}
-            className="grid grid-cols-[5rem_minmax(0,1fr)] border-b border-ink"
+            className="grid grid-cols-[var(--spacing-day)_minmax(0,1fr)] border-b border-ink"
           >
-            <div
-              className={cn(
-                "flex flex-col justify-center border-r border-ink py-2",
-                !d.changed && "text-grain"
-              )}
-            >
-              <span className="title text-3xl">{d.number}</span>
-              <span className="text-xs text-grain">{d.weekday}</span>
-            </div>
+            <DayCell
+              number={d.number}
+              weekday={d.weekday}
+              today={d.today}
+              quiet={!d.changed}
+            />
             <div>
-              <Track ticks={ticks}>
+              <Track ticks={ticks} now={d.now}>
                 {d.blocks.map((b) => (
                   <DraftBlock key={b.id} block={b} />
                 ))}

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 import { Page, Place } from "./parts"
-import { TimeAxis, Track, TrackBlock } from "./track"
+import { DayCell, TimeAxis, Track, TrackBlock } from "./track"
 
 export function ScheduleView({ vm }: { vm: ScheduleVM }) {
   if (vm.number === null) {
@@ -38,18 +38,12 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
         {vm.days.map((d) => (
           <li
             key={d.key}
-            className="grid grid-cols-[3.75rem_minmax(0,1fr)] border-b border-ink md:grid-cols-[5rem_minmax(0,1fr)]"
+            className="grid grid-cols-[3.75rem_minmax(0,1fr)] border-b border-ink md:grid-cols-[var(--spacing-day)_minmax(0,1fr)]"
           >
-            {/* Narrow: pinned under the bar while its day scrolls by. */}
-            <div className="border-r border-ink md:flex md:flex-col md:justify-center">
-              <div className="sticky top-10 flex flex-col py-2 md:static">
-                <span className="title text-2xl md:text-3xl">{d.number}</span>
-                <span className="text-xs text-grain">{d.weekday}</span>
-              </div>
-            </div>
+            <DayCell number={d.number} weekday={d.weekday} today={d.today} />
 
-            {/* Wide: a track from 10 to 01. */}
-            <Track ticks={vm.ticks} className="hidden md:block">
+            {/* Wide: a track across the Schedule's hours. */}
+            <Track ticks={vm.ticks} now={d.now} className="hidden md:block">
               {d.blocks.map((b) => (
                 <TrackBlock
                   key={b.id}

@@ -24,13 +24,13 @@ courteous and sure of itself.
 
 ## Tokens
 
-| Name   | Light     | Dark      | Use                         |
-| ------ | --------- | --------- | --------------------------- |
-| screen | `#E9EBEC` | `#000000` | background                  |
-| ink    | `#000000` | `#E9EBEC` | text, borders               |
-| grain  | `#5F656B` | `#8A9096` | secondary, struck, past     |
-| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track       |
-| stamp  | `#2323C8` | `#8C8CFF` | yours, and the focus ring   |
+| Name   | Light     | Dark      | Use                       |
+| ------ | --------- | --------- | ------------------------- |
+| screen | `#E9EBEC` | `#000000` | background                |
+| ink    | `#000000` | `#E9EBEC` | text, borders             |
+| grain  | `#5F656B` | `#8A9096` | secondary, struck, past   |
+| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track     |
+| stamp  | `#2323C8` | `#8C8CFF` | yours, and the focus ring |
 
 Dark mode is the auditorium with the lights down.
 
@@ -87,9 +87,9 @@ Sentimental Value    ...
 The film page lets the title fill the width, with the screenings beneath.
 
 The schedule is one row per festival day: the day’s numeral, then a track
-from 10:00 to 01:00 with a block per screening, its width the running time.
-It reads like a strip of film. On phones each day becomes a list with its
-numeral pinned.
+across the schedule’s hours with a block per screening, its width the running
+time. It reads like a strip of film. Today is inverted and a thin line marks
+now. On phones each day becomes a list with its numeral pinned.
 
 ```
 30 ┃ ▭ Father Mother… ▭   ▭ Sirāt ▭    ■ Sentimental Value ■

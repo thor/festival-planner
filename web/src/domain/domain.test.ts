@@ -16,7 +16,14 @@ import type {
   ScreeningId,
 } from "./model"
 import { clock, dayKey, festivalDays, minuteOfDay } from "./time"
-import { layDays, layDiff } from "./timeline"
+import {
+  DEFAULT_SPAN,
+  fitSpan,
+  hourTicks,
+  layDays,
+  layDiff,
+  nowOn,
+} from "./timeline"
 
 const s1 = "s1" as ScreeningId
 const a = "a" as ProgrammeEntryId
@@ -91,22 +98,54 @@ describe("time", () => {
   })
 })
 
+const screening = (
+  startTime: string,
+  endTime: string,
+  id = "s1"
+): Screening => ({
+  id: id as ScreeningId,
+  programmeEntryId: a,
+  title: id,
+  startTime,
+  endTime,
+  venue: { id: "v" as never, name: "V" },
+  auditorium: null,
+  ticketUrl: null,
+  events: [],
+  withdrawn: false,
+})
+
 describe("timeline", () => {
-  it("places a Screening by time on its day", () => {
-    const rows = layDays(festival, [
-      {
-        id: s1,
-        programmeEntryId: a,
-        title: "A",
-        startTime: "2026-10-24T15:30:00Z",
-        endTime: "2026-10-24T17:00:00Z",
-        venue: { id: "v" as never, name: "V" },
-        auditorium: null,
-        ticketUrl: null,
-        events: [],
-        withdrawn: false,
-      },
+  // Oslo is UTC+2 on 24 October.
+  it("fits the span to every Screening, with half an hour either side", () => {
+    // 17:30 to 19:00, and 21:15 to 00:40.
+    const span = fitSpan(festival, [
+      screening("2026-10-24T15:30:00Z", "2026-10-24T17:00:00Z"),
+      screening("2026-10-24T19:15:00Z", "2026-10-24T22:40:00Z"),
     ])
+    expect(span).toEqual({ start: 17 * 60, end: 24 * 60 + 40 + 30 })
+  })
+
+  it("ticks on whole hours, every other hour on a long span", () => {
+    const labels = (start: number, end: number) =>
+      hourTicks({ start, end }).map((t) => t.label)
+    expect(labels(21 * 60 + 30, 24 * 60 + 30)).toEqual(["22", "23", "00"])
+    expect(labels(10 * 60, 25 * 60).slice(0, 2)).toEqual(["10", "12"])
+  })
+
+  it("puts now on its day, and just after midnight on the evening before", () => {
+    const on = (now: string) => nowOn(festival, DEFAULT_SPAN, now)?.day
+    expect(on("2026-10-24T16:00:00Z")).toBe("2026-10-24") // 18:00
+    expect(on("2026-10-24T22:30:00Z")).toBe("2026-10-24") // 00:30
+    expect(on("2026-10-24T06:00:00Z")).toBeUndefined() // 08:00, off the span
+  })
+
+  it("places a Screening by time on its day", () => {
+    const rows = layDays(
+      festival,
+      [screening("2026-10-24T15:30:00Z", "2026-10-24T17:00:00Z")],
+      DEFAULT_SPAN
+    )
     expect(rows.map((r) => r.placed.length)).toEqual([1, 0, 0])
     const { left, width } = rows[0].placed[0]
     expect(left).toBeCloseTo((17.5 - 10) / 15)
@@ -115,27 +154,19 @@ describe("timeline", () => {
 })
 
 describe("draft timeline", () => {
-  const at = (id: string, day: string): Screening => ({
-    id: id as ScreeningId,
-    programmeEntryId: a,
-    title: id,
-    startTime: `${day}T15:30:00Z`,
-    endTime: `${day}T17:00:00Z`,
-    venue: { id: "v" as never, name: "V" },
-    auditorium: null,
-    ticketUrl: null,
-    events: [],
-    withdrawn: false,
-  })
+  const at = (id: string, day: string) =>
+    screening(`${day}T15:30:00Z`, `${day}T17:00:00Z`, id)
 
   it("tags each Screening In, Out or kept, on one set of days", () => {
     const kept = at("kept", "2026-10-24")
     const added = at("in", "2026-10-25")
     const out = at("out", "2026-10-25")
-    const rows = layDiff(festival, [kept, added], {
-      added: [added],
-      removed: [out],
-    })
+    const rows = layDiff(
+      festival,
+      [kept, added],
+      { added: [added], removed: [out] },
+      DEFAULT_SPAN
+    )
     expect(rows.map((r) => r.day)).toEqual([
       "2026-10-24",
       "2026-10-25",

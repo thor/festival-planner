@@ -62,13 +62,16 @@ export function minuteOfDay(
 /** Every day of the Festival, inclusive. */
 export function festivalDays(festival: Festival): DayKey[] {
   const days: DayKey[] = []
-  const cursor = new Date(`${festival.startDate}T12:00:00Z`)
-  const end = new Date(`${festival.endDate}T12:00:00Z`)
-  while (cursor <= end) {
-    days.push(cursor.toISOString().slice(0, 10))
-    cursor.setUTCDate(cursor.getUTCDate() + 1)
-  }
+  for (let d = festival.startDate; d <= festival.endDate; d = addDays(d, 1))
+    days.push(d)
   return days
+}
+
+/** Noon UTC, so a change of clocks never moves the date. */
+export function addDays(day: DayKey, n: number): DayKey {
+  const date = new Date(`${day}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + n)
+  return date.toISOString().slice(0, 10)
 }
 
 /** "9" */
@@ -78,10 +81,9 @@ export function dayNumber(day: DayKey): string {
 
 /** "Fri" */
 export function weekday(day: DayKey): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "short",
-    timeZone: "UTC",
-  }).format(new Date(`${day}T12:00:00Z`))
+  return formatter("UTC", { weekday: "short" }).format(
+    new Date(`${day}T12:00:00Z`)
+  )
 }
 
 /** "Fri 10" */

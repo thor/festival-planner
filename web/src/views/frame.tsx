@@ -38,7 +38,7 @@ export function FrameView({
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-20 flex h-10 items-stretch border-b border-ink bg-screen">
+      <header className="sticky top-0 z-20 flex h-bar items-stretch border-b border-ink bg-screen">
         <Link
           to="/"
           aria-label="All festivals"

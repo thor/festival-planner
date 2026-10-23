@@ -11,7 +11,7 @@ export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
     <Page>
       <nav
         aria-label="Days"
-        className="sticky top-10 z-10 flex overflow-x-auto border-x border-b border-ink bg-screen"
+        className="sticky top-bar z-10 flex overflow-x-auto border-x border-b border-ink bg-screen"
       >
         <DayLink
           href={vm.allHref}

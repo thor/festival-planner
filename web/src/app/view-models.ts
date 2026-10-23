@@ -92,7 +92,6 @@ export interface TrackBlockVM {
   time: string
   end: string
   venue: string
-  /** A number or a name; null when the programme does not say. */
   auditorium: string | null
   href: string
   left: number
@@ -109,6 +108,9 @@ export interface ScheduleDayVM {
   key: string
   number: string
   weekday: string
+  today: boolean
+  /** Now, 0..1 across this day's track; null on other days. */
+  now: number | null
   blocks: BlockVM[]
 }
 
@@ -140,7 +142,6 @@ export interface TicketVM {
   href: string
   when: string
   venue: string
-  /** A number or a name; null when the programme does not say. */
   auditorium: string | null
   /** Why it is here and what the ticket allows: "Not scheduled", "Refundable". */
   notes: string[]
@@ -180,7 +181,6 @@ export interface DiffRowVM {
   title: string
   when: string
   venue: string
-  /** A number or a name; null when the programme does not say. */
   auditorium: string | null
   ticket: boolean
 }

@@ -17,6 +17,9 @@
   --color-haze: var(--haze);
   --color-stamp: var(--stamp);
   --color-stamp-ink: var(--stamp-ink);
+  /* The top bar, and a track's day column. */
+  --spacing-bar: 2.5rem;
+  --spacing-day: 5rem;
   /* Perfect fourth from 17px. */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.35;

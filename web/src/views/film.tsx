@@ -41,7 +41,7 @@ export function FilmView({ vm }: { vm: FilmVM }) {
         {vm.buy && (
           <>
             {/* Wide: beside the screenings, kept in view. */}
-            <aside className="sticky top-14 hidden self-start pt-4 md:block">
+            <aside className="sticky top-[calc(var(--spacing-bar)+1rem)] hidden self-start pt-4 md:block">
               <BuyTicket
                 buy={vm.buy}
                 className="max-w-sm flex-col items-start gap-1 px-5 py-4"
