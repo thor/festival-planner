@@ -175,3 +175,16 @@ def test_tie_break_never_costs_score():
     )
     assert scheduled_ids(result) == ["a"]
     assert result.objective == 2.0
+
+
+def test_tie_break_leaves_out_zero_weight_screenings_not_in_the_active_schedule():
+    result = solver.solve(
+        request(
+            screening("a", "14:00", "16:00"),
+            screening("z", "18:00", "20:00"),
+            preferences=Preferences(
+                buffer_minutes=0, programme_entry_weights={"z": 0.0}
+            ),
+        )
+    )
+    assert scheduled_ids(result) == ["a"]

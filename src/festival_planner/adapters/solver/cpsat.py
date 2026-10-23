@@ -1,6 +1,7 @@
 """ScheduleSolver adapter using Google OR-Tools CP-SAT."""
 
 import datetime
+import logging
 
 from ortools.sat.python import cp_model
 
@@ -11,6 +12,8 @@ from ...domain.solving import (
     SolveStatus,
     formulate,
 )
+
+logger = logging.getLogger(__name__)
 
 WEIGHT_PRECISION_MULTIPLIER = 1000
 """CP-SAT needs integer coefficients; weights are scaled by this."""
@@ -28,7 +31,9 @@ NUM_WORKERS = 8
 
 
 def _solver(time_limit_seconds: float) -> cp_model.CpSolver:
-    """A CP-SAT solver whose result depends only on the model."""
+    """A CP-SAT solver whose result depends only on the model.
+
+    The limit is deterministic time, with no wall-clock backstop."""
     solver = cp_model.CpSolver()
     solver.parameters.random_seed = RANDOM_SEED
     solver.parameters.num_workers = NUM_WORKERS
@@ -76,8 +81,10 @@ class CpSatScheduleSolver:
             return SolveResult(status=status, wall_time_seconds=solver.wall_time)
         wall_time = solver.wall_time
 
-        # Among Schedules at least as good, prefer the Active Schedule, then
-        # lower Screening ids; this never lowers the score.
+        # Among Schedules at least as good, prefer Active Screenings (each
+        # outweighs everything else), then fewer extra Screenings (each costs),
+        # then lower Screening ids (cheaper, or worth more if Active); this
+        # never lowers the score.
         model.add(objective >= round(solver.objective_value))
         for i in ids:
             model.add_hint(attend[i], solver.boolean_value(attend[i]))
@@ -86,7 +93,7 @@ class CpSatScheduleSolver:
             cp_model.LinearExpr.weighted_sum(
                 [attend[i] for i in ids],
                 [
-                    (n * n if i in request.active_schedule else 0) + (n - rank)
+                    n * n + (n - rank) if i in request.active_schedule else -(rank + 1)
                     for rank, i in enumerate(ids)
                 ],
             )
@@ -97,6 +104,11 @@ class CpSatScheduleSolver:
             SolveStatus.FEASIBLE,
         ):
             solver, wall_time = tie_break, wall_time + tie_break.wall_time
+        else:
+            logger.warning(
+                "CP-SAT tie-break failed (%s); using the first solution",
+                tie_break.status_name(),
+            )
 
         preferences = request.preferences
         chosen = [
