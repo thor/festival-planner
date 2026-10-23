@@ -22,8 +22,9 @@ the plans in `docs/superpowers/plans/` record how it gets built.
 - Persistence: SQLAlchemy 2 + Alembic on SQLite, kept portable to Postgres
   ([ADR-0002](../../adr/0002-sqlite-first-portable-to-postgres.md)).
 - Auth: the backend only verifies OIDC/JWT bearer tokens from configured
-  issuers; a separate minimal local token issuer lives in the same repo; a User
-  is keyed on (issuer, subject)
+  issuers; the local issuer is a CLI in the same repo
+  ([ADR-0006](../../adr/0006-local-token-issuer-is-a-cli.md)); a User is
+  keyed on (issuer, subject)
   ([ADR-0003](../../adr/0003-backend-only-verifies-tokens.md)).
 
 ## Festival data
@@ -118,6 +119,9 @@ providers).
   history (Screenings, change set, score, accepted-at) and removes the
   Draft. Discarding deletes a Draft. Empty change sets are allowed. Screenings
   that started between solving and accepting are accepted as they are.
+  Creating or re-solving a Draft waits briefly (configurable, about 2 s) and
+  returns it solved if done; otherwise clients poll. "Draft solved" goes
+  through a port so a subscription can replace polling later.
 - Solving is deterministic (fixed seed, interleaved search, deterministic time
   limit). Ties between equally good Schedules break towards the Active
   Schedule, then lower Screening ids, via a second lexicographic pass
@@ -128,18 +132,12 @@ providers).
 - **Screening Commitment**: hard constraint, that exact Screening.
   **Film Commitment**: hard constraint, exactly one Screening of that Programme
   Entry. Releasing one is a change-set item.
-- **Ticket**: data type for "I hold a ticket", with an exchangeable/refundable
-  flag. Informational only for now (no automatic commitment).
 - **Excluded**: a Programme Entry or Screening the User does not want.
 - **Seen** Films are not scheduled unless committed to.
 - Screenings that have started are fixed: kept if in the Active Schedule,
   dropped otherwise. Only the remaining Screenings are solved.
 - No stability bonus towards the Active Schedule: reshuffling uncommitted
   Screenings is fine; heavy reshuffling signals too few preferences.
-- Draft status: `SOLVING` → `READY` | `INFEASIBLE` (Stale as above). The
-  creating mutation waits briefly (configurable, ~2 s) and returns the solved
-  Draft if done; otherwise the frontend polls. "Draft solved" goes through a
-  port so a subscription can replace polling later.
 - Every Draft exposes its changes against the Active Schedule (added, removed,
   score delta). The delta compares the Draft with the Active Schedule
   re-scored under the Draft's Preferences; it warns when a ticketed Screening
@@ -152,7 +150,7 @@ providers).
   weights, year weights, Event weight (for Screenings with Events), attend
   Events (separately timed Events block time), general buffer and per-Venue
   buffer, date range, Transport Mode, Comparisons; curation weight arrives
-  with Curations (step 5). Preferences stay a frozen Pydantic value. Likely
+  with Curations (step 5). Preferences are a frozen Pydantic value. Likely
   next: actors, genres, daily time window.
 - **Comparison**: "A over B", a change-set item and Preference; one per
   unordered pair, the latest replacing the earlier. `formulate` fits
@@ -227,37 +225,25 @@ sync; pushing Seen to Letterboxd.
 
 Each step is its own plan and leaves working, tested software:
 
-1. **Domain core and solver boundary**: domain values, scheduling rules,
+1. **Domain core and solver boundary** (done 2026-10-23, plan
+   `2026-10-23-domain-core-and-solver.md`): domain values, scheduling rules,
    CP-SAT adapter, CLI on the solve request (JSON export/replay).
-2. **Persistence**: Festival, Festival Series, Film, Programme Entry,
-   Screening, Event, Venue and Route; SQLAlchemy repositories; Alembic;
-   ingesting a `ProgrammeSource` (the Filmfrasor scraper) and Routes into the
-   database. Decided 2026-10-23 (see *Persistence and ingestion* above and
+2. **Persistence** (done 2026-10-23, plan `2026-10-23-persistence.md`):
+   Festival, Festival Series, Film, Programme Entry, Screening, Event, Venue
+   and Route; SQLAlchemy repositories; Alembic; ingesting a `ProgrammeSource`
+   (the Filmfrasor scraper) and Routes into the database (see *Persistence
+   and ingestion* above and
    [ADR-0005](../../adr/0005-aware-datetimes-with-festival-time-zone.md)).
-   Organization moves to step 5 and Film external ids to step 6.
-3. **Planning use-cases** (done 2026-10-23, plan `2026-10-23-planning-use-cases.md`): Drafts as change sets, accept, Stale, diff,
-   Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
-   Also: deterministic solving (CP-SAT seed and tie-break, so Draft diffs
-   don't show noise), change-set validation for contradictory inputs, a
-   format version in exported solve requests, Comparisons in Preferences,
-   a bare User keyed on (issuer, subject) with the CLI acting as a local
-   User, and a minimal `plan` CLI. Preferences stay Pydantic. Decided
-   2026-10-23.
-4. **GraphQL API and auth** (done 2026-10-23, plan `2026-10-23-graphql-api-and-auth.md`): distinct id types (`NewType`) before the
-   global-id mapping; Strawberry schema over the use-cases,
-   `TokenVerifier` adapters, local token issuer, SDL export. Evaluate
-   Strawberry's Pydantic integration
-   (<https://strawberry.rocks/docs/integrations/pydantic>) for deriving
-   GraphQL types and inputs. Pydantic is approved in the domain if need be
-   (ADR-0001), so domain models may become Pydantic models where that lets
-   Strawberry derive types directly.
-   From step 3: the server calls `Planner.resume_solving()` once at startup
-   (the CLI currently does it on every command) and shuts the
-   `ThreadPoolJobRunner` down in its lifespan; `create_draft`/`resolve` block
-   up to `wait_seconds`, so run them off the event loop; a subscription-backed
-   `DraftSolvedNotifier` is called on a worker thread and must hand off with
-   `loop.call_soon_threadsafe`; Draft diffs are computed eagerly in
-   `DraftView` and should become a lazy field.
+   Organization moved to step 5 and Film external ids to step 6.
+3. **Planning use-cases** (done 2026-10-23, plan
+   `2026-10-23-planning-use-cases.md`): Drafts as change sets, accept, Stale,
+   diff, Comparisons, Tickets, Seen-from-schedule, deterministic solving
+   (see *Planning* above); in-process `JobRunner`; a bare User with the CLI
+   acting as a local User, and a minimal `plan` CLI.
+4. **GraphQL API and auth** (done 2026-10-23, plan
+   `2026-10-23-graphql-api-and-auth.md`): distinct id types (`NewType`),
+   a Strawberry schema over the use-cases, `TokenVerifier` adapters, the
+   local token issuer and SDL export.
    Outcome: Strawberry's Pydantic integration is not used (nested models,
    `Mapping` fields, the Change Set union as input and global ids do not
    map), so GraphQL types are hand-written, served by Starlette with every
