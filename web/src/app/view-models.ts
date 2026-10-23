@@ -75,6 +75,7 @@ export interface BlockVM {
   id: string
   title: string
   time: string
+  end: string
   venue: string
   /** A number or a name; null when the programme does not say. */
   auditorium: string | null

@@ -50,11 +50,14 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
         {vm.days.map((d) => (
           <li
             key={d.key}
-            className="grid grid-cols-[5rem_minmax(0,1fr)] border-b border-ink"
+            className="grid grid-cols-[3.75rem_minmax(0,1fr)] border-b border-ink md:grid-cols-[5rem_minmax(0,1fr)]"
           >
-            <div className="flex flex-col justify-center border-r border-ink py-2">
-              <span className="title text-3xl">{d.number}</span>
-              <span className="text-xs text-grain">{d.weekday}</span>
+            {/* Narrow: pinned under the bar while its day scrolls by. */}
+            <div className="border-r border-ink md:flex md:flex-col md:justify-center">
+              <div className="sticky top-10 flex flex-col py-2 md:static">
+                <span className="title text-2xl md:text-3xl">{d.number}</span>
+                <span className="text-xs text-grain">{d.weekday}</span>
+              </div>
             </div>
 
             {/* Wide: a track from 10 to 01. */}
@@ -86,11 +89,25 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
                   <span className="truncate text-sm leading-tight font-medium">
                     {b.title}
                   </span>
-                  <span className="flex items-center gap-1 truncate text-xs">
-                    {b.ticket && (
-                      <TicketIcon size={14} weight="bold" aria-label="Ticket" />
-                    )}
-                    {b.time} <Place venue={b.venue} auditorium={b.auditorium} />
+                  {/* Only the place gives way when the block is narrow. */}
+                  <span className="flex items-center gap-1 text-xs">
+                    <span className="shrink-0">
+                      {/* Inline, centred on the figures (0.725em tall). */}
+                      {b.ticket && (
+                        <TicketIcon
+                          size="1.1em"
+                          weight="bold"
+                          aria-label="Ticket"
+                          className="mr-1 inline align-[-0.19em]"
+                        />
+                      )}
+                      {b.time}
+                    </span>
+                    <Place
+                      venue={b.venue}
+                      auditorium={b.auditorium}
+                      className="truncate"
+                    />
                   </span>
                 </Link>
               ))}
@@ -103,31 +120,34 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
               )}
               {d.blocks.map((b) => (
                 <li key={b.id} className="border-b border-haze last:border-b-0">
+                  {/* Start and title, then end and place. */}
                   <Link
                     to={b.href}
                     className={cn(
-                      "flex items-baseline gap-3 px-3 py-2",
+                      "grid grid-cols-[auto_minmax(0,1fr)_auto] items-baseline gap-x-3 px-3 py-2",
+                      b.committed && "shadow-[inset_2px_0_var(--color-stamp)]",
                       b.ticket && "text-stamp",
                       b.withdrawn && "text-grain line-through"
                     )}
                   >
-                    <span className="w-12 shrink-0 text-right">{b.time}</span>
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="swipe">{b.title}</span>
-                      <Place
-                        venue={b.venue}
-                        auditorium={b.auditorium}
-                        className="truncate text-sm text-grain"
-                      />
-                    </span>
+                    <span className="text-right">{b.time}</span>
+                    <span className="swipe">{b.title}</span>
                     {b.ticket && (
                       <TicketIcon
                         size={16}
                         weight="bold"
                         aria-label="Ticket"
-                        className="shrink-0 self-center"
+                        className="col-start-3 row-span-2 row-start-1 self-center"
                       />
                     )}
+                    <span className="col-start-1 text-right text-sm text-grain">
+                      {b.end}
+                    </span>
+                    <Place
+                      venue={b.venue}
+                      auditorium={b.auditorium}
+                      className="truncate text-sm text-grain"
+                    />
                   </Link>
                 </li>
               ))}

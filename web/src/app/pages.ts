@@ -181,6 +181,7 @@ export function useSchedulePage(
           id: s.id,
           title: s.title,
           time: clock(s.startTime, f.timeZone),
+          end: clock(s.endTime, f.timeZone),
           venue: s.venue.name,
           auditorium: s.auditorium,
           href: entryHref(f, { id: s.programmeEntryId }),
