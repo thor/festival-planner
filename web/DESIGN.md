@@ -102,6 +102,10 @@ Tickets lists the ones to let go above the ones held.
 
 Compare stacks two titles. Tap the one you would rather see.
 
+Preferences is rows again: the setting on the left, its control on the
+right. Days are the festival strip; tap the first and the last, and the
+days you chose take the stamp. Interest is four boxes, Less to Most.
+
 Pending changes wait in a tray along the bottom edge.
 
 ## Motion

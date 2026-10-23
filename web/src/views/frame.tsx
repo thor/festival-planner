@@ -2,6 +2,7 @@ import {
   ArrowsLeftRightIcon,
   CalendarBlankIcon,
   FilmStripIcon,
+  SlidersHorizontalIcon,
   StackIcon,
   TicketIcon,
 } from "@phosphor-icons/react"
@@ -71,6 +72,11 @@ export function FrameView({
             to={`/${slug}/compare`}
             icon={ArrowsLeftRightIcon}
             label="Compare"
+          />
+          <NavIcon
+            to={`/${slug}/preferences`}
+            icon={SlidersHorizontalIcon}
+            label="Preferences"
           />
         </nav>
         {account}

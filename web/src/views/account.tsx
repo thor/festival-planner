@@ -27,7 +27,7 @@ export function AccountView({
     <Dialog>
       <DialogTrigger
         aria-label={signedIn ? "Account" : "Sign in"}
-        className="flex h-10 items-center border-l border-ink px-3 hover:bg-haze md:px-4"
+        className="flex h-10 items-center border-l border-ink px-2 hover:bg-haze sm:px-3 md:px-4"
       >
         {signedIn ? (
           <UserIcon size={20} weight="fill" className="text-stamp" />

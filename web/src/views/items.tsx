@@ -1,12 +1,15 @@
 import type { Icon } from "@phosphor-icons/react"
 import {
   ArrowsLeftRightIcon,
+  CalendarDotsIcon,
   CheckIcon,
+  HeartIcon,
+  MicrophoneStageIcon,
   MinusIcon,
+  PathIcon,
   PlusIcon,
   ProhibitIcon,
   TimerIcon,
-  WrenchIcon,
   XIcon,
 } from "@phosphor-icons/react"
 
@@ -19,8 +22,11 @@ export const verbIcon: Record<ItemVerb, Icon> = {
   exclude: ProhibitIcon,
   include: CheckIcon,
   compare: ArrowsLeftRightIcon,
+  interest: HeartIcon,
   buffer: TimerIcon,
-  other: WrenchIcon,
+  days: CalendarDotsIcon,
+  events: MicrophoneStageIcon,
+  transport: PathIcon,
 }
 
 export function ItemLine({ item }: { item: ItemVM }) {

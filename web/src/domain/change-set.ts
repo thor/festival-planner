@@ -8,6 +8,7 @@ import type {
   ProgrammeEntryId,
   ScreeningId,
 } from "./model"
+import { defaultPreferences } from "./preferences"
 
 export type ChangeSet = readonly ChangeSetItem[]
 
@@ -16,7 +17,7 @@ export const emptyInputs: PlanningInputs = {
   filmCommitments: [],
   excludedScreenings: [],
   excludedProgrammeEntries: [],
-  bufferMinutes: 15,
+  preferences: defaultPreferences,
 }
 
 function same(a: ChangeSetItem, b: ChangeSetItem): boolean {
@@ -195,8 +196,11 @@ export type ItemVerb =
   | "exclude"
   | "include"
   | "compare"
+  | "interest"
   | "buffer"
-  | "other"
+  | "days"
+  | "events"
+  | "transport"
 
 export function verbOf(item: ChangeSetItem): ItemVerb {
   switch (item.kind) {
@@ -214,9 +218,19 @@ export function verbOf(item: ChangeSetItem): ItemVerb {
       return "include"
     case "recordComparison":
       return "compare"
+    case "setProgrammeEntryWeight":
+    case "setScreeningWeight":
+    case "setYearWeight":
+    case "setEventWeight":
+    case "setComparisonWeight":
+      return "interest"
     case "setBuffer":
       return "buffer"
-    case "other":
-      return "other"
+    case "setDateRange":
+      return "days"
+    case "setAttendEvents":
+      return "events"
+    case "setTransportMode":
+      return "transport"
   }
 }

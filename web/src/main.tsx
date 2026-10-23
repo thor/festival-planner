@@ -14,6 +14,7 @@ import {
   Film,
   Frame,
   Home,
+  Preferences,
   Programme,
   Tickets,
   SchedulePage,
@@ -35,6 +36,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="drafts/:draftId" element={<DraftPage />} />
                 <Route path="compare" element={<Compare />} />
                 <Route path="tickets" element={<Tickets />} />
+                <Route path="preferences" element={<Preferences />} />
               </Route>
             </Routes>
           </BrowserRouter>

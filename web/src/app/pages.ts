@@ -148,6 +148,7 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
   const selected = selectedViewing(vm.screenings)
   return ready({
     title: entry.title,
+    interest: models.interest(entry),
     buy:
       !vm.screenings.some((s) => s.ticket) && selected?.buyHref
         ? selected

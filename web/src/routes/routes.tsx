@@ -14,6 +14,7 @@ import {
   useTray,
   useSchedulePage,
 } from "@/app/pages"
+import { usePreferencesPage } from "@/app/preferences"
 import { useSession } from "@/app/session"
 import type { Load } from "@/app/view-models"
 import { AccountView } from "@/views/account"
@@ -23,6 +24,7 @@ import { FilmView } from "@/views/film"
 import { FrameView } from "@/views/frame"
 import { HomeView } from "@/views/home"
 import { Loading, Missing } from "@/views/parts"
+import { PreferencesView } from "@/views/preferences"
 import { ProgrammeView } from "@/views/programme"
 import { TicketsView } from "@/views/tickets"
 import { TrayView } from "@/views/tray"
@@ -140,6 +142,15 @@ export function Tickets() {
     <Show
       load={useTicketsPage(useSlug())}
       render={(vm) => <TicketsView vm={vm} />}
+    />
+  )
+}
+
+export function Preferences() {
+  return (
+    <Show
+      load={usePreferencesPage(useSlug())}
+      render={(vm) => <PreferencesView vm={vm} />}
     />
   )
 }

@@ -10,6 +10,8 @@ import type {
   FestivalId,
   FilmId,
   Flag,
+  PlanningInputs,
+  Preferences,
   ProgrammeEntry,
   ProgrammeEntryId,
   Schedule,
@@ -26,6 +28,7 @@ import type {
   EntryFields,
   FestivalFields,
   PlanningQuery,
+  PreferencesFields,
   ScreeningFields,
 } from "./documents"
 
@@ -34,6 +37,7 @@ type ScreeningData = ResultOf<typeof ScreeningFields>
 type EntryData = ResultOf<typeof EntryFields>
 type ChangeSetData = ResultOf<typeof ChangeSetFields>
 type DraftData = ResultOf<typeof DraftFields>
+type PreferencesData = ResultOf<typeof PreferencesFields>
 type PlanningData = NonNullable<
   NonNullable<ResultOf<typeof PlanningQuery>["viewer"]>["planning"]
 >
@@ -96,12 +100,36 @@ export function itemOf(i: ChangeSetData): ChangeSetItem {
         preferredId: i.preferred.id as ProgrammeEntryId,
         otherId: i.other.id as ProgrammeEntryId,
       }
+    case "SetProgrammeEntryWeight":
+      return {
+        kind: "setProgrammeEntryWeight",
+        programmeEntryId: e(i),
+        weight: i.weight,
+      }
+    case "SetScreeningWeight":
+      return { kind: "setScreeningWeight", screeningId: s(i), weight: i.weight }
+    case "SetYearWeight":
+      return { kind: "setYearWeight", year: i.year, weight: i.weight }
     case "SetBuffer":
-      return i.venue
-        ? { kind: "other", label: "Venue buffer" }
-        : { kind: "setBuffer", minutes: i.minutes }
-    default:
-      return { kind: "other", label: i.__typename }
+      return {
+        kind: "setBuffer",
+        venueId: (i.venue?.id ?? null) as VenueId | null,
+        minutes: i.minutes,
+      }
+    case "SetDateRange":
+      return {
+        kind: "setDateRange",
+        startDate: i.startDate,
+        endDate: i.endDate,
+      }
+    case "SetEventWeight":
+      return { kind: "setEventWeight", weight: i.weight }
+    case "SetAttendEvents":
+      return { kind: "setAttendEvents", attend: i.attend }
+    case "SetTransportMode":
+      return { kind: "setTransportMode", mode: i.mode }
+    case "SetComparisonWeight":
+      return { kind: "setComparisonWeight", weight: i.weight }
   }
 }
 
@@ -109,8 +137,7 @@ type ItemInput = NonNullable<
   VariablesOf<typeof CreateDraftMutation>["input"]["changeSet"]
 >[number]
 
-/** Items the API takes. "other" items came from the API and are not sent back. */
-export function itemInputOf(item: ChangeSetItem): ItemInput | null {
+export function itemInputOf(item: ChangeSetItem): ItemInput {
   switch (item.kind) {
     case "addScreeningCommitment":
       return { addScreeningCommitment: { screeningId: item.screeningId } }
@@ -143,10 +170,36 @@ export function itemInputOf(item: ChangeSetItem): ItemInput | null {
           otherId: item.otherId,
         },
       }
+    case "setProgrammeEntryWeight":
+      return {
+        setProgrammeEntryWeight: {
+          programmeEntryId: item.programmeEntryId,
+          weight: item.weight,
+        },
+      }
+    case "setScreeningWeight":
+      return {
+        setScreeningWeight: {
+          screeningId: item.screeningId,
+          weight: item.weight,
+        },
+      }
+    case "setYearWeight":
+      return { setYearWeight: { year: item.year, weight: item.weight } }
     case "setBuffer":
-      return { setBuffer: { minutes: item.minutes } }
-    case "other":
-      return null
+      return { setBuffer: { venueId: item.venueId, minutes: item.minutes } }
+    case "setDateRange":
+      return {
+        setDateRange: { startDate: item.startDate, endDate: item.endDate },
+      }
+    case "setEventWeight":
+      return { setEventWeight: { weight: item.weight } }
+    case "setAttendEvents":
+      return { setAttendEvents: { attend: item.attend } }
+    case "setTransportMode":
+      return { setTransportMode: { mode: item.mode } }
+    case "setComparisonWeight":
+      return { setComparisonWeight: { weight: item.weight } }
   }
 }
 
@@ -189,9 +242,57 @@ export function flagOf(f: PlanningData["flags"][number]): Flag {
   }
 }
 
-export function inputsOf(i: PlanningData["inputs"]) {
+/** A list of weights as a record by key. */
+function byKey<K extends string | number, T>(
+  list: readonly T[],
+  key: (t: T) => K,
+  value: (t: T) => number
+): Record<K, number> {
+  return Object.fromEntries(list.map((t) => [key(t), value(t)])) as Record<
+    K,
+    number
+  >
+}
+
+export function preferencesOf(p: PreferencesData): Preferences {
   return {
-    bufferMinutes: i.preferences.bufferMinutes,
+    bufferMinutes: p.bufferMinutes,
+    venueBuffers: byKey(
+      p.venueBuffers,
+      (b) => b.venue.id as VenueId,
+      (b) => b.minutes
+    ),
+    startDate: p.startDate,
+    endDate: p.endDate,
+    entryWeights: byKey(
+      p.programmeEntryWeights,
+      (w) => w.programmeEntry.id as ProgrammeEntryId,
+      (w) => w.weight
+    ),
+    screeningWeights: byKey(
+      p.screeningWeights,
+      (w) => w.screening.id as ScreeningId,
+      (w) => w.weight
+    ),
+    yearWeights: byKey(
+      p.yearWeights,
+      (w) => w.year,
+      (w) => w.weight
+    ),
+    eventWeight: p.eventWeight,
+    attendEvents: p.attendEvents,
+    transportMode: p.transportMode,
+    comparisonWeight: p.comparisonWeight,
+    comparisons: p.comparisons.map((c) => ({
+      preferredId: c.preferred.id as ProgrammeEntryId,
+      otherId: c.other.id as ProgrammeEntryId,
+    })),
+  }
+}
+
+export function inputsOf(i: PlanningData["inputs"]): PlanningInputs {
+  return {
+    preferences: preferencesOf(i.preferences),
     screeningCommitments: i.screeningCommitments.map(
       (s) => s.id as ScreeningId
     ),

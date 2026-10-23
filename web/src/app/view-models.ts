@@ -43,11 +43,25 @@ export interface ScreeningVM {
   onTicket?: () => void
 }
 
+/** One of four steps of how much something counts. */
+export interface InterestVM {
+  /** Names the control for assistive tech: "Interest in Sirāt". */
+  label: string
+  options: { value: string; word: string }[]
+  value: string
+  /** The pending Change Set changes it. */
+  pending: boolean
+  /** Missing when signed out. */
+  onPick?: (value: string) => void
+}
+
 export interface EntryVM {
   id: string
   title: string
   href: string
   meta: string[]
+  /** "More", "Most" or "Less"; null when usual. */
+  interestWord: string | null
   marks: Marks
   screenings: ScreeningVM[]
   onCommit?: () => void
@@ -72,6 +86,7 @@ export interface ProgrammeVM {
 
 export interface FilmVM {
   title: string
+  interest: InterestVM
   /** The selected viewing, while it can be bought; null once a ticket is held. */
   buy: ScreeningVM | null
   meta: string[]
@@ -241,4 +256,47 @@ export interface CompareVM {
   picked: "a" | "b" | null
   left: number
   onSkip: () => void
+}
+
+/** Minutes, stepped by five. */
+export interface StepperVM {
+  label: string
+  minutes: number
+  /** Not the User's own: the default, or a Venue following the general one. */
+  usual: boolean
+  pending: boolean
+  onLess?: () => void
+  onMore?: () => void
+  /** Back to the general setting; only when it has its own. */
+  onReset?: () => void
+}
+
+export interface RangeDayVM {
+  key: string
+  number: string
+  weekday: string
+  inRange: boolean
+  /** Tapped first; the next tap sets the other end. */
+  anchor: boolean
+  onPick?: () => void
+}
+
+export interface PreferencesVM {
+  days: RangeDayVM[]
+  /** "Fri 30 to Mon 2", or "Every day". */
+  range: string
+  rangePending: boolean
+  /** What the next tap on a day does. */
+  rangeHint: string
+  onEveryDay?: () => void
+  buffer: StepperVM
+  venues: StepperVM[]
+  events: InterestVM
+  attendEvents: {
+    on: boolean
+    pending: boolean
+    onToggle?: () => void
+  }
+  years: { year: string; films: string; interest: InterestVM }[]
+  comparisons: { made: string; interest: InterestVM; href: string }
 }

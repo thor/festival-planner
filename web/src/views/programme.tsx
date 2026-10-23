@@ -50,7 +50,12 @@ export function ProgrammeView({ vm }: { vm: ProgrammeVM }) {
                 >
                   {e.title}
                 </Link>
-                <Meta items={e.meta} className="mt-3" />
+                <div className="mt-3 flex gap-4">
+                  <Meta items={e.meta} />
+                  {e.interestWord && (
+                    <span className="text-stamp">{e.interestWord}</span>
+                  )}
+                </div>
               </div>
               <ul className="self-end">
                 {e.screenings.map((s) => (

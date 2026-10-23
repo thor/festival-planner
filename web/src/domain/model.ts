@@ -114,13 +114,42 @@ export interface ComparisonPair {
   other: ProgrammeEntry
 }
 
+export interface Comparison {
+  preferredId: ProgrammeEntryId
+  otherId: ProgrammeEntryId
+}
+
+/**
+ * Settings that shape a User's Schedules for one Festival. Weights add to a
+ * Screening's worth, 1 by default; a missing key means the default.
+ */
+export interface Preferences {
+  /** Minutes to arrive before a Screening, unless its Venue has its own. */
+  bufferMinutes: number
+  venueBuffers: Readonly<Record<VenueId, number>>
+  startDate: DayKey | null
+  endDate: DayKey | null
+  entryWeights: Readonly<Record<ProgrammeEntryId, number>>
+  screeningWeights: Readonly<Record<ScreeningId, number>>
+  /** Added to every Programme Entry of that year. */
+  yearWeights: Readonly<Record<number, number>>
+  /** Added to every Screening with an Event. */
+  eventWeight: number
+  /** Whether separately timed Events block time. */
+  attendEvents: boolean
+  transportMode: string | null
+  /** How strongly Comparisons shift Programme Entry weights. */
+  comparisonWeight: number
+  comparisons: readonly Comparison[]
+}
+
 /** A signed-in User's accepted inputs for one Festival. */
 export interface PlanningInputs {
   screeningCommitments: ScreeningId[]
   filmCommitments: ProgrammeEntryId[]
   excludedScreenings: ScreeningId[]
   excludedProgrammeEntries: ProgrammeEntryId[]
-  bufferMinutes: number
+  preferences: Preferences
 }
 
 export interface Planning {
@@ -134,10 +163,29 @@ export interface Planning {
   suggestions: ComparisonPair[]
 }
 
-/**
- * One change a Change Set proposes. The subset the concepts edit; the API
- * has more kinds (weights, buffers, date range, events, transport).
- */
+/** A change to one Preferences setting. A null value resets it. */
+export type PreferenceItem =
+  | {
+      kind: "setProgrammeEntryWeight"
+      programmeEntryId: ProgrammeEntryId
+      weight: number | null
+    }
+  | {
+      kind: "setScreeningWeight"
+      screeningId: ScreeningId
+      weight: number | null
+    }
+  | { kind: "setYearWeight"; year: number; weight: number | null }
+  /** The general buffer, or with a Venue that Venue's. */
+  | { kind: "setBuffer"; venueId: VenueId | null; minutes: number | null }
+  /** Both null means every Festival Day. */
+  | { kind: "setDateRange"; startDate: DayKey | null; endDate: DayKey | null }
+  | { kind: "setEventWeight"; weight: number | null }
+  | { kind: "setAttendEvents"; attend: boolean | null }
+  | { kind: "setTransportMode"; mode: string | null }
+  | { kind: "setComparisonWeight"; weight: number | null }
+
+/** One change a Change Set proposes. */
 export type ChangeSetItem =
   | { kind: "addScreeningCommitment"; screeningId: ScreeningId }
   | { kind: "releaseScreeningCommitment"; screeningId: ScreeningId }
@@ -152,7 +200,6 @@ export type ChangeSetItem =
       preferredId: ProgrammeEntryId
       otherId: ProgrammeEntryId
     }
-  | { kind: "setBuffer"; minutes: number | null }
-  | { kind: "other"; label: string }
+  | PreferenceItem
 
 export type ChangeSetItemKind = ChangeSetItem["kind"]

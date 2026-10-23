@@ -24,6 +24,10 @@ _Avoid_: Entry page, title page
 The page showing the Active Schedule as one row per Festival Day.
 _Avoid_: Week, calendar, itinerary
 
+**Preferences page**:
+The page for a User's Preferences for one Festival: which days, how early to arrive, Events, years and how much Comparisons count. Its edits go into the Pending Change Set like any other.
+_Avoid_: Settings, options
+
 **Tickets page**:
 The page listing the User's Tickets for a Festival: Tickets to let go above Held Tickets.
 _Avoid_: Wallet, bookings, purchases
@@ -71,6 +75,20 @@ _Avoid_: Apply, confirm, save
 **Score change**:
 How much better or worse a Draft scores than the Active Schedule under the Draft's Preferences.
 _Avoid_: Delta, gain
+
+### Preferences
+
+**Interest**:
+How much a User wants to see a Programme Entry, in four steps: Less, Usual, More and Most. It stands for a Programme Entry weight; Usual means none is set. Years, Events and Comparisons use the same four steps.
+_Avoid_: Weight, rating, priority, stars
+
+**Days**:
+The Festival Days a User can go, picked as a first and a last. Every day means no date range.
+_Avoid_: Date range, availability
+
+**Arrive early**:
+The buffer: minutes to spare before a Screening, on top of travel, for every Venue or one.
+_Avoid_: Buffer, margin, padding
 
 ### Tickets
 

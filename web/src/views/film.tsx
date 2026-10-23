@@ -9,6 +9,7 @@ import type { EntryVM, FilmVM, ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
 import { Docked } from "./dock"
+import { InterestControl } from "./interest"
 import { Action, ExternalLink, Meta, Page, Place } from "./parts"
 import { ScreeningRow } from "./screening-row"
 
@@ -28,7 +29,10 @@ export function FilmView({ vm }: { vm: FilmVM }) {
         </h1>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <Meta items={vm.meta} className="text-lg" />
-          <FilmActions entry={entry} url={vm.url} />
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <InterestControl vm={vm.interest} size="sm" />
+            <FilmActions entry={entry} url={vm.url} />
+          </div>
         </div>
       </header>
 

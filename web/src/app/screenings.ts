@@ -24,6 +24,7 @@ import { clock, dayKey, isPast, shortDay } from "@/domain/time"
 import { usePendingChangeSet } from "./change-set-store"
 import { useNow } from "./now"
 import { usePorts } from "./ports"
+import { entryInterest, entryInterestWord, usePreferences } from "./preferences"
 import { keys } from "./queries"
 import type { EntryVM, ScreeningVM } from "./view-models"
 
@@ -47,6 +48,7 @@ export function useEntryModels(
   const { planning: port } = usePorts()
   const client = useQueryClient()
   const [set, update] = usePendingChangeSet(festival?.id)
+  const prefs = usePreferences(festival, planning)
   const now = useNow()
   const inputs = planning?.inputs ?? emptyInputs
   const signedIn = !!planning
@@ -102,6 +104,7 @@ export function useEntryModels(
     title: e.title,
     href: entryHref(festival!, e),
     meta: metaOf(e),
+    interestWord: entryInterestWord(e, prefs),
     marks: entryMarks(e.id, inputs, set),
     screenings: e.screenings.filter(only ?? (() => true)).map(screening),
     onCommit: signedIn
@@ -112,5 +115,10 @@ export function useEntryModels(
       : undefined,
   })
 
-  return { entry, screening, signedIn }
+  return {
+    entry,
+    screening,
+    signedIn,
+    interest: (e: ProgrammeEntry) => entryInterest(e, prefs),
+  }
 }

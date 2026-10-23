@@ -10,6 +10,7 @@ import type {
   DraftId,
   Flag,
   PlanningInputs,
+  Preferences,
   ProgrammeEntryId,
   Schedule,
   ScheduleId,
@@ -17,7 +18,9 @@ import type {
   ScreeningId,
   Ticket,
 } from "@/domain/model"
+import { defaultPreferences, preferencesAfter } from "@/domain/preferences"
 import type { PlanningPort, SessionPort } from "@/domain/ports"
+import { dayKey } from "@/domain/time"
 
 import { festival, programme } from "./seed"
 
@@ -26,34 +29,22 @@ const SOLVE_MS = 900
 const all = programme.flatMap((e) => e.screenings)
 const byId = new Map(all.map((s) => [s.id, s]))
 const screening = (id: ScreeningId) => byId.get(id)!
-
-interface Comparison {
-  preferredId: ProgrammeEntryId
-  otherId: ProgrammeEntryId
-}
+const noBuffer: Preferences = { ...defaultPreferences, bufferMinutes: 0 }
 
 interface State {
   inputs: PlanningInputs
-  comparisons: Comparison[]
   schedules: Schedule[]
   drafts: Draft[]
   tickets: Ticket[]
   nextId: number
 }
 
-function apply(
-  inputs: PlanningInputs,
-  comparisons: Comparison[],
-  set: ChangeSet
-) {
+/** The accepted inputs with `set` applied, as the backend would. */
+function apply(inputs: PlanningInputs, set: ChangeSet): PlanningInputs {
   const next: PlanningInputs = {
-    screeningCommitments: [...inputs.screeningCommitments],
-    filmCommitments: [...inputs.filmCommitments],
-    excludedScreenings: [...inputs.excludedScreenings],
-    excludedProgrammeEntries: [...inputs.excludedProgrammeEntries],
-    bufferMinutes: inputs.bufferMinutes,
+    ...inputs,
+    preferences: preferencesAfter(inputs.preferences, set),
   }
-  let compared = [...comparisons]
   const add = <T>(list: T[], v: T) => (list.includes(v) ? list : [...list, v])
   const drop = <T>(list: T[], v: T) => list.filter((x) => x !== v)
   for (const item of set) {
@@ -97,54 +88,49 @@ function apply(
           item.programmeEntryId
         )
         break
-      case "recordComparison":
-        compared = [
-          ...compared.filter(
-            (c) =>
-              !(
-                [c.preferredId, c.otherId].includes(item.preferredId) &&
-                [c.preferredId, c.otherId].includes(item.otherId)
-              )
-          ),
-          { preferredId: item.preferredId, otherId: item.otherId },
-        ]
-        break
-      case "setBuffer":
-        next.bufferMinutes = item.minutes ?? 15
-        break
-      case "other":
-        break
     }
   }
-  return { inputs: next, comparisons: compared }
+  return next
 }
 
-function weightOf(entry: ProgrammeEntryId, comparisons: Comparison[]): number {
-  let w = 1
-  for (const c of comparisons) {
-    if (c.preferredId === entry) w += 0.25
-    if (c.otherId === entry) w -= 0.25
+/** A rough stand-in for the backend's weights: no Bradley–Terry fit. */
+function weightOf(s: Screening, p: Preferences): number {
+  const entry = programme.find((e) => e.id === s.programmeEntryId)
+  let w = p.screeningWeights[s.id] ?? p.entryWeights[s.programmeEntryId] ?? 1
+  if (entry?.year != null) w += p.yearWeights[entry.year] ?? 0
+  if (s.events.length) w += p.eventWeight
+  for (const c of p.comparisons) {
+    if (c.preferredId === s.programmeEntryId) w += p.comparisonWeight / 2
+    if (c.otherId === s.programmeEntryId) w -= p.comparisonWeight / 2
   }
   return w
 }
 
-function fits(chosen: Screening[], s: Screening, buffer: number): boolean {
-  const gap = buffer * 60000
+function fits(chosen: Screening[], s: Screening, p: Preferences): boolean {
+  const gap = (x: Screening) =>
+    (p.venueBuffers[x.venue.id] ?? p.bufferMinutes) * 60000
   return chosen.every(
     (c) =>
-      Date.parse(c.endTime) + gap <= Date.parse(s.startTime) ||
-      Date.parse(s.endTime) + gap <= Date.parse(c.startTime)
+      Date.parse(c.endTime) + gap(s) <= Date.parse(s.startTime) ||
+      Date.parse(s.endTime) + gap(c) <= Date.parse(c.startTime)
   )
 }
 
-function solve(inputs: PlanningInputs, comparisons: Comparison[]) {
-  const buffer = inputs.bufferMinutes
+function solve(inputs: PlanningInputs) {
+  const p = inputs.preferences
   const chosen: Screening[] = inputs.screeningCommitments.map(screening)
   const done = new Set(chosen.map((s) => s.programmeEntryId))
+  const inRange = (s: Screening) => {
+    const day = dayKey(s.startTime, festival.timeZone)
+    return (
+      (!p.startDate || day >= p.startDate) && (!p.endDate || day <= p.endDate)
+    )
+  }
   const open = (s: Screening) =>
     !s.withdrawn &&
+    inRange(s) &&
     !inputs.excludedScreenings.includes(s.id) &&
-    fits(chosen, s, buffer)
+    fits(chosen, s, p)
 
   for (const entryId of inputs.filmCommitments) {
     if (done.has(entryId)) continue
@@ -153,20 +139,21 @@ function solve(inputs: PlanningInputs, comparisons: Comparison[]) {
     chosen.push(pick)
     done.add(entryId)
   }
-  const rest = programme
+  const rest = all
     .filter(
-      (e) => !done.has(e.id) && !inputs.excludedProgrammeEntries.includes(e.id)
+      (s) =>
+        !done.has(s.programmeEntryId) &&
+        !inputs.excludedProgrammeEntries.includes(s.programmeEntryId) &&
+        weightOf(s, p) > 0
     )
-    .sort((a, b) => weightOf(b.id, comparisons) - weightOf(a.id, comparisons))
-  for (const entry of rest) {
-    const pick = entry.screenings.find(open)
-    if (pick) chosen.push(pick)
+    .sort((a, b) => weightOf(b, p) - weightOf(a, p))
+  for (const s of rest) {
+    if (done.has(s.programmeEntryId) || !open(s)) continue
+    chosen.push(s)
+    done.add(s.programmeEntryId)
   }
   chosen.sort((a, b) => a.startTime.localeCompare(b.startTime))
-  const score = chosen.reduce(
-    (sum, s) => sum + weightOf(s.programmeEntryId, comparisons),
-    0
-  )
+  const score = chosen.reduce((sum, s) => sum + weightOf(s, p), 0)
   return { status: "READY" as const, chosen, score }
 }
 
@@ -211,12 +198,14 @@ function initial(): State {
     filmCommitments: ["entry-3" as ProgrammeEntryId],
     excludedScreenings: [],
     excludedProgrammeEntries: [],
-    bufferMinutes: 15,
+    preferences: {
+      ...defaultPreferences,
+      entryWeights: { ["entry-5" as ProgrammeEntryId]: 1.5 },
+    },
   }
-  const first = solve(inputs, [])
+  const first = solve(inputs)
   return {
     inputs,
-    comparisons: [],
     schedules: [
       {
         id: "schedule-1" as ScheduleId,
@@ -288,7 +277,7 @@ function suggestions(state: State, scheduled: Screening[]): ComparisonPair[] {
   const entries = new Map(programme.map((e) => [e.id, e]))
   const inSchedule = new Set(scheduled.map((s) => s.programmeEntryId))
   const compared = (a: ProgrammeEntryId, b: ProgrammeEntryId) =>
-    state.comparisons.some(
+    state.inputs.preferences.comparisons.some(
       (c) =>
         [c.preferredId, c.otherId].includes(a) &&
         [c.preferredId, c.otherId].includes(b)
@@ -298,7 +287,7 @@ function suggestions(state: State, scheduled: Screening[]): ComparisonPair[] {
     for (const other of programme) {
       if (inSchedule.has(other.id) || compared(s.programmeEntryId, other.id))
         continue
-      if (other.screenings.some((o) => !fits([s], o, 0))) {
+      if (other.screenings.some((o) => !fits([s], o, noBuffer))) {
         pairs.push({ scheduled: entries.get(s.programmeEntryId)!, other })
       }
     }
@@ -336,8 +325,7 @@ export function memoryPlanning(session: SessionPort): PlanningPort {
 
   const startSolve = (draft: Draft) => {
     setTimeout(() => {
-      const applied = apply(state.inputs, state.comparisons, draft.changeSet)
-      const result = solve(applied.inputs, applied.comparisons)
+      const result = solve(apply(state.inputs, draft.changeSet))
       state = {
         ...state,
         drafts: state.drafts.map((d) =>
@@ -430,7 +418,7 @@ export function memoryPlanning(session: SessionPort): PlanningPort {
           message: "Not ready or stale.",
         })
       }
-      const applied = apply(state.inputs, state.comparisons, draft.changeSet)
+      const inputs = apply(state.inputs, draft.changeSet)
       const schedule: Schedule = {
         id: `schedule-${state.schedules.length + 1}` as ScheduleId,
         number: state.schedules.length + 1,
@@ -440,8 +428,7 @@ export function memoryPlanning(session: SessionPort): PlanningPort {
       }
       state = {
         ...state,
-        inputs: applied.inputs,
-        comparisons: applied.comparisons,
+        inputs,
         schedules: [...state.schedules, schedule],
         drafts: state.drafts
           .filter((d) => d.id !== id)

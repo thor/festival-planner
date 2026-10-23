@@ -105,9 +105,83 @@ export const ChangeSetFields = graphql(`
         id
       }
     }
+    ... on SetProgrammeEntryWeight {
+      programmeEntry {
+        id
+      }
+      weight
+    }
+    ... on SetScreeningWeight {
+      screening {
+        id
+      }
+      weight
+    }
+    ... on SetYearWeight {
+      year
+      weight
+    }
     ... on SetBuffer {
       minutes
       venue {
+        id
+      }
+    }
+    ... on SetDateRange {
+      startDate
+      endDate
+    }
+    ... on SetEventWeight {
+      weight
+    }
+    ... on SetAttendEvents {
+      attend
+    }
+    ... on SetTransportMode {
+      mode
+    }
+    ... on SetComparisonWeight {
+      weight
+    }
+  }
+`)
+
+export const PreferencesFields = graphql(`
+  fragment PreferencesFields on Preferences {
+    bufferMinutes
+    venueBuffers {
+      minutes
+      venue {
+        id
+      }
+    }
+    startDate
+    endDate
+    programmeEntryWeights {
+      programmeEntry {
+        id
+      }
+      weight
+    }
+    screeningWeights {
+      screening {
+        id
+      }
+      weight
+    }
+    yearWeights {
+      year
+      weight
+    }
+    eventWeight
+    attendEvents
+    transportMode
+    comparisonWeight
+    comparisons {
+      preferred {
+        id
+      }
+      other {
         id
       }
     }
@@ -224,7 +298,7 @@ export const PlanningQuery = graphql(
           }
           inputs {
             preferences {
-              bufferMinutes
+              ...PreferencesFields
             }
             screeningCommitments {
               id
@@ -261,7 +335,7 @@ export const PlanningQuery = graphql(
       }
     }
   `,
-  [ScreeningFields, DraftFields, EntryFields]
+  [ScreeningFields, DraftFields, EntryFields, PreferencesFields]
 )
 
 export const DraftQuery = graphql(

@@ -90,7 +90,7 @@ export function graphqlPlanning(run: Run): PlanningPort {
       return draftOf(node, diff)
     },
     async createDraft(festivalId, changeSet) {
-      const items = changeSet.map(itemInputOf).filter((i) => i !== null)
+      const items = changeSet.map(itemInputOf)
       const { createDraft: r } = await run(
         CreateDraftMutation,
         { input: { festivalId, changeSet: items } },

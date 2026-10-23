@@ -105,7 +105,7 @@ export function NavIcon({
               count > 0 && countLabel ? `${label}, ${countLabel}` : label
             }
             data-end={end}
-            className="flex h-10 items-center gap-2 border-l border-ink px-3 text-sm hover:bg-haze md:px-4"
+            className="flex h-10 items-center gap-2 border-l border-ink px-2 text-sm hover:bg-haze sm:px-3 md:px-4"
           />
         }
       >

@@ -66,5 +66,6 @@ format and fix. `mise run fix` covers the Python side too.
 - `/:slug/tickets` tickets to let go, then the ones held
 - `/:slug/drafts` and `/:slug/drafts/:id` diff, accept, discard, solve again
 - `/:slug/compare` which would you rather see
+- `/:slug/preferences` days, arriving early, events, years, comparisons
 
 Edits collect in the tray as a Change Set. Solve makes a Draft.
