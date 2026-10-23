@@ -90,7 +90,7 @@ export const programme: ProgrammeEntry[] = films
         endTime: instant(Number(day), time, minutes),
         venue: venues[Number(v)],
         auditorium: null,
-        ticketUrl: null,
+        ticketUrl: `https://tickets.example/ffs/${f + 1}-${s + 1}`,
         events: f % 4 === 0 && s === 0 ? [{ description: "Director talk", startTime: null, endTime: null }] : [],
         withdrawn: f === 10 && s === 1,
       }
