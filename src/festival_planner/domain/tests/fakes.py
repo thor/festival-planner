@@ -1,6 +1,7 @@
 """In-memory implementations of the repository ports, for use-case tests."""
 
 import copy
+import datetime
 import itertools
 from collections.abc import Callable, Iterable, Mapping
 from types import TracebackType
@@ -15,6 +16,13 @@ from festival_planner.domain.programme import (
     Screening,
     Venue,
     title_key,
+)
+from festival_planner.domain.solving import (
+    ScheduledScreening,
+    SolveRequest,
+    SolveResult,
+    SolveStatus,
+    formulate,
 )
 from festival_planner.domain.travel import Route
 from festival_planner.domain.users import User
@@ -292,3 +300,103 @@ class _Seen:
 
     def restore(self, user_id: str, screening_id: str) -> None:
         self.s.dismissals.discard((user_id, screening_id))
+
+
+class GreedySolver:
+    """A deterministic stand-in for CP-SAT: required Screenings first, then by
+    weight (highest first) and id, skipping whatever conflicts."""
+
+    def solve(self, request: SolveRequest) -> SolveResult:
+        f = formulate(request)
+        if f.unsatisfiable:
+            return SolveResult(status=SolveStatus.INFEASIBLE, reasons=f.unsatisfiable)
+        conflicts = set(f.conflicts) | {(b, a) for a, b in f.conflicts}
+        groups = [*f.exactly_one, *f.at_most_one]
+        chosen: list[str] = []
+        for s in sorted(
+            f.candidates, key=lambda s: (s.id not in f.required, -f.weights[s.id], s.id)
+        ):
+            fits = all((s.id, c) not in conflicts for c in chosen) and not any(
+                s.id in g and any(c in g for c in chosen) for g in groups
+            )
+            if fits:
+                chosen.append(s.id)
+            elif s.id in f.required:
+                return SolveResult(
+                    status=SolveStatus.INFEASIBLE, reasons=(f"{s.id} does not fit",)
+                )
+        if any(not g & set(chosen) for g in f.exactly_one):
+            return SolveResult(
+                status=SolveStatus.INFEASIBLE,
+                reasons=("A Film Commitment does not fit",),
+            )
+        scheduled = tuple(
+            ScheduledScreening(
+                screening_id=s.id, arrival_time=s.start_time, weight=f.weights[s.id]
+            )
+            for s in sorted(f.candidates, key=lambda s: (s.start_time, s.id))
+            if s.id in chosen
+        )
+        return SolveResult(
+            status=SolveStatus.OPTIMAL,
+            scheduled=scheduled,
+            objective=sum(f.weights[i] for i in chosen),
+        )
+
+
+class FailingSolver:
+    def solve(self, request: SolveRequest) -> SolveResult:
+        raise RuntimeError("solver exploded")
+
+
+class _Finished:
+    def wait(self, timeout: float | None = None) -> bool:
+        return True
+
+
+class InlineJobRunner:
+    def submit(self, work: Callable[[], None]) -> _Finished:
+        work()
+        return _Finished()
+
+
+class _Pending:
+    def __init__(self, runner: "DeferredJobRunner") -> None:
+        self._runner = runner
+
+    def wait(self, timeout: float | None = None) -> bool:
+        return not self._runner.pending
+
+
+class DeferredJobRunner:
+    """Holds work until `run_all()`, like a busy background runner."""
+
+    def __init__(self) -> None:
+        self.pending: list[Callable[[], None]] = []
+
+    def submit(self, work: Callable[[], None]) -> _Pending:
+        self.pending.append(work)
+        return _Pending(self)
+
+    def run_all(self) -> None:
+        while self.pending:
+            self.pending.pop(0)()
+
+
+class RecordingNotifier:
+    def __init__(self) -> None:
+        self.solved: list[Draft] = []
+
+    def draft_solved(self, draft: Draft) -> None:
+        self.solved.append(draft)
+
+
+class TickingClock:
+    """Each call is one minute after the previous one."""
+
+    def __init__(self, start: datetime.datetime) -> None:
+        self.now = start
+
+    def __call__(self) -> datetime.datetime:
+        self.now += datetime.timedelta(minutes=1)
+        return self.now
