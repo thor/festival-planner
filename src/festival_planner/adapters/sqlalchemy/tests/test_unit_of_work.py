@@ -5,9 +5,21 @@ import pytest
 
 from festival_planner.adapters.sqlalchemy.unit_of_work import SqlAlchemyUnitOfWork
 from festival_planner.domain.festival import Festival
-from festival_planner.domain.ingestion import UnitOfWork
+from festival_planner.domain.ingestion import (
+    ProgrammeIngestion,
+    SourceEntry,
+    SourceFestival,
+    SourceProgramme,
+    SourceRoute,
+    SourceScreening,
+    SourceVenue,
+    UnitOfWork,
+    VenueIngestion,
+    ingest_programme,
+    ingest_venues,
+)
 from festival_planner.domain.programme import Film, ProgrammeEntry, Screening, Venue
-from festival_planner.domain.travel import Route
+from festival_planner.domain.travel import DEFAULT_TRANSPORT_MODE, Route
 
 OSLO = zoneinfo.ZoneInfo("Europe/Oslo")
 
@@ -95,3 +107,76 @@ def test_ingesting_and_withdrawing_by_hand_through_the_real_unit_of_work(engine)
         )
         assert uow.festivals.by_slug("fests-2025") == festival
         assert uow.routes.all() == tuple(sorted(routes, key=lambda r: r.from_venue_id))
+
+
+class StaticVenues:
+    """VenueSource and RouteProvider: Vika (alias "Vika Kino") and Vega."""
+
+    def venues(self) -> tuple[SourceVenue, ...]:
+        return (
+            SourceVenue(name="Vika", aliases=frozenset({"Vika Kino"})),
+            SourceVenue(name="Vega"),
+        )
+
+    def routes(self, venues: tuple[Venue, ...]) -> tuple[SourceRoute, ...]:
+        return tuple(
+            SourceRoute(
+                from_venue=a, to_venue=b, mode=DEFAULT_TRANSPORT_MODE, minutes=12
+            )
+            for a, b in (("Vika Kino", "Vega"), ("Vega", "Vika"))
+        )
+
+
+class StaticProgramme:
+    """ProgrammeSource: Fallen Leaves at 18:00 Oslo time at each named venue."""
+
+    def __init__(self, *venue_names: str):
+        start = datetime.datetime(2025, 11, 8, 18, 0, tzinfo=OSLO)
+        self.programme = SourceProgramme(
+            festival=SourceFestival(
+                slug="fests-2025", name="Fests 2025", time_zone="Europe/Oslo"
+            ),
+            entries=(
+                SourceEntry(
+                    source_key="film/fallen-leaves",
+                    title="Fallen Leaves",
+                    year=2023,
+                    screenings=tuple(
+                        SourceScreening(
+                            venue_name=name,
+                            start_time=start,
+                            end_time=start + datetime.timedelta(hours=2),
+                        )
+                        for name in venue_names
+                    ),
+                ),
+            ),
+        )
+
+    def fetch(self) -> SourceProgramme:
+        return self.programme
+
+
+def test_use_cases_run_against_sqlite(engine):
+    uow = SqlAlchemyUnitOfWork(engine)
+
+    def screening_ids() -> list[str]:
+        with uow:
+            festival = uow.festivals.by_slug("fests-2025")
+            assert festival is not None
+            return sorted(s.id for s in uow.programme.screenings(festival.id))
+
+    venues = ingest_venues(uow, StaticVenues(), StaticVenues())
+    first = ingest_programme(uow, StaticProgramme("Vika Kino", "Vega"))
+    ids_after_first = screening_ids()
+    second = ingest_programme(uow, StaticProgramme("Vika Kino", "Vega"))
+    ids_after_second = screening_ids()
+    third = ingest_programme(uow, StaticProgramme("Vika Kino"))
+
+    assert venues == VenueIngestion(venues_created=2, routes=2)
+    assert first.screenings_created == 2
+    assert second == ProgrammeIngestion(festival_slug="fests-2025")
+    assert ids_after_second == ids_after_first
+    assert third == ProgrammeIngestion(
+        festival_slug="fests-2025", screenings_withdrawn=1
+    )
