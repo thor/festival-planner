@@ -122,6 +122,7 @@ class RouteProvider(Protocol):
 
 
 class FestivalRepository(Protocol):
+    def by_id(self, festival_id: FestivalId) -> Festival | None: ...
     def by_slug(self, slug: str) -> Festival | None: ...
     def save(self, festival: Festival) -> None: ...
     def series_by_slug(self, slug: str) -> FestivalSeries | None: ...
@@ -141,6 +142,7 @@ class RouteRepository(Protocol):
 
 
 class FilmRepository(Protocol):
+    def by_id(self, film_id: str) -> Film | None: ...
     def find(self, title: str, year: int) -> Film | None:
         """A Film whose `title_key` and year match, if any."""
         ...
@@ -163,6 +165,14 @@ class ProgrammeRepository(Protocol):
 
     def save_screening(self, screening: Screening) -> None:
         """Insert or update by id, replacing the Events."""
+        ...
+
+    def screenings_by_id(self, ids: Iterable[str]) -> tuple[Screening, ...]:
+        """The Screenings with these ids, in any Festival; unknown ids are skipped."""
+        ...
+
+    def entries_by_id(self, ids: Iterable[str]) -> tuple[ProgrammeEntry, ...]:
+        """The Programme Entries with these ids; unknown ids are skipped."""
         ...
 
 
