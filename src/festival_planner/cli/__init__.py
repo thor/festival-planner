@@ -11,6 +11,7 @@ from .plan import app as plan_app
 from .scrape import app as scrape
 from .set_weight import app as set_weight
 from .solve import app as solve
+from .token import app as token_app
 from .validate import app as validate
 
 app = typer.Typer(help="Festival Planner - Optimize your film festival schedule")
@@ -22,6 +23,7 @@ app.add_typer(validate)
 app.add_typer(db_app, name="db")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(plan_app, name="plan")
+app.add_typer(token_app, name="token")
 
 console = Console()
 logger = get_logger(__name__)
