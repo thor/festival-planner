@@ -137,11 +137,24 @@ class _Festivals:
     def by_slug(self, slug: str) -> Festival | None:
         return next((f for f in self.s.festivals.values() if f.slug == slug), None)
 
+    def all(self) -> tuple[Festival, ...]:
+        return tuple(self.s.festivals.values())
+
+    def by_ids(self, ids: Iterable[FestivalId]) -> tuple[Festival, ...]:
+        wanted = frozenset(ids)
+        return tuple(f for f in self.s.festivals.values() if f.id in wanted)
+
     def save(self, festival: Festival) -> None:
         self.s.festivals[festival.id] = festival
 
     def series_by_slug(self, slug: str) -> FestivalSeries | None:
         return next((x for x in self.s.series.values() if x.slug == slug), None)
+
+    def series_by_ids(
+        self, ids: Iterable[FestivalSeriesId]
+    ) -> tuple[FestivalSeries, ...]:
+        wanted = frozenset(ids)
+        return tuple(s for s in self.s.series.values() if s.id in wanted)
 
     def save_series(self, series: FestivalSeries) -> None:
         self.s.series[series.id] = series
@@ -175,6 +188,10 @@ class _Films:
 
     def by_id(self, film_id: FilmId) -> Film | None:
         return self.s.films.get(film_id)
+
+    def by_ids(self, ids: Iterable[FilmId]) -> tuple[Film, ...]:
+        wanted = frozenset(ids)
+        return tuple(f for f in self.s.films.values() if f.id in wanted)
 
     def find(self, title: str, year: int) -> Film | None:
         return next(
@@ -221,6 +238,14 @@ class _Programme:
     ) -> tuple[ProgrammeEntry, ...]:
         return tuple(
             self.s.entries[i][2] for i in sorted(set(ids)) if i in self.s.entries
+        )
+
+    def screenings_of_entries(
+        self, ids: Iterable[ProgrammeEntryId]
+    ) -> tuple[Screening, ...]:
+        wanted = frozenset(ids)
+        return tuple(
+            s for s in self.s.screenings.values() if s.programme_entry_id in wanted
         )
 
 

@@ -212,3 +212,83 @@ def test_a_second_screening_with_the_same_natural_key_is_rejected(stored):
         uow.programme.save_screening(
             SCREENING.model_copy(update={"id": ScreeningId("other"), "events": ()})
         )
+
+
+def test_festivals_all_and_by_ids(stored):
+    other = Festival(
+        id=FestivalId("f2"),
+        slug="fests-2026",
+        name="Fests 2026",
+        start_date=datetime.date(2026, 11, 6),
+        end_date=datetime.date(2026, 11, 16),
+        time_zone="Europe/Oslo",
+    )
+    with SqlAlchemyUnitOfWork(stored) as uow:
+        uow.festivals.save(other)
+        uow.commit()
+    all_festivals = read(stored, lambda uow: uow.festivals.all())
+    assert {f.id for f in all_festivals} == {FestivalId("f"), FestivalId("f2")}
+    by_ids = read(
+        stored,
+        lambda uow: uow.festivals.by_ids([FestivalId("f"), FestivalId("missing")]),
+    )
+    assert {f.id for f in by_ids} == {FestivalId("f")}
+
+
+def test_series_by_ids(stored):
+    other = FestivalSeries(id=FestivalSeriesId("s2"), slug="other-fests", name="Other")
+    with SqlAlchemyUnitOfWork(stored) as uow:
+        uow.festivals.save_series(other)
+        uow.commit()
+    result = read(
+        stored,
+        lambda uow: uow.festivals.series_by_ids(
+            [FestivalSeriesId("s"), FestivalSeriesId("missing")]
+        ),
+    )
+    assert result == (SERIES,)
+
+
+def test_films_by_ids(stored):
+    other = Film(id=FilmId("m2"), title="Other film", year=2020)
+    with SqlAlchemyUnitOfWork(stored) as uow:
+        uow.films.save(other)
+        uow.commit()
+    result = read(
+        stored, lambda uow: uow.films.by_ids([FilmId("m"), FilmId("missing")])
+    )
+    assert result == (FILM,)
+
+
+def test_screenings_of_entries(stored):
+    other_entry = ProgrammeEntry(
+        id=ProgrammeEntryId("e2"), film_id=FilmId("m"), title="Other", year=2023
+    )
+    other_screening = Screening(
+        id=ScreeningId("sc2"),
+        programme_entry_id=ProgrammeEntryId("e2"),
+        venue_id=VenueId("vika"),
+        start_time=T18 + datetime.timedelta(days=1),
+        end_time=T18 + datetime.timedelta(days=1, hours=2),
+    )
+    withdrawn = SCREENING.model_copy(
+        update={
+            "id": ScreeningId("sc3"),
+            "start_time": T18 + datetime.timedelta(days=2),
+            "end_time": T18 + datetime.timedelta(days=2, hours=2),
+            "withdrawn": True,
+            "events": (),
+        }
+    )
+    with SqlAlchemyUnitOfWork(stored) as uow:
+        uow.programme.save_entry(FestivalId("f"), "film/other", other_entry)
+        uow.programme.save_screening(other_screening)
+        uow.programme.save_screening(withdrawn)
+        uow.commit()
+    result = read(
+        stored,
+        lambda uow: uow.programme.screenings_of_entries(
+            [ProgrammeEntryId("e"), ProgrammeEntryId("missing")]
+        ),
+    )
+    assert {s.id for s in result} == {SCREENING.id, withdrawn.id}

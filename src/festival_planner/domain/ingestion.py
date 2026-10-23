@@ -128,8 +128,19 @@ class RouteProvider(Protocol):
 class FestivalRepository(Protocol):
     def by_id(self, festival_id: FestivalId) -> Festival | None: ...
     def by_slug(self, slug: str) -> Festival | None: ...
+    def all(self) -> tuple[Festival, ...]: ...
+    def by_ids(self, ids: Iterable[FestivalId]) -> tuple[Festival, ...]:
+        """The Festivals with these ids; unknown ids are skipped."""
+        ...
+
     def save(self, festival: Festival) -> None: ...
     def series_by_slug(self, slug: str) -> FestivalSeries | None: ...
+    def series_by_ids(
+        self, ids: Iterable[FestivalSeriesId]
+    ) -> tuple[FestivalSeries, ...]:
+        """The Festival Series with these ids; unknown ids are skipped."""
+        ...
+
     def save_series(self, series: FestivalSeries) -> None: ...
 
 
@@ -147,6 +158,10 @@ class RouteRepository(Protocol):
 
 class FilmRepository(Protocol):
     def by_id(self, film_id: FilmId) -> Film | None: ...
+    def by_ids(self, ids: Iterable[FilmId]) -> tuple[Film, ...]:
+        """The Films with these ids; unknown ids are skipped."""
+        ...
+
     def find(self, title: str, year: int) -> Film | None:
         """A Film whose `title_key` and year match, if any."""
         ...
@@ -179,6 +194,13 @@ class ProgrammeRepository(Protocol):
         self, ids: Iterable[ProgrammeEntryId]
     ) -> tuple[ProgrammeEntry, ...]:
         """The Programme Entries with these ids; unknown ids are skipped."""
+        ...
+
+    def screenings_of_entries(
+        self, ids: Iterable[ProgrammeEntryId]
+    ) -> tuple[Screening, ...]:
+        """The Screenings of these Programme Entries, Withdrawn ones included;
+        unknown ids are skipped."""
         ...
 
 
