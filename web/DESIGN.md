@@ -1,104 +1,111 @@
-# Web concepts: design plan
+# Entr’acte: design
 
-Subject: planning a week at Films from the South (Oslo). One person, many
-films, four or five venues. The job: see the week, change it, accept it.
+Entr’acte plans a film festival for one person: many films, about ten days,
+a handful of venues. It shows the festival, helps change the schedule, and
+keeps the person on track between screenings. Words follow
+[CONTEXT.md](CONTEXT.md); code layout is in [README.md](README.md).
+
+## Character
+
+A good usher: elegant, calm, with the whole house in view. It shows the way
+with a small light and a few words, then steps back. It never hurries,
+never raises its voice, and never decides for you. So every page opens on
+the whole picture, problems are pointed to with one way forward, and
+nothing changes until you accept it.
+
+## Brand
+
+The name is the interval between acts; the app lives in the gaps between
+screenings. Write `entracte` where an apostrophe is awkward. The wordmark is
+Bodoni Moda outlines in ink, with the apostrophe in ultramarine: the
+interval, and the usher’s light. The icon is a stage with the curtains
+drawn back and that apostrophe hanging in the opening. The voice is brief,
+courteous and sure of itself.
 
 ## Tokens
 
-Colour. A silver screen, black ink, one stamp of ultramarine.
+| Name   | Light     | Dark      | Use                         |
+| ------ | --------- | --------- | --------------------------- |
+| screen | `#E9EBEC` | `#000000` | background                  |
+| ink    | `#000000` | `#E9EBEC` | text, borders               |
+| grain  | `#5F656B` | `#8A9096` | secondary, struck, past     |
+| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track       |
+| stamp  | `#2323C8` | `#8C8CFF` | yours, and the focus ring   |
 
-| Name   | Light     | Dark      | Use                                  |
-| ------ | --------- | --------- | ------------------------------------ |
-| screen | `#E9EBEC` | `#000000` | background                           |
-| ink    | `#000000` | `#E9EBEC` | text, every border                   |
-| grain  | `#5F656B` | `#8A9096` | secondary text, withdrawn, excluded  |
-| haze   | `#D5D9DC` | `#1C1E20` | hover, timeline track                |
-| stamp  | `#2323C8` | `#8C8CFF` | yours: committed, ticket, focus ring |
+Dark mode is the auditorium with the lights down.
 
-Type. Two serifs that never swap roles.
+Bodoni Moda at optical size 96 sets film and festival titles and nothing
+else: huge, tight, line-height 0.88. Newsreader sets everything else at
+17px with tabular figures. The scale is a perfect fourth from 13 to 127.
 
-- Bodoni Moda (didone, optical size 96): film titles only. Huge, tight,
-  line-height 0.88. A title is the poster.
-- Newsreader: everything else. 17px body, tabular lining figures for times.
-- Scale, perfect fourth: 13, 17, 23, 30, 40, 53, 71, 95, 127.
+Borders are 1px ink with square corners. Rules separate rows; boxes are for
+controls. Icons are Phosphor, light, 18px, and always named.
 
-Borders. 1px ink, radius 0. Rules separate rows; boxes only for controls.
+## Rules
 
-Icons. Phosphor, light weight, 18px. No icon without a label or tooltip.
+Titles are the only loud thing.
+
+Ultramarine means yours: scheduled times, committed titles, tickets,
+pending changes, the count of tickets to let go. Nothing else gets colour.
+Struck-through grain means excluded or withdrawn; a dashed outline marks a
+withdrawn block.
+
+One word where one will do. Buttons say what happens. Problems say what to
+do next, empty pages point to the next step, and no id is ever shown.
+
+Days are numbered because they are a sequence. Nothing else is numbered.
+
+Problems are pointed to, never drawn into the schedule: one quiet line
+above it, one action.
+
+Changing the schedule and letting go of a ticket are separate. Neither
+waits on the other, and neither happens by itself.
 
 ## Layout
 
-Home: the wordmark across the top, its apostrophe in stamp, dropping in
-once on load. One line of copy. Then the Festivals as a credits roll,
-name left, dates right; past ones in grain.
+Rows, not cards: one item per rule, generous space, left aligned and
+ragged right. Times and numerals align right in their own column. Wide
+screens set a title and its details side by side; phones stack them.
 
-Header: the app icon at left, back to Home. On wide screens the Festival's
-name follows it; on phones the icon stands alone.
+## Pages
 
-Programme: a credits roll. One column of titles, each on its own rule.
-Times sit to the right, small. Days run across the top.
+Home shows the wordmark, one line of copy, and the festivals as a credits
+roll.
 
-```
-Films from the South          ◷  ⇄  ◌
-9 10 11 12 13 14 15 16 17 18
-──────────────────────────────────────────
-Sirāt                      Fri 18:00 Vika   + ×
-                           Sun 21:15 Saga   + ×
-──────────────────────────────────────────
-Sentimental Value          ...
-```
-
-Film: the title fills the width. Below, the screenings as rows.
-
-Schedule: one row per Festival Day. A big day numeral at left, then a track from 10 to
-24 with one block per screening, width by running time.
+The programme is a credits roll too: one title per rule, its screenings
+small to the right, the festival days along the top.
 
 ```
-10 ┃ ▭▭▭ Sirāt ▭▭▭      ▭▭ Magellan ▭▭
-11 ┃        ▭▭▭▭ Dry Leaf ▭▭▭▭
+All  30 31  1  2  3  4  5  6  7  8
+──────────────────────────────────────────────
+Sirāt                Fri 30  18:00  Vika 2   + ×
+                     Mon 2   21:15  Saga 4   + ×
+──────────────────────────────────────────────
+Sentimental Value    ...
 ```
 
-Draft: the diff. `+` and `−` rows, the score change, Accept and Discard.
+The film page lets the title fill the width, with the screenings beneath.
 
-Compare: two titles, stacked, as large as they fit. Tap the one you would
-rather see. The other fades to grain. This is the one motion moment.
+The schedule is one row per festival day: the day’s numeral, then a track
+from 10:00 to 01:00 with a block per screening, its width the running time.
+It reads like a strip of film. On phones each day becomes a list with its
+numeral pinned.
 
-Tray: a bar along the bottom holding the pending Change Set. Count, list,
-Solve.
+```
+30 ┃ ▭ Father Mother… ▭   ▭ Sirāt ▭    ■ Sentimental Value ■
+31 ┃      ▭ The Mastermind ▭   ▭ It Was Just… ▭   ▭ The Secret Agent ▭
+```
 
-Alignment: left, ragged right. Times and numerals right-aligned in their
-column.
+A draft shows what comes in and what goes out, then Accept.
 
-## Principles
+Tickets lists the ones to let go above the ones held.
 
-1. Titles are the only loud thing. Everything else whispers in Newsreader.
-2. Ultramarine means "yours". Nothing else gets colour.
-3. One word where one word will do. Icons carry verbs; tooltips name them.
-4. Days are a real sequence, so they are numbered. Nothing else is.
+Compare stacks two titles. Tap the one you would rather see.
 
-## Review against the brief
+Pending changes wait in a tray along the bottom edge.
 
-- Considered Kodak yellow as the accent. Dropped it: a highlighter yellow
-  reads as generic "marker". Ultramarine reads as an ink stamp on a ticket.
-- Considered the week as day columns (a calendar). Changed to day rows with
-  a horizontal track: it reads like a strip of film and uses wide screens.
-- Sharp borders and serifs are the brief's own words, so hairlines and zero
-  radius stay. Dense newspaper columns do not: one column, generous rows.
-- No mono, no all-caps labels, no eyebrows, no middle-dot meta strings.
+## Motion
 
-## Architecture
-
-Ports and adapters, like the backend.
-
-- `domain/`: types and pure functions (time in the festival's zone, the
-  Change Set reducer, timeline layout). No React.
-- `domain/ports.ts`: interfaces the app needs: programme, planning, session.
-- `adapters/graphql`: urql core with gql.tada types from `../schema.graphql`.
-- `adapters/memory`: seeded sample data and a greedy fake solver, so the
-  concepts run without a server.
-- `adapters/browser`: the token in localStorage.
-- `app/`: hooks that turn ports into view models and actions.
-- `views/`: props in, JSX out. No hooks, no fetching.
-- `routes/`: call one app hook, render one view.
-
-Pick the adapter with `VITE_ADAPTER=memory|graphql` (default `memory`).
+Two moments only: the apostrophe drops into the wordmark once on Home, and
+on Compare the title not chosen fades away. Everything else moves only in
+answer to a tap, briefly. Reduced motion turns it all off.

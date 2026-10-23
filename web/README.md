@@ -1,9 +1,26 @@
-# Web
+# Entr’acte web
 
-Concepts for the Festival Planner frontend. React 19, shadcn on Base UI,
-Tailwind 4, urql core with gql.tada types from `../schema.graphql`.
+The web app for Entr’acte, the festival planner. React 19, shadcn on Base
+UI, Tailwind 4, urql core with gql.tada types from `../schema.graphql`.
 
-Design and layering: [DESIGN.md](DESIGN.md).
+Design: [DESIGN.md](DESIGN.md). Words: [CONTEXT.md](CONTEXT.md).
+
+## Architecture
+
+Ports and adapters, like the backend.
+
+- `domain/`: types and pure functions (time in the Festival's zone, the
+  Change Set rules, tickets to let go, timeline layout). No React.
+- `domain/ports.ts`: interfaces the app needs: programme, planning, session.
+- `adapters/graphql`: urql core with gql.tada types from `../schema.graphql`.
+- `adapters/memory`: seeded sample data and a greedy fake solver, so the
+  app runs without a server.
+- `adapters/browser`: the token in localStorage.
+- `app/`: hooks that turn ports into view models and actions.
+- `views/`: props in, JSX out. No hooks, no fetching.
+- `routes/`: call one app hook, render one view.
+
+Pick the adapter with `VITE_ADAPTER=memory|graphql` (default `memory`).
 
 ## Run
 
