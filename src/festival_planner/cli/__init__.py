@@ -12,6 +12,7 @@ from .set_weight import app as set_weight
 from .validate import app as validate
 from .db import app as db_app
 from .ingest import app as ingest_app
+from .plan import app as plan_app
 
 app = typer.Typer(help="Festival Planner - Optimize your film festival schedule")
 app.add_typer(scrape)
@@ -21,6 +22,7 @@ app.add_typer(set_weight)
 app.add_typer(validate)
 app.add_typer(db_app, name="db")
 app.add_typer(ingest_app, name="ingest")
+app.add_typer(plan_app, name="plan")
 
 console = Console()
 logger = get_logger(__name__)
