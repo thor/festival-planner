@@ -135,6 +135,25 @@ def test_an_invalid_change_set_is_reported(cli, tmp_path):
     assert "unknown screening 'nope'" in result.output
 
 
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        (None, "Cannot read change set"),
+        ("- kind: [unclosed\n", "Invalid change set"),
+        ("- kind: no_such_kind\n", "Invalid change set"),
+    ],
+    ids=["missing file", "invalid YAML", "unknown kind"],
+)
+def test_a_malformed_change_set_file_is_reported(cli, tmp_path, content, message):
+    change_set = tmp_path / "changes.yaml"
+    if content is not None:
+        change_set.write_text(content)
+    result = cli("plan", "draft", "fest-2030", "--change-set", str(change_set))
+    assert result.exit_code == 1
+    assert message in result.output
+    assert result.exception is None or isinstance(result.exception, SystemExit)
+
+
 def test_unknown_drafts_are_reported(cli):
     result = cli("plan", "accept", "nope")
     assert result.exit_code == 1

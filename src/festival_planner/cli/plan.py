@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
+import pydantic
 import typer
 import yaml
 from rich.console import Console
@@ -77,12 +78,20 @@ def _session(database: str | None) -> Iterator[_Session]:
 
 
 def _load_change_set(path: Path | None) -> ChangeSet:
+    """The Change Set in a YAML or JSON file; a malformed file exits with 1."""
     if path is None:
         return ChangeSet()
-    data = yaml.safe_load(path.read_text())  # JSON is YAML too
-    return ChangeSet.model_validate(
-        data if isinstance(data, dict) else {"items": data or []}
-    )
+    try:
+        data = yaml.safe_load(path.read_text())  # JSON is YAML too
+        return ChangeSet.model_validate(
+            data if isinstance(data, dict) else {"items": data or []}
+        )
+    except OSError as e:
+        message = f"Cannot read change set {path}: {e.strerror or e}"
+    except (yaml.YAMLError, pydantic.ValidationError) as e:
+        message = f"Invalid change set {path}: {e}"
+    console.print(f"[bold red]{escape(message)}[/bold red]", soft_wrap=True)
+    raise typer.Exit(code=1)
 
 
 def _describe(
