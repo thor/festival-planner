@@ -138,26 +138,14 @@ class ProgrammeEntry(relay.Node):
 
     @classmethod
     def from_domain(cls, value: p.ProgrammeEntry) -> Self:
-        d = value.details
         return cls(
             id=value.id,
             title=value.title,
             year=value.year,
             country=value.country,
             url=value.url,
-            tagline=d.tagline,
-            synopsis=d.synopsis,
-            poster_url=d.poster_url,
-            still_url=d.still_url,
-            runtime_minutes=d.runtime_minutes,
-            original_title=d.original_title,
-            director=d.director,
-            genre=d.genre,
-            language=d.language,
-            subtitles=d.subtitles,
-            age_limit=d.age_limit,
-            imdb_url=d.imdb_url,
             film_id=value.film_id,
+            **value.details.model_dump(),
         )
 
     @strawberry.field

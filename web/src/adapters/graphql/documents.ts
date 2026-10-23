@@ -337,17 +337,17 @@ export const PlanningQuery = graphql(
           }
           comparisonSuggestions(limit: 10) {
             scheduled {
-              ...EntryFields
+              id
             }
             other {
-              ...EntryFields
+              id
             }
           }
         }
       }
     }
   `,
-  [ScreeningFields, DraftFields, EntryFields, PreferencesFields]
+  [ScreeningFields, DraftFields, PreferencesFields]
 )
 
 export const DraftQuery = graphql(

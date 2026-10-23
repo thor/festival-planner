@@ -9,7 +9,7 @@ import {
 import type { ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
-import { Action, Place } from "./parts"
+import { Action, PendingDot, Place } from "./parts"
 
 export function ScreeningRow({
   s,
@@ -56,9 +56,7 @@ export function ScreeningRow({
             <title>{s.event}</title>
           </MicrophoneStageIcon>
         )}
-        {s.marks.pending && (
-          <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />
-        )}
+        {s.marks.pending && <PendingDot />}
       </span>
       <span className="flex">
         {withTicket && s.buyHref && (

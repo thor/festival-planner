@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { InterestControl } from "./interest"
-import { Action, Page } from "./parts"
+import { Action, Page, PendingDot } from "./parts"
 
 /** One setting per rule: what it is on the left, the control on the right. */
 export function PreferencesView({ vm }: { vm: PreferencesVM }) {
@@ -18,14 +18,14 @@ export function PreferencesView({ vm }: { vm: PreferencesVM }) {
       <Setting
         title="Days"
         note={
-          <span className={cn(vm.onEveryDay && "text-stamp")}>{vm.range}</span>
+          <span className={cn(vm.limited && "text-stamp")}>{vm.range}</span>
         }
         pending={vm.rangePending}
       >
-        <DayStrip days={vm.days} />
+        <DayStrip days={vm.days} limited={vm.limited} />
         <div className="mt-3 flex min-h-10 items-center justify-between gap-4">
           <p className="text-grain">{vm.rangeHint}</p>
-          {vm.onEveryDay && (
+          {vm.limited && (
             <Button
               variant="ghost"
               className="h-10 px-3 text-base"
@@ -55,7 +55,6 @@ export function PreferencesView({ vm }: { vm: PreferencesVM }) {
           <input
             type="checkbox"
             checked={vm.attendEvents.on}
-            disabled={!vm.attendEvents.onToggle}
             onChange={vm.attendEvents.onToggle}
             className="peer sr-only"
           />
@@ -69,9 +68,7 @@ export function PreferencesView({ vm }: { vm: PreferencesVM }) {
             {vm.attendEvents.on && <CheckIcon size={16} weight="bold" />}
           </span>
           <span>Keep time for events held after the film</span>
-          {vm.attendEvents.pending && (
-            <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />
-          )}
+          {vm.attendEvents.pending && <PendingDot />}
         </label>
       </Setting>
 
@@ -133,9 +130,7 @@ function Setting({
       <header>
         <h2 className="flex items-center gap-3 text-xl">
           {title}
-          {pending && (
-            <span aria-label="Changed" className="size-1.5 bg-stamp" />
-          )}
+          {pending && <PendingDot />}
         </h2>
         <p className="mt-2 max-w-[34ch] text-grain">{note}</p>
       </header>
@@ -148,17 +143,15 @@ function Setting({
  * The Festival Days as one strip. Days you can go take the stamp once you
  * have chosen; the rest are struck, like anything else left out.
  */
-function DayStrip({ days }: { days: RangeDayVM[] }) {
-  const chosen = days.some((d) => !d.inRange)
+function DayStrip({ days, limited }: { days: RangeDayVM[]; limited: boolean }) {
   return (
     <div className="flex overflow-x-auto border border-ink">
       {days.map((d) => {
-        const own = chosen && d.inRange
+        const own = limited && d.inRange
         return (
           <button
             key={d.key}
             type="button"
-            disabled={!d.onPick}
             onClick={d.onPick}
             aria-pressed={d.inRange}
             aria-label={`${d.weekday} ${d.number}`}
@@ -198,9 +191,7 @@ function Stepper({ s }: { s: StepperVM }) {
         )}
       >
         <span className="truncate">{s.label}</span>
-        {s.pending && (
-          <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />
-        )}
+        {s.pending && <PendingDot />}
       </span>
       <span className="flex items-center">
         {s.onReset && (

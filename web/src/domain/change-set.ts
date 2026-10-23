@@ -8,6 +8,7 @@ import type {
   ProgrammeEntryId,
   ScreeningId,
 } from "./model"
+import { sameValue } from "./equal"
 import { defaultPreferences } from "./preferences"
 
 export type ChangeSet = readonly ChangeSetItem[]
@@ -20,9 +21,7 @@ export const emptyInputs: PlanningInputs = {
   preferences: defaultPreferences,
 }
 
-function same(a: ChangeSetItem, b: ChangeSetItem): boolean {
-  return JSON.stringify(a) === JSON.stringify(b)
-}
+const same: (a: ChangeSetItem, b: ChangeSetItem) => boolean = sameValue
 
 function without(set: ChangeSet, item: ChangeSetItem): ChangeSet {
   return set.filter((i) => !same(i, item))

@@ -62,28 +62,17 @@ export function screeningOf(s: ScreeningData): Screening {
 }
 
 export function entryOf(e: EntryData): ProgrammeEntry {
+  // Everything else on an entry is what the Festival says about the film.
+  const { id, title, year, country, url, film, screenings, ...details } = e
   return {
-    id: e.id as ProgrammeEntryId,
-    filmId: e.film.id as FilmId,
-    title: e.title,
-    year: e.year,
-    country: e.country,
-    url: e.url,
-    details: {
-      tagline: e.tagline,
-      synopsis: e.synopsis,
-      posterUrl: e.posterUrl,
-      stillUrl: e.stillUrl,
-      runtimeMinutes: e.runtimeMinutes,
-      originalTitle: e.originalTitle,
-      director: e.director,
-      genre: e.genre,
-      language: e.language,
-      subtitles: e.subtitles,
-      ageLimit: e.ageLimit,
-      imdbUrl: e.imdbUrl,
-    },
-    screenings: e.screenings.map(screeningOf),
+    id: id as ProgrammeEntryId,
+    filmId: film.id as FilmId,
+    title,
+    year,
+    country,
+    url,
+    details,
+    screenings: screenings.map(screeningOf),
   }
 }
 

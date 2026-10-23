@@ -20,15 +20,19 @@ from .base import BaseScraper
 logger = get_logger(__name__)
 
 
-# Labels in .entry-technical, Norwegian and English, by field.
-TECHNICAL_LABELS: dict[str, tuple[str, ...]] = {
-    "age_limit": ("aldersgrense", "age limit", "age rating"),
-    "language": ("språk", "language"),
-    "subtitles": ("undertekst", "subtitles"),
-    "runtime": ("spilletid", "running time", "runtime", "duration"),
-    "original_title": ("originaltittel", "original title"),
-    "genre": ("sjanger", "genre"),
-    "director": ("regissør", "director"),
+# Field of each .entry-technical label, Norwegian and English.
+TECHNICAL_FIELDS: dict[str, str] = {
+    label: field
+    for field, labels in {
+        "age_limit": ("aldersgrense", "age limit", "age rating"),
+        "language": ("språk", "language"),
+        "subtitles": ("undertekst", "subtitles"),
+        "runtime": ("spilletid", "running time", "runtime", "duration"),
+        "original_title": ("originaltittel", "original title"),
+        "genre": ("sjanger", "genre"),
+        "director": ("regissør", "director"),
+    }.items()
+    for label in labels
 }
 
 
@@ -304,7 +308,10 @@ class FilmfrasorScraper(BaseScraper):
                             details=details,
                         )
                         screenings.append(screening)
-                        logger.debug("Added screening", **screening.model_dump())
+                        logger.debug(
+                            "Added screening",
+                            **screening.model_dump(exclude={"details"}),
+                        )
                     except ValidationError as e:
                         # Log validation error as warning and continue
                         logger.warning(
@@ -383,9 +390,9 @@ class FilmfrasorScraper(BaseScraper):
             else:
                 value = "".join(t for t in p.find_all(string=True) if t.parent is p)
             value = " ".join(value.split())
-            for field, labels in TECHNICAL_LABELS.items():
-                if key in labels and value:
-                    facts.setdefault(field, value)
+            field = TECHNICAL_FIELDS.get(key)
+            if field and value:
+                facts.setdefault(field, value)
 
         def own_image(folder: str) -> str | None:
             for img in soup.find_all("img", src=re.compile(folder)):

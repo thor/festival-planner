@@ -302,24 +302,26 @@ export interface RangeDayVM {
   inRange: boolean
   /** Tapped first; the next tap sets the other end. */
   anchor: boolean
-  onPick?: () => void
+  onPick: () => void
 }
 
 export interface PreferencesVM {
   days: RangeDayVM[]
   /** "Fri 30 to Mon 2", or "Every day". */
   range: string
+  /** Some days are left out. */
+  limited: boolean
   rangePending: boolean
   /** What the next tap on a day does. */
   rangeHint: string
-  onEveryDay?: () => void
+  onEveryDay: () => void
   buffer: StepperVM
   venues: StepperVM[]
   events: InterestVM
   attendEvents: {
     on: boolean
     pending: boolean
-    onToggle?: () => void
+    onToggle: () => void
   }
   years: { year: string; films: string; interest: InterestVM }[]
   comparisons: { made: string; interest: InterestVM; href: string }

@@ -128,9 +128,10 @@ export interface Flag {
   programmeEntryId: ProgrammeEntryId | null
 }
 
+/** Two Programme Entries whose Screenings competed; the first was scheduled. */
 export interface ComparisonPair {
-  scheduled: ProgrammeEntry
-  other: ProgrammeEntry
+  scheduledId: ProgrammeEntryId
+  otherId: ProgrammeEntryId
 }
 
 export interface Comparison {

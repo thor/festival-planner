@@ -105,7 +105,7 @@ export function NavIcon({
               count > 0 && countLabel ? `${label}, ${countLabel}` : label
             }
             data-end={end}
-            className="flex h-10 items-center gap-2 border-l border-ink px-2 text-sm hover:bg-haze sm:px-3 md:px-4"
+            className={cn(barCell, "gap-2 text-sm")}
           />
         }
       >
@@ -184,6 +184,15 @@ export function Missing({
     </Page>
   )
 }
+
+/** A small stamp square: the pending Change Set changes this. */
+export function PendingDot() {
+  return <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />
+}
+
+/** A cell of the top bar: an icon, a border to its left. */
+export const barCell =
+  "flex h-10 items-center border-l border-ink px-2 hover:bg-haze sm:px-3 md:px-4"
 
 /** Year and country, spaced, never joined by dots. */
 export function Meta({

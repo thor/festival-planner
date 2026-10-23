@@ -3,12 +3,14 @@
 // the pending Change Set never holds a NO_OP or two items for one setting.
 
 import type { ChangeSet } from "./change-set"
+import { sameValue } from "./equal"
 import type {
   ChangeSetItem,
   DayKey,
   Festival,
   PreferenceItem,
   Preferences,
+  VenueId,
 } from "./model"
 
 export const defaultPreferences: Preferences = {
@@ -38,12 +40,12 @@ const preferenceKinds = new Set<ChangeSetItem["kind"]>([
   "setComparisonWeight",
 ])
 
-export function isPreference(item: ChangeSetItem): item is PreferenceItem {
+function isPreference(item: ChangeSetItem): item is PreferenceItem {
   return preferenceKinds.has(item.kind)
 }
 
 /** What an item sets. Two items of one Change Set must not share it. */
-export function settingOf(item: PreferenceItem): string {
+function settingOf(item: PreferenceItem): string {
   switch (item.kind) {
     case "setProgrammeEntryWeight":
       return `entryWeight:${item.programmeEntryId}`
@@ -71,10 +73,7 @@ function put<K extends string | number>(
 }
 
 /** `p` with one item applied. A null value resets the setting. */
-export function applyPreference(
-  p: Preferences,
-  item: PreferenceItem
-): Preferences {
+function applyPreference(p: Preferences, item: PreferenceItem): Preferences {
   const d = defaultPreferences
   switch (item.kind) {
     case "setProgrammeEntryWeight":
@@ -134,17 +133,6 @@ export function preferencesAfter(p: Preferences, set: ChangeSet): Preferences {
   return next
 }
 
-/** JSON with sorted keys, so equal values give equal text. */
-function canonical(value: unknown): string {
-  return JSON.stringify(value, (_, v: unknown) =>
-    v && typeof v === "object" && !Array.isArray(v)
-      ? Object.fromEntries(
-          Object.entries(v).sort(([a], [b]) => a.localeCompare(b))
-        )
-      : v
-  )
-}
-
 /**
  * Put `item` in the pending Change Set, replacing any earlier item for the
  * same setting. If it would leave the accepted Preferences as they are, the
@@ -158,8 +146,7 @@ export function setPreference(
   const key = settingOf(item)
   const at = set.findIndex((i) => isPreference(i) && settingOf(i) === key)
   const rest = set.filter((_, i) => i !== at)
-  if (canonical(applyPreference(accepted, item)) === canonical(accepted))
-    return rest
+  if (sameValue(applyPreference(accepted, item), accepted)) return rest
   if (at < 0) return [...set, item]
   return set.map((i, n) => (n === at ? item : i))
 }
@@ -180,6 +167,19 @@ export function dateRangeItem(
     startDate: whole ? null : start,
     endDate: whole ? null : end,
   }
+}
+
+/**
+ * The buffer at `venueId`, or everywhere when null. A Venue set to the
+ * general buffer follows it again rather than keeping its own.
+ */
+export function bufferItem(
+  venueId: VenueId | null,
+  minutes: number,
+  p: Preferences
+): Extract<PreferenceItem, { kind: "setBuffer" }> {
+  const follows = venueId !== null && minutes === p.bufferMinutes
+  return { kind: "setBuffer", venueId, minutes: follows ? null : minutes }
 }
 
 /** Whether `day` is inside the preferred days. */

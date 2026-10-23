@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 
-import { dayRange, interestWord } from "@/domain/labels"
+import { dayRange, interestWord, plural } from "@/domain/labels"
 import type {
   DayKey,
   Festival,
@@ -13,6 +13,7 @@ import type {
   VenueId,
 } from "@/domain/model"
 import {
+  bufferItem,
   comparisonScale,
   dateRangeItem,
   defaultPreferences,
@@ -44,13 +45,12 @@ export function usePreferences(
 ) {
   const [set, update] = usePendingChangeSet(festival?.id)
   const accepted = planning?.inputs.preferences ?? defaultPreferences
-  const signedIn = !!planning
   return {
-    signedIn,
     /** As they will be once the pending Change Set is accepted. */
     effective: preferencesAfter(accepted, set),
     pending: (item: PreferenceItem) => isPending(set, item),
-    put: signedIn
+    /** Missing when signed out. */
+    put: planning
       ? (item: PreferenceItem) =>
           update((cs) => setPreference(item, accepted, cs))
       : undefined,
@@ -97,9 +97,6 @@ export function entryInterestWord(entry: ProgrammeEntry, prefs: Prefs) {
   return i === "usual" ? null : interestWord[i]
 }
 
-const plural = (n: number, one: string, many: string) =>
-  `${n} ${n === 1 ? one : many}`
-
 export function usePreferencesPage(slug: string): Load<PreferencesVM> {
   const festival = useFestival(slug)
   const programme = useProgramme(festival.data)
@@ -111,16 +108,15 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
   if (festival.isPending || programme.isPending || planning.isPending)
     return { state: "loading" }
   if (!festival.data) return { state: "missing", message: "No such festival." }
-  if (!planning.data)
-    return { state: "missing", message: "Sign in to set preferences." }
+  const put = prefs.put
+  if (!put) return { state: "missing", message: "Sign in to set preferences." }
   const f = festival.data
   const p = prefs.effective
-  const put = prefs.put
   const entries = programme.data ?? []
 
   const range = dateRangeItem(f.startDate, f.endDate, f)
+  const limited = !!(p.startDate || p.endDate)
   const pickDay = (day: DayKey) => {
-    if (!put) return
     if (anchor === null) {
       setAnchor(day)
       put(dateRangeItem(day, day, f))
@@ -136,26 +132,18 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
     own: number | undefined
   ): StepperVM => {
     const minutes = own ?? p.bufferMinutes
-    const item = (m: number | null): PreferenceItem => ({
-      kind: "setBuffer",
-      venueId,
-      minutes: m,
-    })
-    // A Venue set back to the general buffer follows it again.
-    const to = (m: number) =>
-      put?.(item(venueId && m === p.bufferMinutes ? null : m))
+    const reset: PreferenceItem = { kind: "setBuffer", venueId, minutes: null }
+    const to = (m: number) => put(bufferItem(venueId, m, p))
     return {
       label,
       minutes,
       usual: venueId
         ? own === undefined
         : minutes === defaultPreferences.bufferMinutes,
-      pending: prefs.pending(item(null)),
-      onLess: put && minutes > 0 ? () => to(minutes - STEP) : undefined,
-      onMore:
-        put && minutes < MOST_MINUTES ? () => to(minutes + STEP) : undefined,
-      onReset:
-        put && venueId && own !== undefined ? () => put(item(null)) : undefined,
+      pending: prefs.pending(reset),
+      onLess: minutes > 0 ? () => to(minutes - STEP) : undefined,
+      onMore: minutes < MOST_MINUTES ? () => to(minutes + STEP) : undefined,
+      onReset: venueId && own !== undefined ? () => put(reset) : undefined,
     }
   }
 
@@ -183,20 +171,18 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
         weekday: weekday(d),
         inRange: inRange(d, p),
         anchor: d === anchor,
-        onPick: put && (() => pickDay(d)),
+        onPick: () => pickDay(d),
       })),
       range: dayRange(p.startDate, p.endDate),
+      limited,
       rangePending: prefs.pending(range),
       rangeHint: anchor
         ? "Now tap the last day."
         : "Tap the first day, then the last.",
-      onEveryDay:
-        put && (p.startDate || p.endDate)
-          ? () => {
-              setAnchor(null)
-              put(range)
-            }
-          : undefined,
+      onEveryDay: () => {
+        setAnchor(null)
+        put(range)
+      },
       buffer: buffer("Everywhere", null, p.bufferMinutes),
       venues: venues.map((v) => buffer(v.name, v.id, p.venueBuffers[v.id])),
       events: interestModel(
@@ -209,13 +195,11 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
       attendEvents: {
         on: p.attendEvents,
         pending: prefs.pending({ kind: "setAttendEvents", attend: null }),
-        onToggle:
-          put &&
-          (() =>
-            put({
-              kind: "setAttendEvents",
-              attend: p.attendEvents ? null : true,
-            })),
+        onToggle: () =>
+          put({
+            kind: "setAttendEvents",
+            attend: p.attendEvents ? null : true,
+          }),
       },
       years: years.map(([year, films]) => ({
         year: String(year),

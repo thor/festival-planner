@@ -1,6 +1,8 @@
 import type { InterestVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
+import { PendingDot } from "./parts"
+
 /**
  * Four steps in a row of boxes. A step other than Usual is the User's own,
  * so it takes the stamp; Usual stays quiet.
@@ -53,9 +55,7 @@ export function InterestControl({
           )
         })}
       </div>
-      {vm.pending && (
-        <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />
-      )}
+      {vm.pending && <PendingDot />}
     </fieldset>
   )
 }

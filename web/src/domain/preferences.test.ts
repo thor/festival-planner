@@ -7,6 +7,7 @@ import type {
   VenueId,
 } from "./model"
 import {
+  bufferItem,
   defaultPreferences,
   entryScale,
   interestOf,
@@ -100,5 +101,17 @@ describe("interest", () => {
   it("sends null for usual, so it resets", () => {
     expect(valueOf("usual", entryScale)).toBeNull()
     expect(valueOf("more", entryScale)).toBe(1.5)
+  })
+})
+
+describe("bufferItem", () => {
+  it("lets a Venue set to the general buffer follow it again", () => {
+    expect(bufferItem(vika, 15, defaultPreferences)).toEqual({
+      kind: "setBuffer",
+      venueId: vika,
+      minutes: null,
+    })
+    expect(bufferItem(vika, 20, defaultPreferences).minutes).toBe(20)
+    expect(bufferItem(null, 15, defaultPreferences).minutes).toBe(15)
   })
 })

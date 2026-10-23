@@ -13,6 +13,7 @@ import {
   describeItem,
   lookupOf,
   signed,
+  splitSynopsis,
   when,
   type Lookup,
 } from "@/domain/labels"
@@ -21,6 +22,7 @@ import type {
   Draft,
   DraftId,
   Festival,
+  ProgrammeEntry,
   ProgrammeEntryId,
   Screening,
 } from "@/domain/model"
@@ -43,12 +45,12 @@ import {
   factsOf,
   longMetaOf,
   metaOf,
-  synopsisOf,
   useEntryModels,
 } from "./screenings"
 import { useSignedIn } from "./session"
 import { useTicketModels } from "./tickets"
 import type {
+  CompareSideVM,
   CompareVM,
   DiffRowVM,
   DraftListItemVM,
@@ -164,7 +166,7 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
       posterUrl && !stillUrl
         ? { src: posterUrl, alt: `The poster for ${entry.title}` }
         : null,
-    ...synopsisOf(entry),
+    ...splitSynopsis(entry.details.synopsis),
     facts: factsOf(entry),
     interest: models.interest(entry),
     buy:
@@ -428,13 +430,15 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
 }
 
 export function useComparePage(slug: string): Load<CompareVM> {
-  const { festival, planning } = useFestivalData(slug)
+  const { festival, programme, planning } = useFestivalData(slug)
   const [set, update] = usePendingChangeSet(festival.data?.id)
   const [skipped, setSkipped] = useState<string[]>([])
   const [picked, setPicked] = useState<"a" | "b" | null>(null)
-  if (festival.isPending || planning.isPending) return loading
+  if (festival.isPending || planning.isPending || programme.isPending)
+    return loading
   if (!planning.data) return missing("Sign in to compare.")
 
+  const entries = new Map(programme.data?.map((e) => [e.id, e]))
   const key = (a: string, b: string) => [a, b].sort().join("|")
   const done = new Set([
     ...skipped,
@@ -443,7 +447,10 @@ export function useComparePage(slug: string): Load<CompareVM> {
     ),
   ])
   const open = planning.data.suggestions.filter(
-    (p) => !done.has(key(p.scheduled.id, p.other.id))
+    (p) =>
+      !done.has(key(p.scheduledId, p.otherId)) &&
+      entries.has(p.scheduledId) &&
+      entries.has(p.otherId)
   )
   const pair = open[0]
   const pick =
@@ -456,25 +463,25 @@ export function useComparePage(slug: string): Load<CompareVM> {
         setPicked(null)
       }, 420)
     }
+  const side = (
+    s: "a" | "b",
+    entry: ProgrammeEntry,
+    other: ProgrammeEntryId
+  ): CompareSideVM => ({
+    title: entry.title,
+    meta: metaOf(entry),
+    tagline: entry.details.tagline,
+    onPick: pick(s, entry.id, other),
+  })
   return ready({
     picked,
     left: open.length,
     onSkip: () =>
-      pair && setSkipped((s) => [...s, key(pair.scheduled.id, pair.other.id)]),
+      pair && setSkipped((s) => [...s, key(pair.scheduledId, pair.otherId)]),
     pair: pair
       ? {
-          a: {
-            title: pair.scheduled.title,
-            meta: metaOf(pair.scheduled),
-            tagline: pair.scheduled.details.tagline,
-            onPick: pick("a", pair.scheduled.id, pair.other.id),
-          },
-          b: {
-            title: pair.other.title,
-            meta: metaOf(pair.other),
-            tagline: pair.other.details.tagline,
-            onPick: pick("b", pair.other.id, pair.scheduled.id),
-          },
+          a: side("a", entries.get(pair.scheduledId)!, pair.otherId),
+          b: side("b", entries.get(pair.otherId)!, pair.scheduledId),
         }
       : null,
   })

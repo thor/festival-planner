@@ -11,7 +11,7 @@ import {
   toggleScreeningCommitment,
   toggleScreeningExclusion,
 } from "@/domain/change-set"
-import { runtimeWord, splitSynopsis, when } from "@/domain/labels"
+import { runtimeWord, when } from "@/domain/labels"
 import type {
   Festival,
   Planning,
@@ -63,11 +63,6 @@ export function factsOf(entry: ProgrammeEntry): FactVM[] {
     ...fact("Age limit", d.ageLimit),
     ...(d.imdbUrl ? [{ label: "Links", value: "IMDb", href: d.imdbUrl }] : []),
   ]
-}
-
-/** The Festival's description in paragraphs, and who signed it. */
-export function synopsisOf(entry: ProgrammeEntry) {
-  return splitSynopsis(entry.details.synopsis)
 }
 
 /** Builds Screening and Programme Entry view models with their actions. */

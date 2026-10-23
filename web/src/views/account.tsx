@@ -12,6 +12,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+import { barCell } from "./parts"
+
 export function AccountView({
   signedIn,
   hint,
@@ -27,7 +29,7 @@ export function AccountView({
     <Dialog>
       <DialogTrigger
         aria-label={signedIn ? "Account" : "Sign in"}
-        className="flex h-10 items-center border-l border-ink px-2 hover:bg-haze sm:px-3 md:px-4"
+        className={barCell}
       >
         {signedIn ? (
           <UserIcon size={20} weight="fill" className="text-stamp" />

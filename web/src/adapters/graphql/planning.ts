@@ -1,5 +1,5 @@
 import { PortError, type PortProblem } from "@/domain/errors"
-import type { ComparisonPair } from "@/domain/model"
+import type { ComparisonPair, ProgrammeEntryId } from "@/domain/model"
 import type { PlanningPort } from "@/domain/ports"
 
 import type { Run } from "./client"
@@ -15,7 +15,6 @@ import {
 } from "./documents"
 import {
   draftOf,
-  entryOf,
   flagOf,
   inputsOf,
   itemInputOf,
@@ -73,8 +72,8 @@ export function graphqlPlanning(run: Run): PlanningPort {
           refundable: t.refundable,
         })),
         suggestions: p.comparisonSuggestions.map((s): ComparisonPair => ({
-          scheduled: entryOf(s.scheduled),
-          other: entryOf(s.other),
+          scheduledId: s.scheduled.id as ProgrammeEntryId,
+          otherId: s.other.id as ProgrammeEntryId,
         })),
       }
     },

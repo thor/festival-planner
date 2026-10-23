@@ -18,7 +18,11 @@ import type {
   ScreeningId,
   Ticket,
 } from "@/domain/model"
-import { defaultPreferences, preferencesAfter } from "@/domain/preferences"
+import {
+  defaultPreferences,
+  inRange,
+  preferencesAfter,
+} from "@/domain/preferences"
 import type { PlanningPort, SessionPort } from "@/domain/ports"
 import { dayKey } from "@/domain/time"
 
@@ -29,7 +33,7 @@ const SOLVE_MS = 900
 const all = programme.flatMap((e) => e.screenings)
 const byId = new Map(all.map((s) => [s.id, s]))
 const screening = (id: ScreeningId) => byId.get(id)!
-const noBuffer: Preferences = { ...defaultPreferences, bufferMinutes: 0 }
+const entryOf = new Map(programme.map((e) => [e.id, e]))
 
 interface State {
   inputs: PlanningInputs
@@ -95,7 +99,7 @@ function apply(inputs: PlanningInputs, set: ChangeSet): PlanningInputs {
 
 /** A rough stand-in for the backend's weights: no Bradley–Terry fit. */
 function weightOf(s: Screening, p: Preferences): number {
-  const entry = programme.find((e) => e.id === s.programmeEntryId)
+  const entry = entryOf.get(s.programmeEntryId)
   let w = p.screeningWeights[s.id] ?? p.entryWeights[s.programmeEntryId] ?? 1
   if (entry?.year != null) w += p.yearWeights[entry.year] ?? 0
   if (s.events.length) w += p.eventWeight
@@ -106,9 +110,16 @@ function weightOf(s: Screening, p: Preferences): number {
   return w
 }
 
-function fits(chosen: Screening[], s: Screening, p: Preferences): boolean {
-  const gap = (x: Screening) =>
-    (p.venueBuffers[x.venue.id] ?? p.bufferMinutes) * 60000
+/** Minutes to arrive before a Screening. */
+type Gap = (s: Screening) => number
+
+const bufferOf =
+  (p: Preferences): Gap =>
+  (s) =>
+    p.venueBuffers[s.venue.id] ?? p.bufferMinutes
+
+function fits(chosen: Screening[], s: Screening, minutes: Gap): boolean {
+  const gap = (x: Screening) => minutes(x) * 60000
   return chosen.every(
     (c) =>
       Date.parse(c.endTime) + gap(s) <= Date.parse(s.startTime) ||
@@ -120,17 +131,11 @@ function solve(inputs: PlanningInputs) {
   const p = inputs.preferences
   const chosen: Screening[] = inputs.screeningCommitments.map(screening)
   const done = new Set(chosen.map((s) => s.programmeEntryId))
-  const inRange = (s: Screening) => {
-    const day = dayKey(s.startTime, festival.timeZone)
-    return (
-      (!p.startDate || day >= p.startDate) && (!p.endDate || day <= p.endDate)
-    )
-  }
   const open = (s: Screening) =>
     !s.withdrawn &&
-    inRange(s) &&
+    inRange(dayKey(s.startTime, festival.timeZone), p) &&
     !inputs.excludedScreenings.includes(s.id) &&
-    fits(chosen, s, p)
+    fits(chosen, s, bufferOf(p))
 
   for (const entryId of inputs.filmCommitments) {
     if (done.has(entryId)) continue
@@ -274,7 +279,6 @@ function flags(state: State): Flag[] {
 }
 
 function suggestions(state: State, scheduled: Screening[]): ComparisonPair[] {
-  const entries = new Map(programme.map((e) => [e.id, e]))
   const inSchedule = new Set(scheduled.map((s) => s.programmeEntryId))
   const compared = (a: ProgrammeEntryId, b: ProgrammeEntryId) =>
     state.inputs.preferences.comparisons.some(
@@ -287,8 +291,8 @@ function suggestions(state: State, scheduled: Screening[]): ComparisonPair[] {
     for (const other of programme) {
       if (inSchedule.has(other.id) || compared(s.programmeEntryId, other.id))
         continue
-      if (other.screenings.some((o) => !fits([s], o, noBuffer))) {
-        pairs.push({ scheduled: entries.get(s.programmeEntryId)!, other })
+      if (other.screenings.some((o) => !fits([s], o, () => 0))) {
+        pairs.push({ scheduledId: s.programmeEntryId, otherId: other.id })
       }
     }
   }

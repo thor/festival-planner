@@ -145,6 +145,11 @@ export const changeWord: Record<Exclude<Change, "kept">, string> = {
   out: "Out",
 }
 
+/** "1 film", "3 films". */
+export function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`
+}
+
 /** "1 h 18 min", "45 min", "2 h". */
 export function runtimeWord(minutes: number): string {
   const h = Math.floor(minutes / 60)

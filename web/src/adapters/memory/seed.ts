@@ -1,6 +1,7 @@
 // Sample programme for the concepts. Real films, made-up screenings.
 
 import type {
+  EntryDetails,
   Festival,
   FestivalId,
   FilmId,
@@ -128,6 +129,21 @@ const films: Row[] = [
   ["Left-Handed Girl", 2025, "Taiwan", 108, ["4 13:45 1", "8 18:30 3"]],
 ]
 
+const noDetails: EntryDetails = {
+  tagline: null,
+  synopsis: null,
+  posterUrl: null,
+  stillUrl: null,
+  runtimeMinutes: null,
+  originalTitle: null,
+  director: null,
+  genre: null,
+  language: null,
+  subtitles: null,
+  ageLimit: null,
+  imdbUrl: null,
+}
+
 /** Directors, and a line on a few. No synopses: nothing here is made up. */
 const about: Record<string, [director: string, tagline?: string]> = {
   Sirāt: [
@@ -207,18 +223,10 @@ export const programme: ProgrammeEntry[] = films
       country,
       url: null,
       details: {
+        ...noDetails,
         tagline: about[title]?.[1] ?? null,
-        synopsis: null,
-        posterUrl: null,
-        stillUrl: null,
         runtimeMinutes: minutes,
-        originalTitle: null,
         director: about[title]?.[0] ?? null,
-        genre: null,
-        language: null,
-        subtitles: null,
-        ageLimit: null,
-        imdbUrl: null,
       },
       screenings,
     }
