@@ -1,7 +1,12 @@
-from festival_planner.domain.planning import Preferences
+from festival_planner.domain.planning import Comparison, Preferences
 from festival_planner.domain.programme import Event
-from festival_planner.domain.solving import DEFAULT_WEIGHT, screening_weight
-from festival_planner.domain.tests.builders import at, entry, screening
+from festival_planner.domain.solving import (
+    DEFAULT_WEIGHT,
+    formulate,
+    score,
+    screening_weight,
+)
+from festival_planner.domain.tests.builders import at, entry, request, screening
 
 
 def test_default_weight():
@@ -83,3 +88,24 @@ def test_weights_combine_and_may_be_negative():
         preferences,
     )
     assert weight == -1.0 - 0.2 + 0.5
+
+
+def test_comparisons_shift_programme_entry_weights():
+    req = request(
+        screening("a", "14:00", "16:00"),
+        screening("b", "18:00", "20:00"),
+        preferences=Preferences(
+            buffer_minutes=0, comparisons=(Comparison(preferred="b", other="a"),)
+        ),
+    )
+    weights = formulate(req).weights
+    assert weights["b"] > 1.0 > weights["a"]
+
+
+def test_score_sums_the_weights_of_known_screenings():
+    req = request(
+        screening("a", "14:00", "16:00"),
+        screening("b", "18:00", "20:00"),
+        preferences=Preferences(buffer_minutes=0, programme_entry_weights={"b": 3.0}),
+    )
+    assert score(req, {"a", "b", "unknown"}) == 4.0

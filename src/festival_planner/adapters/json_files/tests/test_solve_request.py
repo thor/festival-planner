@@ -5,6 +5,7 @@ import pytest
 
 from festival_planner.adapters.json_files.solve_request import (
     dump_solve_request,
+    UnsupportedFormatError,
     load_solve_request,
 )
 from festival_planner.domain.planning import Preferences
@@ -64,4 +65,29 @@ def test_rejects_a_request_with_duplicate_screenings(tmp_path):
     path.write_text(json.dumps(data))
 
     with pytest.raises(ValueError, match="Duplicate screening id 'a'"):
+        load_solve_request(path)
+
+
+def test_exported_requests_carry_their_format_version(tmp_path):
+    path = tmp_path / "request.json"
+    dump_solve_request(request(screening("a", "14:00", "16:00")), path)
+    assert json.loads(path.read_text())["format_version"] == 1
+
+
+def test_requests_without_a_version_are_version_one(tmp_path):
+    path = tmp_path / "request.json"
+    dump_solve_request(request(screening("a", "14:00", "16:00")), path)
+    data = json.loads(path.read_text())
+    del data["format_version"]
+    path.write_text(json.dumps(data))
+    assert load_solve_request(path).format_version == 1
+
+
+def test_other_versions_are_refused_clearly(tmp_path):
+    path = tmp_path / "request.json"
+    dump_solve_request(request(screening("a", "14:00", "16:00")), path)
+    data = json.loads(path.read_text())
+    data["format_version"] = 2
+    path.write_text(json.dumps(data))
+    with pytest.raises(UnsupportedFormatError, match="version 2"):
         load_solve_request(path)

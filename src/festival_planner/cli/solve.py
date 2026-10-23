@@ -12,7 +12,11 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from ..adapters.json_files.solve_request import dump_solve_request, load_solve_request
+from ..adapters.json_files.solve_request import (
+    UnsupportedFormatError,
+    dump_solve_request,
+    load_solve_request,
+)
 from ..adapters.solver.cpsat import CpSatScheduleSolver
 from ..adapters.yaml_files.solve_request import build_solve_request
 from ..config import ConfigLoader
@@ -143,7 +147,11 @@ def solve(
 ) -> None:
     """Solve the scheduling optimization problem."""
     if request_file:
-        request = load_solve_request(request_file)
+        try:
+            request = load_solve_request(request_file)
+        except UnsupportedFormatError as e:
+            console.print(f"[bold red]{e}[/bold red]", soft_wrap=True)
+            raise typer.Exit(code=2) from e
         console.print(f"[green]Loaded solve request from {request_file}[/green]")
     else:
         request = _load_request_from_yaml()

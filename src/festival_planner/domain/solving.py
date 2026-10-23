@@ -9,12 +9,13 @@ import enum
 import itertools
 import zoneinfo
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Protocol, Self
+from typing import Literal, Protocol, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
+from .comparisons import comparison_bonuses
 from .planning import Preferences
 from .programme import (
     FilmId,
@@ -26,6 +27,9 @@ from .programme import (
 )
 from .travel import RouteTable
 from .values import TimeZone, Value
+
+SOLVE_REQUEST_FORMAT_VERSION = 1
+"""Bumped whenever an exported SolveRequest would no longer load."""
 
 DEFAULT_WEIGHT = 1.0
 """Weight of a Screening without any weight preference."""
@@ -39,6 +43,8 @@ class SolveRequest(Value):
     Schedule) may refer to nothing; `formulate` decides what that means.
     """
 
+    format_version: Literal[1] = SOLVE_REQUEST_FORMAT_VERSION
+    """Exported requests carry this so replays fail clearly after changes."""
     venues: tuple[Venue, ...]
     programme_entries: tuple[ProgrammeEntry, ...]
     screenings: tuple[Screening, ...]
@@ -54,6 +60,7 @@ class SolveRequest(Value):
     active_schedule: frozenset[ScreeningId] = frozenset()
     now: AwareDatetime | None = None
     time_limit_seconds: float = 60.0
+    """CP-SAT deterministic time limit (roughly seconds)."""
 
     @model_validator(mode="after")
     def _references_are_sound(self) -> Self:
@@ -121,21 +128,46 @@ class ScheduleSolver(Protocol):
 
 
 def screening_weight(
-    screening: Screening, entry: ProgrammeEntry, preferences: Preferences
+    screening: Screening,
+    entry: ProgrammeEntry,
+    preferences: Preferences,
+    bonuses: Mapping[ProgrammeEntryId, float] | None = None,
 ) -> float:
     """How much attending `screening` is worth.
 
     A screening weight overrides a programme entry weight, which overrides
-    `DEFAULT_WEIGHT`. Year and Event weights are added on top.
+    `DEFAULT_WEIGHT`. Year, Event and Comparison weights are added on top.
     """
     weight = preferences.screening_weights.get(
         screening.id, preferences.programme_entry_weights.get(entry.id, DEFAULT_WEIGHT)
     )
     if entry.year is not None:
         weight += preferences.year_weights.get(entry.year, 0.0)
+    weight += (bonuses or {}).get(entry.id, 0.0)
     if screening.events:
         weight += preferences.event_weight
     return weight
+
+
+def score(request: SolveRequest, screening_ids: Iterable[ScreeningId]) -> float:
+    """What attending `screening_ids` is worth under the request's Preferences.
+
+    Ids the request does not know count for nothing.
+    """
+    preferences = request.preferences
+    entries = {e.id: e for e in request.programme_entries}
+    screenings = {s.id: s for s in request.screenings}
+    bonuses = comparison_bonuses(preferences.comparisons, preferences.comparison_weight)
+    return sum(
+        screening_weight(
+            screenings[i],
+            entries[screenings[i].programme_entry_id],
+            preferences,
+            bonuses,
+        )
+        for i in sorted(set(screening_ids))
+        if i in screenings
+    )
 
 
 @dataclass(frozen=True)
@@ -170,6 +202,7 @@ def formulate(request: SolveRequest) -> Formulation:
       time, given travel and the arrival buffer.
     """
     preferences = request.preferences
+    bonuses = comparison_bonuses(preferences.comparisons, preferences.comparison_weight)
     entries = {e.id: e for e in request.programme_entries}
     unsatisfiable: list[str] = [
         f"Committed screening {screening_id!r} does not exist"
@@ -241,7 +274,9 @@ def formulate(request: SolveRequest) -> Formulation:
     return Formulation(
         candidates=tuple(candidates),
         weights={
-            s.id: screening_weight(s, entries[s.programme_entry_id], preferences)
+            s.id: screening_weight(
+                s, entries[s.programme_entry_id], preferences, bonuses
+            )
             for s in candidates
         },
         required=frozenset(required),
