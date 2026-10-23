@@ -23,6 +23,20 @@ _STATUSES = {
 }
 
 
+RANDOM_SEED = 0
+NUM_WORKERS = 8
+
+
+def _solver(time_limit_seconds: float) -> cp_model.CpSolver:
+    """A CP-SAT solver whose result depends only on the model."""
+    solver = cp_model.CpSolver()
+    solver.parameters.random_seed = RANDOM_SEED
+    solver.parameters.num_workers = NUM_WORKERS
+    solver.parameters.interleave_search = True
+    solver.parameters.max_deterministic_time = time_limit_seconds
+    return solver
+
+
 class CpSatScheduleSolver:
     """Optimises a `Formulation` as a CP-SAT boolean model."""
 
@@ -47,26 +61,47 @@ class CpSatScheduleSolver:
             model.add_at_most_one(attend[i] for i in group)
         for a, b in formulation.conflicts:
             model.add_at_most_one(attend[a], attend[b])
-        ids = list(formulation.weights)
-        model.maximize(
-            cp_model.LinearExpr.weighted_sum(
-                [attend[i] for i in ids],
-                [
-                    round(formulation.weights[i] * WEIGHT_PRECISION_MULTIPLIER)
-                    for i in ids
-                ],
-            )
+        ids = sorted(formulation.weights)
+        objective = cp_model.LinearExpr.weighted_sum(
+            [attend[i] for i in ids],
+            [round(formulation.weights[i] * WEIGHT_PRECISION_MULTIPLIER) for i in ids],
         )
+        model.maximize(objective)
 
-        solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = request.time_limit_seconds
+        solver = _solver(request.time_limit_seconds)
         status = _STATUSES.get(solver.solve(model))
         if status is None:
             raise RuntimeError(f"CP-SAT failed: {solver.status_name()}")
         if status not in (SolveStatus.OPTIMAL, SolveStatus.FEASIBLE):
             return SolveResult(status=status, wall_time_seconds=solver.wall_time)
+        wall_time = solver.wall_time
+
+        # Among Schedules at least as good, prefer the Active Schedule, then
+        # lower Screening ids; this never lowers the score.
+        model.add(objective >= round(solver.objective_value))
+        for i in ids:
+            model.add_hint(attend[i], solver.boolean_value(attend[i]))
+        n = len(ids)
+        model.maximize(
+            cp_model.LinearExpr.weighted_sum(
+                [attend[i] for i in ids],
+                [
+                    (n * n if i in request.active_schedule else 0) + (n - rank)
+                    for rank, i in enumerate(ids)
+                ],
+            )
+        )
+        tie_break = _solver(request.time_limit_seconds)
+        if _STATUSES.get(tie_break.solve(model)) in (
+            SolveStatus.OPTIMAL,
+            SolveStatus.FEASIBLE,
+        ):
+            solver, wall_time = tie_break, wall_time + tie_break.wall_time
 
         preferences = request.preferences
+        chosen = [
+            s for s in formulation.candidates if solver.boolean_value(attend[s.id])
+        ]
         scheduled = tuple(
             ScheduledScreening(
                 screening_id=s.id,
@@ -74,12 +109,11 @@ class CpSatScheduleSolver:
                 - datetime.timedelta(minutes=preferences.buffer_for(s.venue_id)),
                 weight=formulation.weights[s.id],
             )
-            for s in sorted(formulation.candidates, key=lambda s: s.start_time)
-            if solver.boolean_value(attend[s.id])
+            for s in sorted(chosen, key=lambda s: (s.start_time, s.id))
         )
         return SolveResult(
             status=status,
             scheduled=scheduled,
-            objective=solver.objective_value / WEIGHT_PRECISION_MULTIPLIER,
-            wall_time_seconds=solver.wall_time,
+            objective=round(sum(formulation.weights[s.id] for s in chosen), 6),
+            wall_time_seconds=wall_time,
         )

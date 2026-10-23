@@ -3,6 +3,7 @@ from festival_planner.domain.planning import Preferences
 from festival_planner.domain.programme import Event
 from festival_planner.domain.solving import ScheduleSolver, SolveStatus
 from festival_planner.domain.tests.builders import at, request, screening
+from festival_planner.domain.travel import DEFAULT_TRANSPORT_MODE, Route
 
 solver: ScheduleSolver = CpSatScheduleSolver()
 
@@ -120,3 +121,57 @@ def test_unknown_commitment_is_infeasible_with_a_reason():
     )
     assert result.status == SolveStatus.INFEASIBLE
     assert "'missing'" in result.reasons[0]
+
+
+def test_identical_requests_give_identical_schedules():
+    screenings = [
+        screening(f"s{i:02}", f"{10 + i % 8}:00", f"{11 + i % 8}:30", venue="AB"[i % 2])
+        for i in range(24)
+    ]
+    routes = (
+        Route(
+            from_venue_id="A", to_venue_id="B", mode=DEFAULT_TRANSPORT_MODE, minutes=10
+        ),
+        Route(
+            from_venue_id="B", to_venue_id="A", mode=DEFAULT_TRANSPORT_MODE, minutes=10
+        ),
+    )
+    first = solver.solve(request(*screenings, routes=routes))
+    for _ in range(3):
+        assert (
+            solver.solve(request(*screenings, routes=routes)).scheduled
+            == first.scheduled
+        )
+
+
+def test_ties_break_towards_lower_screening_ids():
+    result = solver.solve(
+        request(screening("b", "14:00", "16:00"), screening("a", "14:00", "16:00"))
+    )
+    assert scheduled_ids(result) == ["a"]
+
+
+def test_ties_break_towards_the_active_schedule_before_ids():
+    result = solver.solve(
+        request(
+            screening("a", "14:00", "16:00"),
+            screening("b", "14:00", "16:00"),
+            active_schedule=frozenset({"b"}),
+        )
+    )
+    assert scheduled_ids(result) == ["b"]
+
+
+def test_tie_break_never_costs_score():
+    result = solver.solve(
+        request(
+            screening("a", "14:00", "16:00"),
+            screening("b", "15:00", "17:00"),
+            preferences=Preferences(
+                buffer_minutes=0, programme_entry_weights={"a": 2.0}
+            ),
+            active_schedule=frozenset({"b"}),
+        )
+    )
+    assert scheduled_ids(result) == ["a"]
+    assert result.objective == 2.0
