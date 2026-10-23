@@ -270,6 +270,17 @@ type Film implements Node {
   year: Int
 }
 
+"""A Film, by id."""
+input FilmInput {
+  filmId: ID!
+}
+
+union FilmMutationResult = FilmResult | NotFound | NotSignedIn
+
+type FilmResult {
+  film: Film!
+}
+
 """Something in a User's planning that needs attention."""
 type Flag {
   kind: FlagKind!
@@ -311,6 +322,24 @@ type Mutation {
 
   """Throw a Draft away."""
   discardDraft(input: DraftInput!): DiscardDraftResult!
+
+  """Record that the User holds a Ticket for a Screening."""
+  recordTicket(input: RecordTicketInput!): RecordTicketResult!
+
+  """Give up a Ticket for a Screening."""
+  removeTicket(input: ScreeningInput!): ScreeningMutationResult!
+
+  """Mark a Film Seen by hand."""
+  markSeen(input: FilmInput!): FilmMutationResult!
+
+  """Undo marking a Film Seen by hand."""
+  unmarkSeen(input: FilmInput!): FilmMutationResult!
+
+  """"I did not go": the Screening no longer makes its Film Seen."""
+  dismissInferredSeen(input: ScreeningInput!): ScreeningMutationResult!
+
+  """Undo dismissing a Screening's inferred Seen Film."""
+  restoreInferredSeen(input: ScreeningInput!): ScreeningMutationResult!
 }
 
 """An object with a Globally Unique ID"""
@@ -462,6 +491,15 @@ input RecordComparisonInput {
   otherId: ID!
 }
 
+"""A Screening to get a Ticket for."""
+input RecordTicketInput {
+  screeningId: ID!
+  exchangeable: Boolean! = false
+  refundable: Boolean! = false
+}
+
+union RecordTicketResult = TicketResult | NotFound | NotSignedIn
+
 type ReleaseFilmCommitment {
   programmeEntry: ProgrammeEntry!
 }
@@ -564,6 +602,12 @@ type ScreeningEdge {
 """A Screening, by id."""
 input ScreeningInput {
   screeningId: ID!
+}
+
+union ScreeningMutationResult = ScreeningResult | NotFound | NotSignedIn
+
+type ScreeningResult {
+  screening: Screening!
 }
 
 type ScreeningWeight {
@@ -683,6 +727,10 @@ type Ticket {
   screening: Screening!
   exchangeable: Boolean!
   refundable: Boolean!
+}
+
+type TicketResult {
+  ticket: Ticket!
 }
 
 """A fixed physical place where Screenings take place."""
