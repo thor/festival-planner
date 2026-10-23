@@ -9,6 +9,7 @@ import { recordComparison, removeAt, type ChangeSet } from "@/domain/change-set"
 import { describeProblem, problemOf } from "@/domain/errors"
 import { dateSpan, festivalsInOrder, phaseOf } from "@/domain/festivals"
 import {
+  changeWord,
   describeItem,
   lookupOf,
   signed,
@@ -16,6 +17,7 @@ import {
   type Lookup,
 } from "@/domain/labels"
 import type {
+  DayKey,
   Draft,
   DraftId,
   Festival,
@@ -23,7 +25,7 @@ import type {
   Screening,
 } from "@/domain/model"
 import { clock, dayKey, dayNumber, festivalDays, weekday } from "@/domain/time"
-import { hourTicks, layDays } from "@/domain/timeline"
+import { hourTicks, layDays, layDiff, type Placed } from "@/domain/timeline"
 
 import { usePendingChangeSet } from "./change-set-store"
 import { usePorts } from "./ports"
@@ -193,25 +195,37 @@ export function useSchedulePage(
       ticketsHref: `/${f.slug}/tickets`,
       problems: ticketModels.problems,
       days: layDays(f, schedule?.screenings ?? []).map((row) => ({
-        key: row.day,
-        number: dayNumber(row.day),
-        weekday: weekday(row.day),
-        blocks: row.placed.map(({ screening: s, left, width }) => ({
-          id: s.id,
-          title: s.title,
-          time: clock(s.startTime, f.timeZone),
-          end: clock(s.endTime, f.timeZone),
-          venue: s.venue.name,
-          auditorium: s.auditorium,
-          href: entryHref(f, { id: s.programmeEntryId }),
-          left,
-          width,
-          ticket: tickets.has(s.id),
-          committed: committed.has(s.id) || films.has(s.programmeEntryId),
-          withdrawn: s.withdrawn,
+        ...dayOf(row.day),
+        blocks: row.placed.map((placed) => ({
+          ...blockOf(f, placed),
+          ticket: tickets.has(placed.screening.id),
+          committed:
+            committed.has(placed.screening.id) ||
+            films.has(placed.screening.programmeEntryId),
         })),
       })),
     }),
+  }
+}
+
+/** A Festival Day's heading on its track. */
+function dayOf(day: DayKey) {
+  return { key: day, number: dayNumber(day), weekday: weekday(day) }
+}
+
+/** A Screening as a block on its day track. */
+function blockOf(f: Festival, { screening: s, left, width }: Placed) {
+  return {
+    id: s.id,
+    title: s.title,
+    time: clock(s.startTime, f.timeZone),
+    end: clock(s.endTime, f.timeZone),
+    venue: s.venue.name,
+    auditorium: s.auditorium,
+    href: entryHref(f, { id: s.programmeEntryId }),
+    left,
+    width,
+    withdrawn: s.withdrawn,
   }
 }
 
@@ -296,6 +310,7 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
   const lookup = useLookup(festival.data)
   const id = draftId as DraftId
   const draft = useDraft(id)
+  const planning = usePlanning(festival.data)
 
   const settle = () => client.invalidateQueries({ queryKey: ["planning"] })
   const accept = useMutation({
@@ -323,15 +338,36 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
   if (draft.isPending || !festival.data) return loading
   if (!draft.data) return missing("Draft gone.")
   const d = draft.data
-  const tz = festival.data.timeZone
-  const tickets = new Set(d.diff?.droppedTickets.map((s) => s.id))
+  const f = festival.data
+  const tz = f.timeZone
+  // Freed tickets, and every ticket held, on any block or row.
+  const held = new Set([
+    ...(d.diff?.droppedTickets.map((s) => s.id) ?? []),
+    ...(planning.data?.tickets.map((t) => t.screening.id) ?? []),
+  ])
+  const week =
+    d.diff &&
+    layDiff(f, d.screenings, d.diff).map((row) => {
+      const blocks = row.placed.map(({ change, ...placed }) => ({
+        ...blockOf(f, placed),
+        ticket: held.has(placed.screening.id),
+        change,
+        word: change === "kept" ? null : changeWord[change],
+      }))
+      return {
+        ...dayOf(row.day),
+        changed: row.changed,
+        blocks: blocks.filter((b) => b.change !== "out"),
+        ghosts: blocks.filter((b) => b.change === "out"),
+      }
+    })
   const row = (s: Screening): DiffRowVM => ({
     id: s.id,
     title: s.title,
     when: when(s, tz),
     venue: s.venue.name,
     auditorium: s.auditorium,
-    ticket: tickets.has(s.id),
+    ticket: held.has(s.id),
   })
   const failed = accept.error ?? discard.error ?? resolve.error
   return ready({
@@ -344,6 +380,8 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
     in: d.diff?.added.map(row) ?? [],
     out: d.diff?.removed.map(row) ?? [],
     droppedTickets: d.diff?.droppedTickets.length ?? 0,
+    week,
+    ticks: hourTicks(),
     reasons: d.reasons,
     items: itemsOf(d.changeSet, lookup),
     busy: accept.isPending || discard.isPending || resolve.isPending,

@@ -12,10 +12,11 @@ import type {
   FestivalId,
   PlanningInputs,
   ProgrammeEntryId,
+  Screening,
   ScreeningId,
 } from "./model"
 import { clock, dayKey, festivalDays, minuteOfDay } from "./time"
-import { layDays } from "./timeline"
+import { layDays, layDiff } from "./timeline"
 
 const s1 = "s1" as ScreeningId
 const a = "a" as ProgrammeEntryId
@@ -110,5 +111,41 @@ describe("timeline", () => {
     const { left, width } = rows[0].placed[0]
     expect(left).toBeCloseTo((17.5 - 10) / 15)
     expect(width).toBeCloseTo(1.5 / 15)
+  })
+})
+
+describe("draft timeline", () => {
+  const at = (id: string, day: string): Screening => ({
+    id: id as ScreeningId,
+    programmeEntryId: a,
+    title: id,
+    startTime: `${day}T15:30:00Z`,
+    endTime: `${day}T17:00:00Z`,
+    venue: { id: "v" as never, name: "V" },
+    auditorium: null,
+    ticketUrl: null,
+    events: [],
+    withdrawn: false,
+  })
+
+  it("tags each Screening In, Out or kept, on one set of days", () => {
+    const kept = at("kept", "2026-10-24")
+    const added = at("in", "2026-10-25")
+    const out = at("out", "2026-10-25")
+    const rows = layDiff(festival, [kept, added], {
+      added: [added],
+      removed: [out],
+    })
+    expect(rows.map((r) => r.day)).toEqual([
+      "2026-10-24",
+      "2026-10-25",
+      "2026-10-26",
+    ])
+    expect(rows.map((r) => r.changed)).toEqual([false, true, false])
+    expect(rows[1].placed.map((p) => [p.screening.id, p.change])).toEqual([
+      ["in", "in"],
+      ["out", "out"],
+    ])
+    expect(rows[0].placed[0].change).toBe("kept")
   })
 })

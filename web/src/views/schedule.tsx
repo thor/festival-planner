@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 import { Page, Place } from "./parts"
+import { TimeAxis, Track, TrackBlock } from "./track"
 
 export function ScheduleView({ vm }: { vm: ScheduleVM }) {
   if (vm.number === null) {
@@ -31,20 +32,7 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
 
       <Notices vm={vm} />
 
-      <div
-        aria-hidden
-        className="relative ml-20 hidden h-8 border-b border-ink md:block"
-      >
-        {vm.ticks.map((t) => (
-          <span
-            key={t.label}
-            className="absolute bottom-1 -translate-x-1/2 text-xs text-grain"
-            style={{ left: `${t.left * 100}%` }}
-          >
-            {t.label}
-          </span>
-        ))}
-      </div>
+      <TimeAxis ticks={vm.ticks} />
 
       <ol>
         {vm.days.map((d) => (
@@ -61,57 +49,21 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
             </div>
 
             {/* Wide: a track from 10 to 01. */}
-            <div className="relative hidden h-24 md:block">
-              {vm.ticks.map((t) => (
-                <span
-                  key={t.label}
-                  aria-hidden
-                  className="absolute inset-y-0 border-l border-haze"
-                  style={{ left: `${t.left * 100}%` }}
-                />
-              ))}
+            <Track ticks={vm.ticks} className="hidden md:block">
               {d.blocks.map((b) => (
-                <Link
+                <TrackBlock
                   key={b.id}
-                  to={b.href}
+                  block={b}
                   className={cn(
-                    "absolute inset-y-2 flex flex-col justify-between overflow-hidden border border-ink bg-screen px-2 py-1 hover:bg-haze",
+                    "border border-ink bg-screen hover:bg-haze",
                     b.committed && "border-2 border-stamp",
                     b.ticket &&
                       "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85",
                     b.withdrawn && "border-dashed text-grain line-through"
                   )}
-                  style={{
-                    left: `${b.left * 100}%`,
-                    width: `${b.width * 100}%`,
-                  }}
-                >
-                  <span className="truncate text-sm leading-tight font-medium">
-                    {b.title}
-                  </span>
-                  {/* Only the place gives way when the block is narrow. */}
-                  <span className="flex items-center gap-1 text-xs">
-                    <span className="shrink-0">
-                      {/* Inline, centred on the figures (0.725em tall). */}
-                      {b.ticket && (
-                        <TicketIcon
-                          size="1.1em"
-                          weight="bold"
-                          aria-label="Ticket"
-                          className="mr-1 inline align-[-0.19em]"
-                        />
-                      )}
-                      {b.time}
-                    </span>
-                    <Place
-                      venue={b.venue}
-                      auditorium={b.auditorium}
-                      className="truncate"
-                    />
-                  </span>
-                </Link>
+                />
               ))}
-            </div>
+            </Track>
 
             {/* Narrow: a list. */}
             <ul className="md:hidden">

@@ -1,6 +1,6 @@
 // Lay Screenings out on a day track: one row per festival day, x by time.
 
-import type { DayKey, Festival, Screening } from "./model"
+import type { DayKey, DraftDiff, Festival, Screening } from "./model"
 import { dayKey, festivalDays, minuteOfDay } from "./time"
 
 export const TRACK_START = 10 * 60
@@ -62,4 +62,37 @@ export function hourTicks(): { label: string; left: number }[] {
     ticks.push({ label: String((m / 60) % 24), left: (m - TRACK_START) / span })
   }
   return ticks
+}
+
+/** What a Draft does to a Screening: brings it In, takes it Out, or keeps it. */
+export type Change = "in" | "out" | "kept"
+
+export interface DiffRow {
+  day: DayKey
+  /** Something comes in or goes out on this day. */
+  changed: boolean
+  placed: (Placed & { change: Change })[]
+}
+
+/**
+ * Lay a Draft's Schedule and its Out Screenings on one set of days, so the
+ * Out ones line up under the day they leave.
+ */
+export function layDiff(
+  festival: Festival,
+  draft: Screening[],
+  { added, removed }: Pick<DraftDiff, "added" | "removed">
+): DiffRow[] {
+  const ins = new Set(added.map((s) => s.id))
+  const outs = new Set(removed.map((s) => s.id))
+  const changeOf = (s: Screening): Change =>
+    outs.has(s.id) ? "out" : ins.has(s.id) ? "in" : "kept"
+  return layDays(festival, [...draft, ...removed]).map(({ day, placed }) => {
+    const tagged = placed.map((p) => ({ ...p, change: changeOf(p.screening) }))
+    return {
+      day,
+      changed: tagged.some((p) => p.change !== "kept"),
+      placed: tagged,
+    }
+  })
 }

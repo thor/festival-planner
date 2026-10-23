@@ -1,6 +1,7 @@
 // What views render. Plain data and callbacks; no domain types leak through.
 
 import type { ItemVerb } from "@/domain/change-set"
+import type { Change } from "@/domain/timeline"
 
 export type Load<T> =
   | { state: "loading" }
@@ -79,7 +80,13 @@ export interface FilmVM {
   backHref: string
 }
 
-export interface BlockVM {
+export interface Tick {
+  label: string
+  left: number
+}
+
+/** A Screening on a day track. */
+export interface TrackBlockVM {
   id: string
   title: string
   time: string
@@ -91,8 +98,11 @@ export interface BlockVM {
   left: number
   width: number
   ticket: boolean
-  committed: boolean
   withdrawn: boolean
+}
+
+export interface BlockVM extends TrackBlockVM {
+  committed: boolean
 }
 
 export interface ScheduleDayVM {
@@ -106,7 +116,7 @@ export interface ScheduleVM {
   number: number | null
   count: number
   days: ScheduleDayVM[]
-  ticks: { label: string; left: number }[]
+  ticks: Tick[]
   /** Tickets to let go, counted here and listed on the Tickets page. */
   letGo: number
   ticketsHref: string
@@ -175,6 +185,21 @@ export interface DiffRowVM {
   ticket: boolean
 }
 
+export interface DraftBlockVM extends TrackBlockVM {
+  change: Change
+  /** "In" or "Out"; null when kept. */
+  word: string | null
+}
+
+export interface DraftDayVM extends Omit<ScheduleDayVM, "blocks"> {
+  /** Something comes in or goes out this day. */
+  changed: boolean
+  /** The Draft's Schedule: kept and In. */
+  blocks: DraftBlockVM[]
+  /** Out: in the Active Schedule, not in the Draft. */
+  ghosts: DraftBlockVM[]
+}
+
 export interface DraftVM {
   status: "solving" | "ready" | "infeasible" | "failed"
   stale: boolean
@@ -184,6 +209,9 @@ export interface DraftVM {
   /** Screenings the Draft takes out of it; not Withdrawn, just not chosen. */
   out: DiffRowVM[]
   droppedTickets: number
+  /** The Draft's week as day tracks; null until it has a diff. */
+  week: DraftDayVM[] | null
+  ticks: Tick[]
   reasons: string[]
   items: ItemVM[]
   busy: boolean

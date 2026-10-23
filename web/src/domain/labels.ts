@@ -3,6 +3,7 @@
 import { verbOf, type ItemVerb } from "./change-set"
 import type { ChangeSetItem, ProgrammeEntry, Screening } from "./model"
 import type { LetGoReason } from "./tickets"
+import type { Change } from "./timeline"
 import { clock, dayKey, shortDay } from "./time"
 
 export interface Lookup {
@@ -73,4 +74,10 @@ export function describeItem(item: ChangeSetItem, lookup: Lookup) {
 export function signed(n: number): string {
   const r = Math.round(n * 10) / 10
   return r > 0 ? `+${r}` : r < 0 ? `−${-r}` : "0"
+}
+
+/** What a Draft does to a Screening; kept needs no word. */
+export const changeWord: Record<Exclude<Change, "kept">, string> = {
+  in: "In",
+  out: "Out",
 }

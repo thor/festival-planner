@@ -1,12 +1,21 @@
 import { MinusIcon, PlusIcon, TicketIcon } from "@phosphor-icons/react"
 import { Link } from "react-router"
 
-import type { DiffRowVM, DraftListItemVM, DraftVM } from "@/app/view-models"
+import type {
+  DiffRowVM,
+  DraftBlockVM,
+  DraftDayVM,
+  DraftListItemVM,
+  DraftVM,
+  Tick,
+} from "@/app/view-models"
+import type { Change } from "@/domain/timeline"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { ItemLine } from "./items"
 import { Page, Place, Spinner } from "./parts"
+import { TimeAxis, Track, TrackBlock } from "./track"
 
 const statusWord: Record<DraftVM["status"], string> = {
   solving: "Solving",
@@ -116,6 +125,8 @@ export function DraftView({ vm }: { vm: DraftVM }) {
         <DiffList rows={vm.out} sign="minus" empty="Nothing out." />
       </div>
 
+      {vm.week && <DraftWeek week={vm.week} ticks={vm.ticks} />}
+
       {vm.items.length > 0 && (
         <section className="mt-10 max-w-xl">
           <h2 className="border-b border-ink pb-2 text-grain">Changes</h2>
@@ -177,5 +188,86 @@ function DiffList({
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * Wide screens: the Draft's Schedule as day tracks. In is filled ink, kept
+ * steps back, and Out stays as a ghost, the same size, in a lane under its day.
+ */
+function DraftWeek({ week, ticks }: { week: DraftDayVM[]; ticks: Tick[] }) {
+  return (
+    <section aria-label="Week" className="mt-10 hidden md:block">
+      <TimeAxis ticks={ticks} />
+      <ol>
+        {week.map((d) => (
+          <li
+            key={d.key}
+            className="grid grid-cols-[5rem_minmax(0,1fr)] border-b border-ink"
+          >
+            <div
+              className={cn(
+                "flex flex-col justify-center border-r border-ink py-2",
+                !d.changed && "text-grain"
+              )}
+            >
+              <span className="title text-3xl">{d.number}</span>
+              <span className="text-xs text-grain">{d.weekday}</span>
+            </div>
+            <div>
+              <Track ticks={ticks}>
+                {d.blocks.map((b) => (
+                  <DraftBlock key={b.id} block={b} />
+                ))}
+              </Track>
+              {d.ghosts.length > 0 && (
+                <Track
+                  ticks={ticks}
+                  role="group"
+                  aria-label="Out"
+                  className="border-t border-dotted border-grain/40"
+                >
+                  {d.ghosts.map((b) => (
+                    <DraftBlock key={b.id} block={b} />
+                  ))}
+                </Track>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+const tone: Record<Change, string> = {
+  kept: "border border-ink/25 bg-screen text-grain hover:bg-haze hover:text-ink",
+  in: "border border-ink bg-ink text-screen hover:bg-ink/85",
+  out: "border border-dotted border-grain/60 text-grain hover:bg-haze hover:text-ink",
+}
+
+function DraftBlock({ block: b }: { block: DraftBlockVM }) {
+  const Glyph = b.change === "in" ? PlusIcon : MinusIcon
+  return (
+    <TrackBlock
+      block={b}
+      className={cn(
+        tone[b.change],
+        b.withdrawn && "border-dashed line-through"
+      )}
+      lead={
+        b.change !== "kept" && (
+          <>
+            <Glyph size="1em" weight="bold" className="shrink-0" />
+            <span className="sr-only">{b.word}: </span>
+          </>
+        )
+      }
+      ticketLabel={b.change === "out" ? "Frees a ticket" : "Ticket"}
+      ticketClassName={cn(
+        b.change === "kept" && "text-stamp",
+        b.change === "out" && "text-ink"
+      )}
+    />
   )
 }
