@@ -1,8 +1,96 @@
+type AddExcludedProgrammeEntry {
+  programmeEntry: ProgrammeEntry!
+}
+
+type AddExcludedScreening {
+  screening: Screening!
+}
+
+type AddFilmCommitment {
+  programmeEntry: ProgrammeEntry!
+}
+
+type AddScreeningCommitment {
+  screening: Screening!
+}
+
+"""One change a Change Set proposes."""
+union ChangeSetItem = AddScreeningCommitment | ReleaseScreeningCommitment | AddFilmCommitment | ReleaseFilmCommitment | AddExcludedScreening | RemoveExcludedScreening | AddExcludedProgrammeEntry | RemoveExcludedProgrammeEntry | SetProgrammeEntryWeight | SetScreeningWeight | SetYearWeight | SetBuffer | SetDateRange | SetEventWeight | SetAttendEvents | SetTransportMode | SetComparisonWeight | RecordComparison
+
+"""The User would rather watch `preferred` than `other`."""
+type Comparison {
+  preferred: ProgrammeEntry!
+  other: ProgrammeEntry!
+}
+
+"""Two Programme Entries whose Screenings competed."""
+type ComparisonSuggestion {
+  weightGap: Float!
+
+  """The one that won a place in the Schedule."""
+  scheduled: ProgrammeEntry!
+  other: ProgrammeEntry!
+}
+
 """Date (isoformat)"""
 scalar Date
 
 """Date with time (isoformat)"""
 scalar DateTime
+
+"""A proposed Schedule: a Change Set and the Schedule solved from it."""
+type Draft implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  status: DraftStatus!
+
+  """Whether the Active Schedule changed since this Draft was based on it."""
+  stale: Boolean!
+  changeSet: [ChangeSetItem!]!
+
+  """By arrival time."""
+  screenings: [ScheduledScreening!]!
+  score: Float!
+
+  """Why the Draft is INFEASIBLE or FAILED."""
+  reasons: [String!]!
+
+  """What re-solving changed in the Change Set."""
+  notes: [String!]!
+  createdAt: DateTime!
+  solvedAt: DateTime
+  festival: Festival!
+
+  """
+  Against the current Active Schedule; null unless READY. Computed only when asked for.
+  """
+  diff: DraftDiff
+}
+
+"""A Draft's Schedule against the Active Schedule."""
+type DraftDiff {
+  """
+  The Draft's score minus the Active Schedule's, both under the Draft's Preferences.
+  """
+  scoreDelta: Float!
+
+  """By start time."""
+  added: [Screening!]!
+
+  """By start time."""
+  removed: [Screening!]!
+
+  """Removed Screenings the User holds a Ticket for; by start time."""
+  droppedTickets: [Screening!]!
+}
+
+"""Where a Draft's solve is."""
+enum DraftStatus {
+  SOLVING
+  READY
+  INFEASIBLE
+  FAILED
+}
 
 """Something belonging to a Screening beyond the film."""
 type Event {
@@ -59,6 +147,37 @@ type Festival implements Node {
   ): ScreeningConnection!
 }
 
+"""A signed-in User's planning for one Festival."""
+type FestivalPlanning {
+  festival: Festival!
+  activeSchedule: Schedule
+
+  """Oldest first."""
+  schedules(
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): ScheduleConnection!
+
+  """Oldest first."""
+  drafts: [Draft!]!
+  inputs: PlanningInputs!
+  flags: [Flag!]!
+
+  """
+  Pairs that competed in the latest READY Draft, else the Active Schedule, and are not compared yet; closest weights first.
+  """
+  comparisonSuggestions(limit: Int! = 10): [ComparisonSuggestion!]!
+}
+
 """The recurring identity that groups Festivals."""
 type FestivalSeries {
   slug: String!
@@ -71,6 +190,26 @@ type Film implements Node {
   id: ID!
   title: String!
   year: Int
+}
+
+"""Something in a User's planning that needs attention."""
+type Flag {
+  kind: FlagKind!
+  message: String!
+
+  """The Screening concerned, if the Flag is about one."""
+  screening: Screening
+
+  """The Programme Entry concerned, if not a Screening."""
+  programmeEntry: ProgrammeEntry
+}
+
+"""What a Flag is about."""
+enum FlagKind {
+  WITHDRAWN_COMMITMENT
+  WITHDRAWN_TICKET
+  UNSCHEDULED_TICKET
+  WITHDRAWN_IN_SCHEDULE
 }
 
 """An object with a Globally Unique ID"""
@@ -92,6 +231,52 @@ type PageInfo {
 
   """When paginating forwards, the cursor to continue."""
   endCursor: String
+}
+
+"""
+A User's accepted commitments, Excluded and Preferences for a Festival.
+"""
+type PlanningInputs {
+  preferences: Preferences!
+
+  """By start time."""
+  screeningCommitments: [Screening!]!
+
+  """By title."""
+  filmCommitments: [ProgrammeEntry!]!
+
+  """By start time."""
+  excludedScreenings: [Screening!]!
+
+  """By title."""
+  excludedProgrammeEntries: [ProgrammeEntry!]!
+}
+
+"""A User's settings that shape their Schedules."""
+type Preferences {
+  """Minutes to arrive before a Screening, unless its Venue has its own."""
+  bufferMinutes: Int!
+
+  """By Venue id."""
+  venueBuffers: [VenueBuffer!]!
+  startDate: Date
+  endDate: Date
+
+  """By Programme Entry id."""
+  programmeEntryWeights: [ProgrammeEntryWeight!]!
+
+  """By Screening id."""
+  screeningWeights: [ScreeningWeight!]!
+
+  """By year."""
+  yearWeights: [YearWeight!]!
+  eventWeight: Float!
+  attendEvents: Boolean!
+  transportMode: String
+
+  """How strongly Comparisons shift Programme Entry weights."""
+  comparisonWeight: Float!
+  comparisons: [Comparison!]!
 }
 
 """A Film as presented in one Festival's programme."""
@@ -126,6 +311,11 @@ type ProgrammeEntryEdge {
   node: ProgrammeEntry!
 }
 
+type ProgrammeEntryWeight {
+  programmeEntry: ProgrammeEntry!
+  weight: Float!
+}
+
 type Query {
   """By start date, then slug."""
   festivals: [Festival!]!
@@ -142,6 +332,71 @@ type Query {
 
   """The signed-in User; null when signed out."""
   viewer: Viewer
+}
+
+"""Replaces any earlier Comparison of the same pair."""
+type RecordComparison {
+  preferred: ProgrammeEntry!
+  other: ProgrammeEntry!
+}
+
+type ReleaseFilmCommitment {
+  programmeEntry: ProgrammeEntry!
+}
+
+type ReleaseScreeningCommitment {
+  screening: Screening!
+}
+
+type RemoveExcludedProgrammeEntry {
+  programmeEntry: ProgrammeEntry!
+}
+
+type RemoveExcludedScreening {
+  screening: Screening!
+}
+
+"""
+An accepted Schedule. The one with the highest number is the Active Schedule; the others form the history.
+"""
+type Schedule implements Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+  number: Int!
+  score: Float!
+
+  """The Change Set whose acceptance produced this Schedule."""
+  changeSet: [ChangeSetItem!]!
+  acceptedAt: DateTime!
+  festival: Festival!
+
+  """By start time."""
+  screenings: [Screening!]!
+}
+
+"""A connection to a list of items."""
+type ScheduleConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [ScheduleEdge!]!
+}
+
+"""An edge in a connection."""
+type ScheduleEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Schedule!
+}
+
+"""A Screening in a Draft's Schedule."""
+type ScheduledScreening {
+  screening: Screening!
+  arrivalTime: DateTime!
+  weight: Float!
 }
 
 """A single showing of a Programme Entry at a given time and Venue."""
@@ -178,6 +433,71 @@ type ScreeningEdge {
   node: Screening!
 }
 
+type ScreeningWeight {
+  screening: Screening!
+  weight: Float!
+}
+
+type SetAttendEvents {
+  """Null resets the setting to its default."""
+  attend: Boolean
+}
+
+"""The general buffer, or with a Venue that Venue's."""
+type SetBuffer {
+  """Null resets the setting to its default."""
+  minutes: Int
+  venue: Venue
+}
+
+type SetComparisonWeight {
+  """Null resets the setting to its default."""
+  weight: Float
+}
+
+type SetDateRange {
+  startDate: Date
+  endDate: Date
+}
+
+type SetEventWeight {
+  """Null resets the setting to its default."""
+  weight: Float
+}
+
+type SetProgrammeEntryWeight {
+  programmeEntry: ProgrammeEntry!
+
+  """Null resets the setting to its default."""
+  weight: Float
+}
+
+type SetScreeningWeight {
+  screening: Screening!
+
+  """Null resets the setting to its default."""
+  weight: Float
+}
+
+type SetTransportMode {
+  """Null resets the setting to its default."""
+  mode: String
+}
+
+type SetYearWeight {
+  year: Int!
+
+  """Null resets the setting to its default."""
+  weight: Float
+}
+
+"""A User's record that they hold a ticket."""
+type Ticket {
+  screening: Screening!
+  exchangeable: Boolean!
+  refundable: Boolean!
+}
+
 """A fixed physical place where Screenings take place."""
 type Venue implements Node {
   """The Globally Unique ID of this object"""
@@ -185,8 +505,30 @@ type Venue implements Node {
   name: String!
 }
 
+"""Minutes to arrive before a Screening at a Venue."""
+type VenueBuffer {
+  minutes: Int!
+  venue: Venue!
+}
+
 """The signed-in User."""
 type Viewer {
   issuer: String!
   subject: String!
+
+  """By start time of the Screening."""
+  tickets: [Ticket!]!
+
+  """
+  Marked by hand, or from an ended Screening in an Active Schedule; by title.
+  """
+  seenFilms: [Film!]!
+
+  """Null if the id is not a known Festival's."""
+  planning(festivalId: ID!): FestivalPlanning
+}
+
+type YearWeight {
+  year: Int!
+  weight: Float!
 }

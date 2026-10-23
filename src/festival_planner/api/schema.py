@@ -8,9 +8,11 @@ from strawberry import relay
 
 from .context import Info
 from .ids import decode_any
+from .planning_types import PLANNING_NODES, Viewer
 from .programme_types import PROGRAMME_NODES, NodeResolver, ProgrammeQuery
 
-NODES: Mapping[str, NodeResolver] = {**PROGRAMME_NODES}
+assert PROGRAMME_NODES.keys().isdisjoint(PLANNING_NODES), "a Node type is twice"
+NODES: Mapping[str, NodeResolver] = {**PROGRAMME_NODES, **PLANNING_NODES}
 """How `node` and `nodes` find each Node type, by GraphQL type name."""
 
 
@@ -21,12 +23,6 @@ async def _node(info: Info, global_id: str) -> relay.Node | None:
     type_name, domain_id = decoded
     resolver = NODES.get(type_name)
     return None if resolver is None else await resolver(info, domain_id)
-
-
-@strawberry.type(description="The signed-in User.")
-class Viewer:
-    issuer: str
-    subject: str
 
 
 @strawberry.type
@@ -48,7 +44,7 @@ class Query(ProgrammeQuery):
         user = info.context.viewer
         if user is None:
             return None
-        return Viewer(issuer=user.issuer, subject=user.subject)
+        return Viewer(issuer=user.issuer, subject=user.subject, user_id=user.id)
 
 
 schema = strawberry.Schema(query=Query)
