@@ -59,3 +59,14 @@ def test_token_issue_without_keys_exits_1(tmp_path: Path):
 
     assert result.exit_code == 1
     assert "token init" in result.output
+
+
+def test_token_issue_rejects_non_positive_days(tmp_path: Path):
+    directory = tmp_path / "local-issuer"
+    LocalIssuer(directory).init()
+
+    result = runner.invoke(
+        app, ["token", "issue", "--directory", str(directory), "--days", "0"]
+    )
+
+    assert result.exit_code != 0

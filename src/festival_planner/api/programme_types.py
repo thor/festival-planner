@@ -176,7 +176,10 @@ class Festival(relay.Node):
         series = await info.context.loaders.festival_series.load(self.series_id)
         return None if series is None else FestivalSeries.from_domain(series)
 
-    @relay.connection(relay.ListConnection[ProgrammeEntry], description="By title.")
+    @relay.connection(
+        relay.ListConnection[ProgrammeEntry],
+        description=("By title. At most 100 per page; use first/after to page."),
+    )
     async def programme_entries(self, info: Info) -> Iterable[ProgrammeEntry]:
         ctx = info.context
         entries = await ctx.run(
@@ -186,7 +189,10 @@ class Festival(relay.Node):
             ctx.loaders.programme_entry.prime(entry.id, entry)
         return [ProgrammeEntry.from_domain(e) for e in entries]
 
-    @relay.connection(relay.ListConnection[Screening], description="By start time.")
+    @relay.connection(
+        relay.ListConnection[Screening],
+        description=("By start time. At most 100 per page; use first/after to page."),
+    )
     async def screenings(
         self, info: Info, include_withdrawn: bool = False
     ) -> Iterable[Screening]:

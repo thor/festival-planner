@@ -6,7 +6,6 @@ an untrusted issuer.
 """
 
 from collections.abc import Callable, Iterable, Mapping
-from datetime import datetime
 from pathlib import Path
 
 import jwt
@@ -125,7 +124,12 @@ class _KeySet:
 
     @staticmethod
     def from_uri(uri: str) -> "_KeySet":
-        client = jwt.PyJWKClient(uri, cache_keys=True)
+        # cache_keys=False: PyJWKClient's own JWK-set cache (bounded by its
+        # `lifespan`) already avoids refetching on every token. The per-kid
+        # cache_keys=True cache never drops a key once fetched, so a key
+        # rotated out at the issuer would stay trusted for the process's
+        # whole lifetime.
+        client = jwt.PyJWKClient(uri, cache_keys=False)
         return _KeySet(client.get_signing_keys, client.get_signing_key)
 
 
@@ -138,17 +142,7 @@ class JwtTokenVerifier:
     audience, issuer and expiry (with a 30 second leeway) against them.
     """
 
-    def __init__(
-        self,
-        issuers: Iterable[TrustedIssuer],
-        *,
-        clock: Callable[[], datetime] | None = None,
-    ):
-        # `clock` is accepted for symmetry with the domain's other
-        # injectable-clock collaborators. PyJWT has no hook for a custom
-        # clock, so it is unused: verification always runs against real
-        # wall-clock time.
-        self._clock = clock
+    def __init__(self, issuers: Iterable[TrustedIssuer]):
         self._issuers: dict[str, TrustedIssuer] = {}
         self._keys: dict[str, _KeySet] = {}
         for issuer in issuers:

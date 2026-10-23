@@ -60,6 +60,16 @@ def test_init_creates_the_directory_with_owner_only_access(issuer: LocalIssuer):
     assert stat.S_IMODE(mode) == 0o700
 
 
+def test_init_does_not_tighten_a_pre_existing_directory(tmp_path: Path):
+    directory = tmp_path / "local-issuer"
+    directory.mkdir()
+    directory.chmod(0o755)
+
+    LocalIssuer(directory).init()
+
+    assert stat.S_IMODE(directory.stat().st_mode) == 0o755
+
+
 def test_an_issued_token_verifies_as_the_local_issuer(issuer: LocalIssuer):
     verifier = JwtTokenVerifier([issuer.trusted_issuer()])
     assert verifier.verify(issuer.issue("alice")) == Identity(

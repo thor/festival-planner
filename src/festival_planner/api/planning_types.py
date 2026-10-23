@@ -4,6 +4,7 @@ Each resolver reads through one Planner call on a worker thread, or through
 the request's DataLoaders. Drafts and Schedules are Nodes only to their owner.
 """
 
+import asyncio
 import datetime
 import enum
 from collections.abc import Iterable, Mapping
@@ -699,28 +700,54 @@ class FestivalPlanning:
         if not flags:
             return []
         inputs = await ctx.run(planner.inputs, self.user_id, self.festival.slug)
+
+        # Only a withdrawn Film Commitment is about a Programme Entry; every
+        # other Flag is about a Screening.
+        about_entry = [
+            flag.kind is ins.FlagKind.WITHDRAWN_COMMITMENT
+            and flag.target_id in inputs.film_commitments
+            for flag in flags
+        ]
+        screening_ids = [
+            p.ScreeningId(flag.target_id)
+            for flag, entry in zip(flags, about_entry, strict=True)
+            if not entry
+        ]
+        entry_ids = [
+            p.ProgrammeEntryId(flag.target_id)
+            for flag, entry in zip(flags, about_entry, strict=True)
+            if entry
+        ]
+        # One DataLoader batch per kind, instead of one load per Flag.
+        screenings, entries = await asyncio.gather(
+            ctx.loaders.screening.load_many(screening_ids),
+            ctx.loaders.programme_entry.load_many(entry_ids),
+        )
+        screening_by_id = dict(zip(screening_ids, screenings, strict=True))
+        entry_by_id = dict(zip(entry_ids, entries, strict=True))
+
         found: list[Flag] = []
-        for flag in flags:
-            # Only a withdrawn Film Commitment is about a Programme Entry;
-            # every other Flag is about a Screening.
-            about_entry = (
-                flag.kind is ins.FlagKind.WITHDRAWN_COMMITMENT
-                and flag.target_id in inputs.film_commitments
-            )
+        for flag, entry in zip(flags, about_entry, strict=True):
+            if entry:
+                entry_id = p.ProgrammeEntryId(flag.target_id)
+                entry_value = entry_by_id[entry_id]
+                if entry_value is None:
+                    raise LookupError(f"Programme Entry {entry_id!r} is missing")
+                screening = None
+                programme_entry = ProgrammeEntry.from_domain(entry_value)
+            else:
+                screening_id = p.ScreeningId(flag.target_id)
+                screening_value = screening_by_id[screening_id]
+                if screening_value is None:
+                    raise LookupError(f"Screening {screening_id!r} is missing")
+                screening = Screening.from_domain(screening_value)
+                programme_entry = None
             found.append(
                 Flag(
                     kind=FlagKind(flag.kind.value),
                     message=flag.message,
-                    screening=(
-                        None
-                        if about_entry
-                        else await _screening(info, p.ScreeningId(flag.target_id))
-                    ),
-                    programme_entry=(
-                        await _entry(info, p.ProgrammeEntryId(flag.target_id))
-                        if about_entry
-                        else None
-                    ),
+                    screening=screening,
+                    programme_entry=programme_entry,
                 )
             )
         return found

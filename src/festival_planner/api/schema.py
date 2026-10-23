@@ -4,7 +4,9 @@ import asyncio
 from collections.abc import Mapping
 
 import strawberry
+from graphql.error import GraphQLError
 from strawberry import relay
+from strawberry.extensions import MaskErrors
 
 from .context import Info
 from .ids import decode_any
@@ -48,4 +50,24 @@ class Query(ProgrammeQuery):
         return Viewer(issuer=user.issuer, subject=user.subject, user_id=user.id)
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+def _should_mask_error(error: GraphQLError) -> bool:
+    """Mask only an unexpected exception from a resolver.
+
+    `error.original_error` is the Python exception a resolver raised (e.g.
+    `LookupError`, a SQLAlchemy error); its message can leak internals and
+    is not meant for clients. A GraphQL-level error, such as the `@oneOf`
+    coercion error or an unknown field, has no `original_error`: it is
+    already a client-facing message and stays visible. The typed error
+    unions (`NotFound`, `NotSignedIn`, ...) are plain return values, never
+    exceptions, so they are untouched either way.
+    """
+    return error.original_error is not None
+
+
+schema = strawberry.Schema(
+    query=Query,
+    mutation=Mutation,
+    # A factory, not an instance: Strawberry builds one MaskErrors per
+    # request from it, as it does for every extension.
+    extensions=[lambda: MaskErrors(should_mask_error=_should_mask_error)],
+)

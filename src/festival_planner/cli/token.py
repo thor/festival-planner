@@ -48,7 +48,7 @@ def issue(
     subject: str | None = typer.Option(
         None, "--subject", help="Token subject (default: the OS user)"
     ),
-    days: int = typer.Option(30, "--days", help="Token lifetime in days"),
+    days: int = typer.Option(30, "--days", min=1, help="Token lifetime in days"),
     directory: Path | None = DIRECTORY_OPTION,
 ) -> None:
     """Print a bearer token for the given subject."""

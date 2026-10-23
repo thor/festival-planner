@@ -68,8 +68,13 @@ class LocalIssuer:
             raise FileExistsError(
                 f"local issuer keys already exist in {self.directory}"
             )
+        existed_before = self.directory.exists()
         self.directory.mkdir(parents=True, exist_ok=True)
-        os.chmod(self.directory, 0o700)
+        if not existed_before:
+            # Only this call's own directory gets locked down. A directory
+            # the user already had (and may share, or have set up with its
+            # own mode) keeps whatever mode it came with.
+            os.chmod(self.directory, 0o700)
         key = Ed25519PrivateKey.generate()
         pem = key.private_bytes(
             encoding=serialization.Encoding.PEM,

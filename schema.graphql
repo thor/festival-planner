@@ -192,7 +192,7 @@ type Festival implements Node {
   timeZone: String!
   series: FestivalSeries
 
-  """By title."""
+  """By title. At most 100 per page; use first/after to page."""
   programmeEntries(
     """Returns the items in the list that come before the specified cursor."""
     before: String = null
@@ -207,7 +207,7 @@ type Festival implements Node {
     last: Int = null
   ): ProgrammeEntryConnection!
 
-  """By start time."""
+  """By start time. At most 100 per page; use first/after to page."""
   screenings(
     includeWithdrawn: Boolean! = false
 
