@@ -175,6 +175,26 @@ mise exec -- festival-planner validate
 Options:
 - `--verbose`, `-v`: Show detailed validation info
 
+## Database
+
+Festivals, Venues, Routes and programmes are stored in a database. By default
+it is a SQLite file at `$XDG_DATA_HOME/festival-planner/festival-planner.db`
+(usually `~/.local/share/festival-planner/festival-planner.db`). Set
+`FESTIVAL_PLANNER_DATABASE_URL` to a SQLAlchemy URL, or pass `--database` (a
+URL or a SQLite file path) to any of these commands, to use another one.
+
+```bash
+# Create the database or apply pending migrations (the ingest commands do this too)
+mise exec -- festival-planner db upgrade
+
+# Ingest Venues and Routes from `cinemas:` in config.yaml
+mise exec -- festival-planner ingest venues
+
+# Ingest a Festival's programme; re-running keeps ids stable and marks
+# screenings that disappeared as withdrawn
+mise exec -- festival-planner ingest programme filmfrasor --year 2025 [--refresh]
+```
+
 ## Standalone Scraper Script
 
 You can also run the scraper independently:
