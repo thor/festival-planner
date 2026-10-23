@@ -166,8 +166,8 @@ def test_an_explicit_null_weight_resets(client: TestClient):
 
 
 def test_an_invalid_item_is_an_invalid_change_set(client: TestClient):
-    date_range = {"setDateRange": {"startDate": "2030-11-09", "endDate": "2030-11-08"}}
-    result = _create(client, [_commit("a"), date_range])
+    no_days = {"setDays": {"days": []}}
+    result = _create(client, [_commit("a"), no_days])
     assert result["__typename"] == "InvalidChangeSet"
     [problem] = result["problems"]
     assert (problem["code"], problem["items"]) == ("INVALID_ITEM", [1])

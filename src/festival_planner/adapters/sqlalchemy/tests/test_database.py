@@ -1,3 +1,4 @@
+import json
 import logging
 
 import pytest
@@ -96,3 +97,45 @@ def test_default_is_in_xdg_data_home(monkeypatch, tmp_path):
     expected = tmp_path / "festival-planner" / "festival-planner.db"
     assert resolve_database_url() == f"sqlite:///{expected}"
     assert expected.parent.is_dir()
+
+
+def test_date_ranges_become_days(tmp_path):
+    engine = create_engine_for(f"sqlite:///{tmp_path / 'old.db'}")
+    try:
+        migrate(engine, "0003")
+        old_range = (
+            '{"kind":"set_date_range","start_date":"2026-11-07","end_date":null}'
+        )
+        with engine.begin() as c:
+            c.execute(
+                text(
+                    "INSERT INTO festival (id, slug, name, start_date, end_date, "
+                    "time_zone) VALUES ('f', 'f-2026', 'F', '2026-11-05', "
+                    "'2026-11-08', 'Europe/Oslo')"
+                )
+            )
+            c.execute(text("INSERT INTO app_user VALUES ('u', 'local', 'me')"))
+            c.execute(
+                text("INSERT INTO planning_inputs VALUES ('u', 'f', :p)"),
+                {"p": '{"buffer_minutes":15,"start_date":null,"end_date":null}'},
+            )
+            c.execute(
+                text(
+                    "INSERT INTO schedule VALUES ('s', 'u', 'f', 1, 0, :cs, "
+                    "'2026-10-23 12:00:00')"
+                ),
+                {"cs": f'{{"items":[{old_range}]}}'},
+            )
+        migrate(engine)
+        with engine.connect() as c:
+            preferences = c.execute(text("SELECT preferences FROM planning_inputs"))
+            change_set = c.execute(text("SELECT change_set FROM schedule"))
+            assert json.loads(preferences.scalar_one()) == {
+                "buffer_minutes": 15,
+                "days": None,
+            }
+            assert json.loads(change_set.scalar_one())["items"] == [
+                {"kind": "set_days", "days": ["2026-11-07", "2026-11-08"]}
+            ]
+    finally:
+        engine.dispose()

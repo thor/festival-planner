@@ -20,7 +20,7 @@ import type {
 } from "@/domain/model"
 import {
   defaultPreferences,
-  inRange,
+  goesOn,
   preferencesAfter,
 } from "@/domain/preferences"
 import type { PlanningPort, SessionPort } from "@/domain/ports"
@@ -133,7 +133,7 @@ function solve(inputs: PlanningInputs) {
   const done = new Set(chosen.map((s) => s.programmeEntryId))
   const open = (s: Screening) =>
     !s.withdrawn &&
-    inRange(dayKey(s.startTime, festival.timeZone), p) &&
+    goesOn(dayKey(s.startTime, festival.timeZone), p) &&
     !inputs.excludedScreenings.includes(s.id) &&
     fits(chosen, s, bufferOf(p))
 

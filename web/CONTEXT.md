@@ -83,7 +83,7 @@ How much a User wants to see a Programme Entry, in four steps: Less, Usual, More
 _Avoid_: Weight, rating, priority, stars
 
 **Days**:
-The Festival Days a User can go, picked as a first and a last. Every day means no date range.
+The Festival Days a User can go: any of them, in one or many runs. Choosing none, or all, means every day.
 _Avoid_: Date range, availability
 
 **Arrive early**:

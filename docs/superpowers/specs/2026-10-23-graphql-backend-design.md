@@ -153,7 +153,8 @@ providers).
 - **Preferences** (first version): per-Programme-Entry and per-Screening
   weights, year weights, Event weight (for Screenings with Events), attend
   Events (separately timed Events block time), general buffer and per-Venue
-  buffer, date range, Transport Mode, Comparisons; curation weight arrives
+  buffer, the Festival Days the User can go (any set; none means every
+  day), Transport Mode, Comparisons; curation weight arrives
   with Curations (step 5). Preferences are a frozen Pydantic value. Likely
   next: actors, genres, daily time window.
 - **Comparison**: "A over B", a change-set item and Preference; one per

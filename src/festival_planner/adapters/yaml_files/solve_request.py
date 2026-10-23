@@ -9,7 +9,7 @@ import itertools
 import zoneinfo
 
 from ...config import Config
-from ...domain.planning import Preferences
+from ...domain.planning import Preferences, days_between
 from ...domain.programme import (
     Event,
     FilmId,
@@ -136,10 +136,18 @@ def _preferences(films: list[Film], config: Config) -> Preferences:
         elif film.title not in title_weights and film.preference_weight != 1.0:
             screening_weights[screening_id(film)] = film.preference_weight
 
+    start, end = config.schedule.start_date, config.schedule.end_date
+    days = None
+    if start or end:
+        # An open end runs to the films' first or last day.
+        dates = [film.start_time.date() for film in films]
+        first = start or (min(dates) if dates else end)
+        last = end or (max(dates) if dates else start)
+        assert first and last
+        days = days_between(first, last)
     return Preferences(
         buffer_minutes=config.schedule.buffer_time_minutes,
-        start_date=config.schedule.start_date,
-        end_date=config.schedule.end_date,
+        days=days,
         programme_entry_weights=title_weights,
         screening_weights=screening_weights,
         year_weights=config.priority.year_weights,

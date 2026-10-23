@@ -48,12 +48,12 @@ class TestCandidates:
         )
         assert candidate_ids(req) == {"a"}
 
-    def test_screenings_outside_date_range_are_dropped(self):
+    def test_screenings_on_days_the_user_cannot_go_are_dropped(self):
         next_day = DAY + datetime.timedelta(days=1)
         req = request(
             screening("a", "14:00", "16:00"),
             screening("b", "14:00", "16:00", day=next_day),
-            preferences=Preferences(start_date=next_day),
+            preferences=Preferences(days=(next_day,)),
         )
         assert candidate_ids(req) == {"b"}
 
@@ -63,7 +63,7 @@ class TestCandidates:
             screening_commitments=frozenset({"a"}),
             excluded_screenings=frozenset({"a"}),
             seen_films=frozenset({"film-a"}),
-            preferences=Preferences(end_date=DAY - datetime.timedelta(days=1)),
+            preferences=Preferences(days=(DAY - datetime.timedelta(days=1),)),
         )
         formulation = formulate(req)
         assert {s.id for s in formulation.candidates} == {"a"}
@@ -104,7 +104,7 @@ class TestStartedScreenings:
             excluded_screenings=frozenset({"a"}),
             excluded_programme_entries=frozenset({"a"}),
             seen_films=frozenset({"film-a"}),
-            preferences=Preferences(start_date=next_day),
+            preferences=Preferences(days=(next_day,)),
         )
         formulation = formulate(req)
         assert {s.id for s in formulation.candidates} == {"a"}
@@ -304,7 +304,7 @@ class TestUnknownCommitments:
         assert not formulation.unsatisfiable
 
 
-def test_date_range_is_applied_to_festival_local_dates():
+def test_days_are_festival_local_dates():
     # Stored in UTC, 00:30 on 9 Nov in Oslo is still 8 Nov.
     oslo = screening("late", "00:30", "02:00", day=datetime.date(2025, 11, 9))
     late = oslo.model_copy(
@@ -315,13 +315,11 @@ def test_date_range_is_applied_to_festival_local_dates():
     )
     on_ninth = Preferences(
         buffer_minutes=0,
-        start_date=datetime.date(2025, 11, 9),
-        end_date=datetime.date(2025, 11, 9),
+        days=(datetime.date(2025, 11, 9),),
     )
     on_eighth = Preferences(
         buffer_minutes=0,
-        start_date=datetime.date(2025, 11, 8),
-        end_date=datetime.date(2025, 11, 8),
+        days=(datetime.date(2025, 11, 8),),
     )
     assert [
         s.id for s in formulate(request(late, preferences=on_ninth)).candidates

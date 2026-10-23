@@ -295,26 +295,40 @@ export interface StepperVM {
   onReset?: () => void
 }
 
-export interface RangeDayVM {
+/** A Festival Day in the Days strip. */
+export interface DayCellVM {
   key: string
   number: string
   weekday: string
-  inRange: boolean
-  /** Tapped first; the next tap sets the other end. */
-  anchor: boolean
-  onPick: () => void
+  /** One of the days the User chose. */
+  chosen: boolean
+  /** Chosen, and so is the next day: the run carries on. */
+  joinsNext: boolean
+}
+
+/**
+ * The days a User can go. Press a day and sweep across others to paint a
+ * run; a press on a chosen day takes days away instead.
+ */
+export interface DaysVM {
+  cells: DayCellVM[]
+  /** No choice: every day. */
+  every: boolean
+  /** "Fri 30 to Sun 1 and Wed 4", or "Every day". */
+  summary: string
+  /** "6 of 11 days"; null for every day. */
+  count: string | null
+  pending: boolean
+  hint: string
+  /** `extend` paints from the day touched last, as Shift does. */
+  onPress: (day: string, extend: boolean) => void
+  onSweep: (day: string) => void
+  onRelease: () => void
+  onEveryDay: () => void
 }
 
 export interface PreferencesVM {
-  days: RangeDayVM[]
-  /** "Fri 30 to Mon 2", or "Every day". */
-  range: string
-  /** Some days are left out. */
-  limited: boolean
-  rangePending: boolean
-  /** What the next tap on a day does. */
-  rangeHint: string
-  onEveryDay: () => void
+  days: DaysVM
   buffer: StepperVM
   venues: StepperVM[]
   events: InterestVM

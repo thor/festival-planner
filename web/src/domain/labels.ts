@@ -8,7 +8,9 @@ import {
   entryScale,
   interestOf,
   offsetScale,
+  runsOf,
   type Interest,
+  type Run,
   type Scale,
 } from "./preferences"
 import type { LetGoReason } from "./tickets"
@@ -72,15 +74,15 @@ function step(weight: number | null, scale: Scale): string {
   ].toLowerCase()
 }
 
-/** "Fri 30 to Mon 2", or "Every day" when there are no bounds. */
-export function dayRange(start: string | null, end: string | null): string {
-  if (start && end)
-    return start === end
-      ? `${shortDay(start)} only`
-      : `${shortDay(start)} to ${shortDay(end)}`
-  if (start) return `From ${shortDay(start)}`
-  if (end) return `Until ${shortDay(end)}`
-  return "Every day"
+/** "Fri 30 to Sun 1, Wed 4 and Sat 7"; "Every day" when there is no choice. */
+export function daysWord(runs: Run[]): string {
+  if (runs.length === 0) return "Every day"
+  const words = runs.map(({ first, last }) =>
+    first === last ? shortDay(first) : `${shortDay(first)} to ${shortDay(last)}`
+  )
+  return words.length === 1
+    ? words[0]
+    : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`
 }
 
 /** What an item is about: a title, a time, or a value. */
@@ -120,8 +122,8 @@ export function subjectOf(item: ChangeSetItem, lookup: Lookup): string {
       }
       return `${item.minutes ?? defaultPreferences.bufferMinutes} min`
     }
-    case "setDateRange":
-      return dayRange(item.startDate, item.endDate)
+    case "setDays":
+      return daysWord(runsOf(item.days ?? []))
     case "setAttendEvents":
       return item.attend ? "Stay for events" : "Skip separate events"
     case "setTransportMode":

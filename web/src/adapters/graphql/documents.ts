@@ -139,9 +139,8 @@ export const ChangeSetFields = graphql(`
         id
       }
     }
-    ... on SetDateRange {
-      startDate
-      endDate
+    ... on SetDays {
+      days
     }
     ... on SetEventWeight {
       weight
@@ -167,8 +166,7 @@ export const PreferencesFields = graphql(`
         id
       }
     }
-    startDate
-    endDate
+    days
     programmeEntryWeights {
       programmeEntry {
         id

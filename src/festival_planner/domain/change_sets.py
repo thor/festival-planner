@@ -7,9 +7,9 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
-from .planning import Comparison, PlanningInputs, Preferences
+from .planning import Comparison, PlanningInputs, Preferences, days_in_order
 from .programme import (
     ProgrammeEntry,
     ProgrammeEntryId,
@@ -93,16 +93,18 @@ class SetBuffer(Value):
     minutes: int | None = Field(default=None, ge=0)
 
 
-class SetDateRange(Value):
-    kind: Literal["set_date_range"] = "set_date_range"
-    start_date: datetime.date | None = None
-    end_date: datetime.date | None = None
+class SetDays(Value):
+    """The Festival Days the User can go; None means every day."""
 
-    @model_validator(mode="after")
-    def _ends_after_it_starts(self) -> Self:
-        if self.start_date and self.end_date and self.end_date < self.start_date:
-            raise ValueError("A date range cannot end before it starts")
-        return self
+    kind: Literal["set_days"] = "set_days"
+    days: tuple[datetime.date, ...] | None = None
+
+    @field_validator("days")
+    @classmethod
+    def _days_in_order(
+        cls, days: tuple[datetime.date, ...] | None
+    ) -> tuple[datetime.date, ...] | None:
+        return None if days is None else days_in_order(days)
 
 
 class SetEventWeight(Value):
@@ -152,7 +154,7 @@ ChangeSetItem = Annotated[
     | SetScreeningWeight
     | SetYearWeight
     | SetBuffer
-    | SetDateRange
+    | SetDays
     | SetEventWeight
     | SetAttendEvents
     | SetTransportMode
@@ -310,8 +312,8 @@ def _set(preferences: Preferences, item: ChangeSetItem) -> Preferences:
             changes = {
                 "venue_buffer_minutes": _put(p.venue_buffer_minutes, venue_id, m)
             }
-        case SetDateRange(start_date=start, end_date=end):
-            changes = {"start_date": start, "end_date": end}
+        case SetDays(days=days):
+            changes = {"days": days}
         case SetEventWeight(weight=w):
             changes = {"event_weight": _default("event_weight") if w is None else w}
         case SetAttendEvents(attend=a):

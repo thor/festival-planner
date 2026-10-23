@@ -225,7 +225,7 @@ export function verbOf(item: ChangeSetItem): ItemVerb {
       return "interest"
     case "setBuffer":
       return "buffer"
-    case "setDateRange":
+    case "setDays":
       return "days"
     case "setAttendEvents":
       return "events"

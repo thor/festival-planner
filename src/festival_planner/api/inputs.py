@@ -73,10 +73,12 @@ class SetBufferInput:
     minutes: int | None = strawberry.field(default=strawberry.UNSET, description=RESET)
 
 
-@strawberry.input
-class SetDateRangeInput:
-    start_date: datetime.date | None = strawberry.UNSET
-    end_date: datetime.date | None = strawberry.UNSET
+@strawberry.input(description="The Festival Days the User can go.")
+class SetDaysInput:
+    days: list[datetime.date] | None = strawberry.field(
+        default=strawberry.UNSET,
+        description="At least one, in the Festival's time zone. " + RESET,
+    )
 
 
 @strawberry.input
@@ -126,7 +128,7 @@ class ChangeSetItemInput:
     set_screening_weight: SetScreeningWeightInput | None = strawberry.UNSET
     set_year_weight: SetYearWeightInput | None = strawberry.UNSET
     set_buffer: SetBufferInput | None = strawberry.UNSET
-    set_date_range: SetDateRangeInput | None = strawberry.UNSET
+    set_days: SetDaysInput | None = strawberry.UNSET
     set_event_weight: SetEventWeightInput | None = strawberry.UNSET
     set_attend_events: SetAttendEventsInput | None = strawberry.UNSET
     set_transport_mode: SetTransportModeInput | None = strawberry.UNSET
@@ -188,11 +190,9 @@ def _fields(value: Any, ids: _Ids) -> dict[str, Any]:
                 else ids("venueId", venue_id, "Venue"),
                 "minutes": _or_none(value.minutes),
             }
-        case SetDateRangeInput():
-            return {
-                "start_date": _or_none(value.start_date),
-                "end_date": _or_none(value.end_date),
-            }
+        case SetDaysInput():
+            days = _or_none(value.days)
+            return {"days": None if days is None else tuple(days)}
         case SetEventWeightInput() | SetComparisonWeightInput():
             return {"weight": _or_none(value.weight)}
         case SetAttendEventsInput():
@@ -223,7 +223,7 @@ _ITEMS: dict[str, type[cs.ChangeSetItem]] = {
         cs.SetScreeningWeight,
         cs.SetYearWeight,
         cs.SetBuffer,
-        cs.SetDateRange,
+        cs.SetDays,
         cs.SetEventWeight,
         cs.SetAttendEvents,
         cs.SetTransportMode,

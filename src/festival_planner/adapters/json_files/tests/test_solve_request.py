@@ -44,8 +44,7 @@ def test_round_trips_every_field(tmp_path):
         preferences=Preferences(
             buffer_minutes=10,
             venue_buffer_minutes={VenueId("A"): 20},
-            start_date=DAY,
-            end_date=DAY + datetime.timedelta(days=2),
+            days=(DAY, DAY + datetime.timedelta(days=2)),
             programme_entry_weights={ProgrammeEntryId("a"): 2.0},
             screening_weights={ScreeningId("b"): 0.5},
             year_weights={1960: 0.3},

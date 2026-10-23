@@ -119,12 +119,8 @@ export function itemOf(i: ChangeSetData): ChangeSetItem {
         venueId: (i.venue?.id ?? null) as VenueId | null,
         minutes: i.minutes,
       }
-    case "SetDateRange":
-      return {
-        kind: "setDateRange",
-        startDate: i.startDate,
-        endDate: i.endDate,
-      }
+    case "SetDays":
+      return { kind: "setDays", days: i.days }
     case "SetEventWeight":
       return { kind: "setEventWeight", weight: i.weight }
     case "SetAttendEvents":
@@ -191,10 +187,8 @@ export function itemInputOf(item: ChangeSetItem): ItemInput {
       return { setYearWeight: { year: item.year, weight: item.weight } }
     case "setBuffer":
       return { setBuffer: { venueId: item.venueId, minutes: item.minutes } }
-    case "setDateRange":
-      return {
-        setDateRange: { startDate: item.startDate, endDate: item.endDate },
-      }
+    case "setDays":
+      return { setDays: { days: item.days && [...item.days] } }
     case "setEventWeight":
       return { setEventWeight: { weight: item.weight } }
     case "setAttendEvents":
@@ -265,8 +259,7 @@ export function preferencesOf(p: PreferencesData): Preferences {
       (b) => b.venue.id as VenueId,
       (b) => b.minutes
     ),
-    startDate: p.startDate,
-    endDate: p.endDate,
+    days: p.days,
     entryWeights: byKey(
       p.programmeEntryWeights,
       (w) => w.programmeEntry.id as ProgrammeEntryId,

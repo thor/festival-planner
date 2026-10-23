@@ -213,10 +213,11 @@ class SetBuffer:
         return None if self.venue_id is None else await _venue(info, self.venue_id)
 
 
-@strawberry.type
-class SetDateRange:
-    start_date: datetime.date | None
-    end_date: datetime.date | None
+@strawberry.type(description="The Festival Days the User can go.")
+class SetDays:
+    days: list[datetime.date] | None = strawberry.field(
+        description="In order. " + RESET
+    )
 
 
 @strawberry.type
@@ -257,7 +258,7 @@ ChangeSetItem = Annotated[
     | SetScreeningWeight
     | SetYearWeight
     | SetBuffer
-    | SetDateRange
+    | SetDays
     | SetEventWeight
     | SetAttendEvents
     | SetTransportMode
@@ -299,8 +300,8 @@ def change_set_item(item: cs.ChangeSetItem) -> ChangeSetItem:
             return SetYearWeight(year=item.year, weight=item.weight)
         case cs.SetBuffer():
             return SetBuffer(venue_id=item.venue_id, minutes=item.minutes)
-        case cs.SetDateRange():
-            return SetDateRange(start_date=item.start_date, end_date=item.end_date)
+        case cs.SetDays():
+            return SetDays(days=None if item.days is None else list(item.days))
         case cs.SetEventWeight():
             return SetEventWeight(weight=item.weight)
         case cs.SetAttendEvents():
@@ -517,8 +518,9 @@ class Preferences:
         description="Minutes to arrive before a Screening, unless its Venue has its own."
     )
     venue_buffers: list[VenueBuffer] = strawberry.field(description="By Venue id.")
-    start_date: datetime.date | None
-    end_date: datetime.date | None
+    days: list[datetime.date] | None = strawberry.field(
+        description="The Festival Days the User can go, in order; null means every day."
+    )
     programme_entry_weights: list[ProgrammeEntryWeight] = strawberry.field(
         description="By Programme Entry id."
     )
@@ -542,8 +544,7 @@ class Preferences:
                 VenueBuffer(venue_id=k, minutes=v)
                 for k, v in sorted(value.venue_buffer_minutes.items())
             ],
-            start_date=value.start_date,
-            end_date=value.end_date,
+            days=None if value.days is None else list(value.days),
             programme_entry_weights=[
                 ProgrammeEntryWeight(programme_entry_id=k, weight=v)
                 for k, v in sorted(value.programme_entry_weights.items())

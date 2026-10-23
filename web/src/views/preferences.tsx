@@ -2,7 +2,7 @@ import { CheckIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react"
 import type { ReactNode } from "react"
 import { Link } from "react-router"
 
-import type { PreferencesVM, RangeDayVM, StepperVM } from "@/app/view-models"
+import type { DaysVM, PreferencesVM, StepperVM } from "@/app/view-models"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -18,21 +18,32 @@ export function PreferencesView({ vm }: { vm: PreferencesVM }) {
       <Setting
         title="Days"
         note={
-          <span className={cn(vm.limited && "text-stamp")}>{vm.range}</span>
+          <span className={cn(!vm.days.every && "text-stamp")}>
+            {vm.days.summary}
+          </span>
         }
-        pending={vm.rangePending}
+        pending={vm.days.pending}
       >
-        <DayStrip days={vm.days} limited={vm.limited} />
-        <div className="mt-3 flex min-h-10 items-center justify-between gap-4">
-          <p className="text-grain">{vm.rangeHint}</p>
-          {vm.limited && (
-            <Button
-              variant="ghost"
-              className="h-10 px-3 text-base"
-              onClick={vm.onEveryDay}
-            >
-              Every day
-            </Button>
+        <DayStrip days={vm.days} />
+        <div className="mt-3 flex min-h-10 flex-wrap items-center justify-between gap-x-4">
+          <p id="days-hint" className="text-grain">
+            {vm.days.hint}
+            <span className="sr-only">
+              {" "}
+              Hold Shift to choose every day between.
+            </span>
+          </p>
+          {!vm.days.every && (
+            <span className="flex items-center gap-2">
+              <span className="text-grain">{vm.days.count}</span>
+              <Button
+                variant="ghost"
+                className="h-10 px-3 text-base"
+                onClick={vm.days.onEveryDay}
+              >
+                Every day
+              </Button>
+            </span>
           )}
         </div>
       </Setting>
@@ -139,33 +150,66 @@ function Setting({
   )
 }
 
+/** The day under a pointer, wherever it has moved to. */
+function dayAt(x: number, y: number): string | null {
+  const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-day]")
+  return el?.dataset.day ?? null
+}
+
 /**
- * The Festival Days as one strip. Days you can go take the stamp once you
- * have chosen; the rest are struck, like anything else left out.
+ * The Festival Days as a strip that wraps on narrow screens. Press a day and
+ * sweep across others to paint a run. Chosen days take the stamp and run
+ * together like a strip of film; the rest are struck, like anything else
+ * left out.
  */
-function DayStrip({ days, limited }: { days: RangeDayVM[]; limited: boolean }) {
+function DayStrip({ days }: { days: DaysVM }) {
   return (
-    <div className="flex overflow-x-auto border border-ink">
-      {days.map((d) => {
-        const own = limited && d.inRange
+    <div
+      role="group"
+      aria-label="Festival Days"
+      aria-describedby="days-hint"
+      className="grid touch-pan-y grid-cols-[repeat(auto-fit,minmax(3.5rem,1fr))] border-t border-l border-ink select-none"
+      onPointerMove={(e) => {
+        if (e.buttons === 0) return days.onRelease()
+        const day = dayAt(e.clientX, e.clientY)
+        if (day) days.onSweep(day)
+      }}
+      onPointerUp={days.onRelease}
+      onPointerCancel={days.onRelease}
+      onLostPointerCapture={days.onRelease}
+    >
+      {days.cells.map((d) => {
+        const own = !days.every && d.chosen
         return (
           <button
             key={d.key}
             type="button"
-            onClick={d.onPick}
-            aria-pressed={d.inRange}
+            data-day={d.key}
+            aria-pressed={own}
             aria-label={`${d.weekday} ${d.number}`}
+            onPointerDown={(e) => {
+              if (e.button !== 0) return
+              // Keep the moves coming here, even off the strip.
+              e.currentTarget.parentElement?.setPointerCapture(e.pointerId)
+              days.onPress(d.key, e.shiftKey)
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return
+              e.preventDefault()
+              days.onPress(d.key, e.shiftKey)
+              days.onRelease()
+            }}
             className={cn(
-              "flex min-w-12 flex-1 flex-col items-center border-l border-ink py-3 first:border-l-0 hover:bg-haze focus-visible:relative focus-visible:-outline-offset-4",
+              "flex flex-col items-center border-r border-b border-ink py-3 hover:bg-haze focus-visible:relative focus-visible:z-10 focus-visible:-outline-offset-4",
               own && "bg-stamp text-stamp-ink hover:bg-stamp/85",
-              !d.inRange && "text-grain",
-              d.anchor && "shadow-[inset_0_0_0_3px_var(--screen)]"
+              own && d.joinsNext && "border-r-stamp",
+              !days.every && !d.chosen && "text-grain"
             )}
           >
             <span
               className={cn(
                 "text-xl sm:text-2xl",
-                !d.inRange && "line-through"
+                !days.every && !d.chosen && "line-through"
               )}
             >
               {d.number}

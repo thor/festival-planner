@@ -4,10 +4,10 @@
 
 import type { ChangeSet } from "./change-set"
 import { sameValue } from "./equal"
+import { addDays } from "./time"
 import type {
   ChangeSetItem,
   DayKey,
-  Festival,
   PreferenceItem,
   Preferences,
   VenueId,
@@ -16,8 +16,7 @@ import type {
 export const defaultPreferences: Preferences = {
   bufferMinutes: 15,
   venueBuffers: {},
-  startDate: null,
-  endDate: null,
+  days: null,
   entryWeights: {},
   screeningWeights: {},
   yearWeights: {},
@@ -33,7 +32,7 @@ const preferenceKinds = new Set<ChangeSetItem["kind"]>([
   "setScreeningWeight",
   "setYearWeight",
   "setBuffer",
-  "setDateRange",
+  "setDays",
   "setEventWeight",
   "setAttendEvents",
   "setTransportMode",
@@ -99,8 +98,8 @@ function applyPreference(p: Preferences, item: PreferenceItem): Preferences {
             ...p,
             venueBuffers: put(p.venueBuffers, item.venueId, item.minutes),
           }
-    case "setDateRange":
-      return { ...p, startDate: item.startDate, endDate: item.endDate }
+    case "setDays":
+      return { ...p, days: item.days }
     case "setEventWeight":
       return { ...p, eventWeight: item.weight ?? d.eventWeight }
     case "setAttendEvents":
@@ -151,22 +150,56 @@ export function setPreference(
   return set.map((i, n) => (n === at ? item : i))
 }
 
+// --- Days: the Festival Days a User can go -------------------------------
+
 /**
- * The days from `a` to `b`, either way round. Every Festival Day is no range
- * at all, so it matches the default.
+ * Days as a setting: in order, once each. No days, or every one of the
+ * Festival's, is no choice at all: every day.
  */
-export function dateRangeItem(
+export function daysItem(
+  days: Iterable<DayKey>,
+  festivalDays: readonly DayKey[]
+): Extract<PreferenceItem, { kind: "setDays" }> {
+  const chosen = festivalDays.filter((d) => new Set(days).has(d))
+  const every = chosen.length === 0 || chosen.length === festivalDays.length
+  return { kind: "setDays", days: every ? null : chosen }
+}
+
+/**
+ * `base` with the days from `a` to `b` turned on or off. From every day,
+ * turning days on starts a choice with only those.
+ */
+export function paintDays(
+  base: readonly DayKey[] | null,
   a: DayKey,
   b: DayKey,
-  festival: Pick<Festival, "startDate" | "endDate">
-): PreferenceItem {
-  const [start, end] = a <= b ? [a, b] : [b, a]
-  const whole = start <= festival.startDate && end >= festival.endDate
-  return {
-    kind: "setDateRange",
-    startDate: whole ? null : start,
-    endDate: whole ? null : end,
+  on: boolean,
+  festivalDays: readonly DayKey[]
+): Extract<PreferenceItem, { kind: "setDays" }> {
+  const [from, to] = a <= b ? [a, b] : [b, a]
+  const swept = festivalDays.filter((d) => d >= from && d <= to)
+  const start = new Set(base ?? (on ? [] : festivalDays))
+  for (const d of swept) {
+    if (on) start.add(d)
+    else start.delete(d)
   }
+  return daysItem(start, festivalDays)
+}
+
+export interface Run {
+  first: DayKey
+  last: DayKey
+}
+
+/** Unbroken runs of days, in order: Festival Days follow one another. */
+export function runsOf(days: readonly DayKey[]): Run[] {
+  const runs: Run[] = []
+  for (const d of [...new Set(days)].sort()) {
+    const open = runs.at(-1)
+    if (open && addDays(open.last, 1) === d) open.last = d
+    else runs.push({ first: d, last: d })
+  }
+  return runs
 }
 
 /**
@@ -182,11 +215,9 @@ export function bufferItem(
   return { kind: "setBuffer", venueId, minutes: follows ? null : minutes }
 }
 
-/** Whether `day` is inside the preferred days. */
-export function inRange(day: DayKey, p: Preferences): boolean {
-  return (
-    (!p.startDate || day >= p.startDate) && (!p.endDate || day <= p.endDate)
-  )
+/** Whether the User can go on `day`. */
+export function goesOn(day: DayKey, p: Preferences): boolean {
+  return p.days === null || p.days.includes(day)
 }
 
 /** Whether the pending Change Set changes this setting. */

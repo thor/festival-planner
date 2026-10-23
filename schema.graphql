@@ -19,7 +19,7 @@ type AddScreeningCommitment {
 }
 
 """One change a Change Set proposes."""
-union ChangeSetItem = AddScreeningCommitment | ReleaseScreeningCommitment | AddFilmCommitment | ReleaseFilmCommitment | AddExcludedScreening | RemoveExcludedScreening | AddExcludedProgrammeEntry | RemoveExcludedProgrammeEntry | SetProgrammeEntryWeight | SetScreeningWeight | SetYearWeight | SetBuffer | SetDateRange | SetEventWeight | SetAttendEvents | SetTransportMode | SetComparisonWeight | RecordComparison
+union ChangeSetItem = AddScreeningCommitment | ReleaseScreeningCommitment | AddFilmCommitment | ReleaseFilmCommitment | AddExcludedScreening | RemoveExcludedScreening | AddExcludedProgrammeEntry | RemoveExcludedProgrammeEntry | SetProgrammeEntryWeight | SetScreeningWeight | SetYearWeight | SetBuffer | SetDays | SetEventWeight | SetAttendEvents | SetTransportMode | SetComparisonWeight | RecordComparison
 
 """One change a Change Set proposes: exactly one field."""
 input ChangeSetItemInput @oneOf {
@@ -35,7 +35,7 @@ input ChangeSetItemInput @oneOf {
   setScreeningWeight: SetScreeningWeightInput
   setYearWeight: SetYearWeightInput
   setBuffer: SetBufferInput
-  setDateRange: SetDateRangeInput
+  setDays: SetDaysInput
   setEventWeight: SetEventWeightInput
   setAttendEvents: SetAttendEventsInput
   setTransportMode: SetTransportModeInput
@@ -399,8 +399,9 @@ type Preferences {
 
   """By Venue id."""
   venueBuffers: [VenueBuffer!]!
-  startDate: Date
-  endDate: Date
+
+  """The Festival Days the User can go, in order; null means every day."""
+  days: [Date!]
 
   """By Programme Entry id."""
   programmeEntryWeights: [ProgrammeEntryWeight!]!
@@ -670,14 +671,18 @@ input SetComparisonWeightInput {
   weight: Float
 }
 
-type SetDateRange {
-  startDate: Date
-  endDate: Date
+"""The Festival Days the User can go."""
+type SetDays {
+  """In order. Null resets the setting to its default."""
+  days: [Date!]
 }
 
-input SetDateRangeInput {
-  startDate: Date
-  endDate: Date
+"""The Festival Days the User can go."""
+input SetDaysInput {
+  """
+  At least one, in the Festival's time zone. Null or left out resets the setting to its default.
+  """
+  days: [Date!]
 }
 
 type SetEventWeight {

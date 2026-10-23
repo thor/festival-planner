@@ -1,7 +1,7 @@
 """A User's planning inputs: Preferences, Comparisons, commitments and Tickets."""
 
 import datetime
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Self
 
 from pydantic import Field, field_validator, model_validator
@@ -28,13 +28,28 @@ class Comparison(Value):
         return frozenset((self.preferred, self.other))
 
 
+def days_in_order(days: Iterable[datetime.date]) -> tuple[datetime.date, ...]:
+    """`days` sorted, once each; at least one, as no days at all means nothing."""
+    ordered = tuple(sorted(set(days)))
+    if not ordered:
+        raise ValueError("Pick at least one day, or none to mean every day")
+    return ordered
+
+
+def days_between(start: datetime.date, end: datetime.date) -> tuple[datetime.date, ...]:
+    """Every day from `start` to `end`, both included."""
+    return tuple(
+        start + datetime.timedelta(days=n) for n in range((end - start).days + 1)
+    )
+
+
 class Preferences(Value):
     """A User's settings that shape their Schedules for a Festival."""
 
     buffer_minutes: int = 15
     venue_buffer_minutes: Mapping[VenueId, int] = Field(default_factory=dict)
-    start_date: datetime.date | None = None
-    end_date: datetime.date | None = None
+    days: tuple[datetime.date, ...] | None = None
+    """The Festival Days the User can go, in order; None means every day."""
     programme_entry_weights: Mapping[ProgrammeEntryId, float] = Field(
         default_factory=dict
     )
@@ -46,6 +61,13 @@ class Preferences(Value):
     comparison_weight: float = Field(default=0.5, ge=0)
     """How strongly Comparisons shift Programme Entry weights."""
     comparisons: tuple[Comparison, ...] = ()
+
+    @field_validator("days")
+    @classmethod
+    def _days_in_order(
+        cls, days: tuple[datetime.date, ...] | None
+    ) -> tuple[datetime.date, ...] | None:
+        return None if days is None else days_in_order(days)
 
     @field_validator("comparisons")
     @classmethod
@@ -64,10 +86,8 @@ class Preferences(Value):
         return self.venue_buffer_minutes.get(venue_id, self.buffer_minutes)
 
     def covers(self, day: datetime.date) -> bool:
-        """Whether `day` falls inside the preferred date range."""
-        if self.start_date is not None and day < self.start_date:
-            return False
-        return self.end_date is None or day <= self.end_date
+        """Whether `day` is one of the days the User can go."""
+        return self.days is None or day in self.days
 
 
 class PlanningInputs(Value):

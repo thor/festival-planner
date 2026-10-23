@@ -15,7 +15,7 @@ from festival_planner.domain.change_sets import (
     ReleaseScreeningCommitment,
     RemoveExcludedScreening,
     SetBuffer,
-    SetDateRange,
+    SetDays,
     SetProgrammeEntryWeight,
     SetYearWeight,
     apply,
@@ -178,7 +178,7 @@ def test_apply_changes_commitments_excluded_and_preferences():
             ReleaseScreeningCommitment(screening_id=S1),
             AddExcludedScreening(screening_id=S2),
             SetProgrammeEntryWeight(programme_entry_id=E1, weight=2.0),
-            SetDateRange(start_date=datetime.date(2025, 11, 8), end_date=None),
+            SetDays(days=(datetime.date(2025, 11, 8),)),
             RecordComparison(preferred=E1, other=E2),
         ),
         base,
@@ -186,7 +186,7 @@ def test_apply_changes_commitments_excluded_and_preferences():
     assert result.screening_commitments == frozenset()
     assert result.excluded_screenings == frozenset({S2})
     assert result.preferences.programme_entry_weights == {E1: 2.0}
-    assert result.preferences.start_date == datetime.date(2025, 11, 8)
+    assert result.preferences.days == (datetime.date(2025, 11, 8),)
     assert result.preferences.comparisons == (Comparison(preferred=E1, other=E2),)
 
 

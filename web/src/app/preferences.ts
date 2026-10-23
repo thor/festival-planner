@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 
-import { dayRange, interestWord, plural } from "@/domain/labels"
+import { daysWord, interestWord, plural } from "@/domain/labels"
 import type {
   DayKey,
   Festival,
@@ -15,15 +15,16 @@ import type {
 import {
   bufferItem,
   comparisonScale,
-  dateRangeItem,
+  daysItem,
   defaultPreferences,
   entryScale,
-  inRange,
   interestOf,
   interests,
   isPending,
   offsetScale,
+  paintDays,
   preferencesAfter,
+  runsOf,
   setPreference,
   valueOf,
   type Interest,
@@ -33,7 +34,13 @@ import { dayNumber, festivalDays, weekday } from "@/domain/time"
 
 import { usePendingChangeSet } from "./change-set-store"
 import { useFestival, usePlanning, useProgramme } from "./queries"
-import type { InterestVM, Load, PreferencesVM, StepperVM } from "./view-models"
+import type {
+  DaysVM,
+  InterestVM,
+  Load,
+  PreferencesVM,
+  StepperVM,
+} from "./view-models"
 
 const STEP = 5
 const MOST_MINUTES = 90
@@ -97,13 +104,83 @@ export function entryInterestWord(entry: ProgrammeEntry, prefs: Prefs) {
   return i === "usual" ? null : interestWord[i]
 }
 
+/** A sweep across the Days strip: where it began, and what it paints. */
+interface Sweep {
+  origin: DayKey
+  on: boolean
+  /** The days as they were when the press began. */
+  base: readonly DayKey[] | null
+  at: DayKey
+}
+
+/**
+ * The Days strip. A press paints from its day, and a sweep stretches that
+ * paint like a rubber band over the days as they were when it began.
+ */
+function useDays(festival: Festival | null | undefined, prefs: Prefs) {
+  const [sweep, setSweep] = useState<Sweep | null>(null)
+  // The day touched last and what it got, for Shift to paint from.
+  const [last, setLast] = useState<{ day: DayKey; on: boolean } | null>(null)
+
+  return (put: (item: PreferenceItem) => void): DaysVM => {
+    const all = festival ? festivalDays(festival) : []
+    const days = prefs.effective.days
+    const chosen = new Set(days ?? [])
+    const paint = (s: Sweep) => {
+      put(paintDays(s.base, s.origin, s.at, s.on, all))
+      setLast({ day: s.at, on: s.on })
+    }
+    const every = days === null
+    return {
+      cells: all.map((d, i) => ({
+        key: d,
+        number: dayNumber(d),
+        weekday: weekday(d),
+        chosen: chosen.has(d),
+        joinsNext: chosen.has(d) && chosen.has(all[i + 1]),
+      })),
+      every,
+      summary: daysWord(runsOf(days ?? [])),
+      count: every
+        ? null
+        : `${chosen.size} of ${plural(all.length, "day", "days")}`,
+      pending: prefs.pending(daysItem([], all)),
+      hint: every
+        ? "Tap the days you can go, or sweep across several."
+        : "Tap or sweep to add days, or to take them away.",
+      onPress: (day, extend) => {
+        const from = extend && last ? last : null
+        const s: Sweep = {
+          origin: from?.day ?? day,
+          on: from?.on ?? !chosen.has(day),
+          base: days,
+          at: day,
+        }
+        setSweep(s)
+        paint(s)
+      },
+      onSweep: (day) => {
+        if (!sweep || sweep.at === day) return
+        const s = { ...sweep, at: day }
+        setSweep(s)
+        paint(s)
+      },
+      onRelease: () => setSweep(null),
+      onEveryDay: () => {
+        setSweep(null)
+        setLast(null)
+        put(daysItem([], all))
+      },
+    }
+  }
+}
+
 export function usePreferencesPage(slug: string): Load<PreferencesVM> {
   const festival = useFestival(slug)
   const programme = useProgramme(festival.data)
   const planning = usePlanning(festival.data)
   const prefs = usePreferences(festival.data, planning.data)
-  // The first day tapped, waiting for the last.
-  const [anchor, setAnchor] = useState<DayKey | null>(null)
+  const daysOf = useDays(festival.data, prefs)
 
   if (festival.isPending || programme.isPending || planning.isPending)
     return { state: "loading" }
@@ -113,18 +190,6 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
   const f = festival.data
   const p = prefs.effective
   const entries = programme.data ?? []
-
-  const range = dateRangeItem(f.startDate, f.endDate, f)
-  const limited = !!(p.startDate || p.endDate)
-  const pickDay = (day: DayKey) => {
-    if (anchor === null) {
-      setAnchor(day)
-      put(dateRangeItem(day, day, f))
-    } else {
-      setAnchor(null)
-      put(dateRangeItem(anchor, day, f))
-    }
-  }
 
   const buffer = (
     label: string,
@@ -165,24 +230,7 @@ export function usePreferencesPage(slug: string): Load<PreferencesVM> {
   return {
     state: "ready",
     value: {
-      days: festivalDays(f).map((d) => ({
-        key: d,
-        number: dayNumber(d),
-        weekday: weekday(d),
-        inRange: inRange(d, p),
-        anchor: d === anchor,
-        onPick: () => pickDay(d),
-      })),
-      range: dayRange(p.startDate, p.endDate),
-      limited,
-      rangePending: prefs.pending(range),
-      rangeHint: anchor
-        ? "Now tap the last day."
-        : "Tap the first day, then the last.",
-      onEveryDay: () => {
-        setAnchor(null)
-        put(range)
-      },
+      days: daysOf(put),
       buffer: buffer("Everywhere", null, p.bufferMinutes),
       venues: venues.map((v) => buffer(v.name, v.id, p.venueBuffers[v.id])),
       events: interestModel(

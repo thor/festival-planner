@@ -8,6 +8,7 @@ from festival_planner.domain.planning import (
     PlanningInputs,
     Preferences,
     Ticket,
+    days_between,
 )
 from festival_planner.domain.programme import ProgrammeEntryId, ScreeningId, VenueId
 
@@ -23,17 +24,25 @@ def test_venue_buffer_overrides_general_buffer():
     assert preferences.buffer_for(VenueId("B")) == 15
 
 
-def test_date_range_is_inclusive():
-    preferences = Preferences(start_date=DAY, end_date=DAY)
-    assert preferences.covers(DAY)
-    assert not preferences.covers(DAY - ONE_DAY)
+def test_days_may_have_gaps():
+    preferences = Preferences(days=(DAY + 2 * ONE_DAY, DAY))
+    assert preferences.days == (DAY, DAY + 2 * ONE_DAY)
+    assert preferences.covers(DAY) and preferences.covers(DAY + 2 * ONE_DAY)
     assert not preferences.covers(DAY + ONE_DAY)
 
 
-def test_date_range_may_be_open_ended():
-    assert Preferences(start_date=DAY).covers(DAY + 365 * ONE_DAY)
-    assert Preferences(end_date=DAY).covers(DAY - 365 * ONE_DAY)
-    assert Preferences().covers(DAY)
+def test_no_days_means_every_day():
+    assert Preferences().covers(DAY + 365 * ONE_DAY)
+    with pytest.raises(ValidationError):
+        Preferences(days=())
+
+
+def test_days_between_includes_both_ends():
+    assert days_between(DAY, DAY + 2 * ONE_DAY) == (
+        DAY,
+        DAY + ONE_DAY,
+        DAY + 2 * ONE_DAY,
+    )
 
 
 def test_preferences_do_not_alias_the_mappings_they_are_given():

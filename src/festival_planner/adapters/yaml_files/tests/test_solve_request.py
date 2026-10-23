@@ -91,7 +91,7 @@ def test_schedule_and_priority_config_become_preferences():
     )
     preferences = build_solve_request([], config).preferences
     assert preferences.buffer_minutes == 20
-    assert preferences.start_date == DAY
+    assert preferences.days == (DAY,)
     assert preferences.year_weights == {1960: 0.3}
     assert preferences.event_weight == 0.5
 

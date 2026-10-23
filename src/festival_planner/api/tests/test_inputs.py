@@ -89,10 +89,8 @@ CASES: list[tuple[i.ChangeSetItemInput, cs.ChangeSetItem]] = [
         cs.SetBuffer(venue_id=VenueId("v"), minutes=20),
     ),
     (
-        i.ChangeSetItemInput(
-            set_date_range=i.SetDateRangeInput(start_date=D1, end_date=D2)
-        ),
-        cs.SetDateRange(start_date=D1, end_date=D2),
+        i.ChangeSetItemInput(set_days=i.SetDaysInput(days=[D2, D1, D2])),
+        cs.SetDays(days=(D1, D2)),
     ),
     (
         i.ChangeSetItemInput(set_event_weight=i.SetEventWeightInput(weight=3.0)),
@@ -151,27 +149,25 @@ def test_a_null_weight_resets():
 def test_unset_preferences_reset():
     items = [
         i.ChangeSetItemInput(set_buffer=i.SetBufferInput()),
-        i.ChangeSetItemInput(set_date_range=i.SetDateRangeInput()),
+        i.ChangeSetItemInput(set_days=i.SetDaysInput()),
     ]
     assert i.to_change_set(items).items == (
         cs.SetBuffer(venue_id=None, minutes=None),
-        cs.SetDateRange(start_date=None, end_date=None),
+        cs.SetDays(days=None),
     )
 
 
 def test_an_invalid_item_is_an_invalid_item_problem():
     items = [
         i.ChangeSetItemInput(add_screening_commitment=i.ScreeningInput(screening_id=S)),
-        i.ChangeSetItemInput(
-            set_date_range=i.SetDateRangeInput(start_date=D2, end_date=D1)
-        ),
+        i.ChangeSetItemInput(set_days=i.SetDaysInput(days=[])),
     ]
     with pytest.raises(cs.InvalidChangeSetError) as raised:
         i.to_change_set(items)
     [problem] = raised.value.problems
     assert problem.code is cs.ProblemCode.INVALID_ITEM
     assert problem.items == (1,)
-    assert "cannot end before it starts" in problem.message
+    assert "at least one day" in problem.message
 
 
 def test_every_invalid_item_is_reported():

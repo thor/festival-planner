@@ -9,7 +9,7 @@ from festival_planner.domain.change_sets import (
     RecordComparison,
     SetBuffer,
     SetComparisonWeight,
-    SetDateRange,
+    SetDays,
     SetYearWeight,
 )
 from festival_planner.domain.programme import ProgrammeEntryId, ScreeningId, VenueId
@@ -43,11 +43,14 @@ def test_unknown_kinds_are_rejected():
         ChangeSet.model_validate({"items": [{"kind": "teleport"}]})
 
 
-def test_a_date_range_cannot_end_before_it_starts():
+def test_days_are_kept_in_order_once_each():
+    d8, d9 = datetime.date(2025, 11, 8), datetime.date(2025, 11, 9)
+    assert SetDays(days=(d9, d8, d9)).days == (d8, d9)
+
+
+def test_no_days_at_all_is_rejected():
     with pytest.raises(ValidationError):
-        SetDateRange(
-            start_date=datetime.date(2025, 11, 9), end_date=datetime.date(2025, 11, 8)
-        )
+        SetDays(days=())
 
 
 def test_negative_buffers_are_rejected():

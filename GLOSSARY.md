@@ -103,7 +103,7 @@ A User's statement that they would rather watch one Programme Entry than another
 _Avoid_: Vote, ranking, A/B
 
 **Preferences**:
-A User's settings that shape their Schedules for a Festival, such as buffer times (overall and per Venue), date range, weights, Comparisons, Event attendance and Transport Mode.
+A User's settings that shape their Schedules for a Festival, such as buffer times (overall and per Venue), the days they can go, weights, Comparisons, Event attendance and Transport Mode.
 _Avoid_: Settings, config
 
 ### Viewing history

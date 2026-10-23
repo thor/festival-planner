@@ -31,7 +31,7 @@ from festival_planner.domain.change_sets import (
     SetAttendEvents,
     SetBuffer,
     SetComparisonWeight,
-    SetDateRange,
+    SetDays,
     SetEventWeight,
     SetProgrammeEntryWeight,
     SetScreeningWeight,
@@ -161,7 +161,7 @@ def test_planning_without_any_activity(client: TestClient):
           excludedScreenings { id }
           excludedProgrammeEntries { id }
           preferences {
-            bufferMinutes venueBuffers { minutes } startDate endDate
+            bufferMinutes venueBuffers { minutes } days
             programmeEntryWeights { weight } screeningWeights { weight }
             yearWeights { year } eventWeight attendEvents transportMode
             comparisonWeight comparisons { preferred { id } }
@@ -184,8 +184,7 @@ def test_planning_without_any_activity(client: TestClient):
             "preferences": {
                 "bufferMinutes": 15,
                 "venueBuffers": [],
-                "startDate": None,
-                "endDate": None,
+                "days": None,
                 "programmeEntryWeights": [],
                 "screeningWeights": [],
                 "yearWeights": [],
@@ -595,7 +594,7 @@ drafts {
     ... on SetScreeningWeight { screening { id } screeningWeight: weight }
     ... on SetYearWeight { year yearWeight: weight }
     ... on SetBuffer { venue { id } minutes }
-    ... on SetDateRange { startDate endDate }
+    ... on SetDays { days }
     ... on SetEventWeight { eventWeight: weight }
     ... on SetAttendEvents { attend }
     ... on SetTransportMode { mode }
@@ -635,7 +634,7 @@ def test_a_change_set_shows_every_item_kind(deps: ApiDependencies, client: TestC
             SetScreeningWeight(screening_id=ScreeningId("c"), weight=1.5),
             SetYearWeight(year=2030, weight=0.5),
             SetBuffer(venue_id=A, minutes=5),
-            SetDateRange(start_date=DAY, end_date=DAY),
+            SetDays(days=(DAY,)),
             SetEventWeight(weight=0.25),
             SetAttendEvents(attend=True),
             SetTransportMode(mode="walk"),
@@ -678,7 +677,7 @@ def test_a_change_set_shows_every_item_kind(deps: ApiDependencies, client: TestC
             "venue": {"id": encode("Venue", A)},
             "minutes": 5,
         },
-        {"__typename": "SetDateRange", "startDate": day, "endDate": day},
+        {"__typename": "SetDays", "days": [day]},
         {"__typename": "SetEventWeight", "eventWeight": 0.25},
         {"__typename": "SetAttendEvents", "attend": True},
         {"__typename": "SetTransportMode", "mode": "walk"},

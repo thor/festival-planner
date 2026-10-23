@@ -147,8 +147,8 @@ export interface Preferences {
   /** Minutes to arrive before a Screening, unless its Venue has its own. */
   bufferMinutes: number
   venueBuffers: Readonly<Record<VenueId, number>>
-  startDate: DayKey | null
-  endDate: DayKey | null
+  /** The Festival Days the User can go, in order; null means every day. */
+  days: readonly DayKey[] | null
   entryWeights: Readonly<Record<ProgrammeEntryId, number>>
   screeningWeights: Readonly<Record<ScreeningId, number>>
   /** Added to every Programme Entry of that year. */
@@ -198,8 +198,8 @@ export type PreferenceItem =
   | { kind: "setYearWeight"; year: number; weight: number | null }
   /** The general buffer, or with a Venue that Venue's. */
   | { kind: "setBuffer"; venueId: VenueId | null; minutes: number | null }
-  /** Both null means every Festival Day. */
-  | { kind: "setDateRange"; startDate: DayKey | null; endDate: DayKey | null }
+  /** Null means every Festival Day. */
+  | { kind: "setDays"; days: readonly DayKey[] | null }
   | { kind: "setEventWeight"; weight: number | null }
   | { kind: "setAttendEvents"; attend: boolean | null }
   | { kind: "setTransportMode"; mode: string | null }

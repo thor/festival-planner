@@ -21,6 +21,7 @@ from ..adapters.json_files.solve_request import (
 from ..adapters.solver.cpsat import CpSatScheduleSolver
 from ..adapters.yaml_files.solve_request import build_solve_request
 from ..config import ConfigLoader
+from ..domain.planning import days_between
 from ..domain.programme import ProgrammeEntry, Screening, Venue
 from ..domain.solving import SolveRequest, SolveResult
 
@@ -91,9 +92,7 @@ def _apply_overrides(
         preferences = preferences.model_copy(update={"buffer_minutes": buffer_time})
     if dates:
         start, end = _parse_dates(dates)
-        preferences = preferences.model_copy(
-            update={"start_date": start, "end_date": end}
-        )
+        preferences = preferences.model_copy(update={"days": days_between(start, end)})
     request = request.model_copy(update={"preferences": preferences})
     if time_limit is not None:
         request = request.model_copy(update={"time_limit_seconds": time_limit})

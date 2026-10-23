@@ -8,12 +8,15 @@ import type {
 } from "./model"
 import {
   bufferItem,
+  daysItem,
   defaultPreferences,
   entryScale,
   interestOf,
   isPending,
   offsetScale,
+  paintDays,
   preferencesAfter,
+  runsOf,
   setPreference,
   valueOf,
 } from "./preferences"
@@ -68,18 +71,13 @@ describe("setPreference", () => {
     })
   })
 
-  it("treats the date range as one setting", () => {
-    const range = (startDate: string | null, endDate: string | null) =>
-      ({ kind: "setDateRange", startDate, endDate }) as const
-    const set = setPreference(
-      range("2026-10-30", "2026-11-02"),
-      defaultPreferences,
-      [range("2026-10-30", null)]
-    )
-    expect(set).toEqual([range("2026-10-30", "2026-11-02")])
-    expect(setPreference(range(null, null), defaultPreferences, set)).toEqual(
-      []
-    )
+  it("treats the days as one setting", () => {
+    const days = (...d: string[]) => ({ kind: "setDays", days: d }) as const
+    const set = setPreference(days(D1, D3), defaultPreferences, [days(D1)])
+    expect(set).toEqual([days(D1, D3)])
+    expect(
+      setPreference({ kind: "setDays", days: null }, defaultPreferences, set)
+    ).toEqual([])
   })
 
   it("says which settings are pending", () => {
@@ -101,6 +99,40 @@ describe("interest", () => {
   it("sends null for usual, so it resets", () => {
     expect(valueOf("usual", entryScale)).toBeNull()
     expect(valueOf("more", entryScale)).toBe(1.5)
+  })
+})
+
+const FEST = ["2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02"]
+const [D1, D2, D3, D4] = FEST
+
+describe("days", () => {
+  it("starts a choice from every day with only the days painted", () => {
+    expect(paintDays(null, D2, D3, true, FEST).days).toEqual([D2, D3])
+  })
+
+  it("takes days away, and every day off is every day again", () => {
+    expect(paintDays([D1, D2, D4], D2, D2, false, FEST).days).toEqual([D1, D4])
+    expect(paintDays([D2], D2, D2, false, FEST).days).toBeNull()
+  })
+
+  it("paints a sweep either way round", () => {
+    expect(paintDays([D1], D4, D3, true, FEST).days).toEqual([D1, D3, D4])
+  })
+
+  it("takes away from every day when a sweep turns days off", () => {
+    expect(paintDays(null, D1, D2, false, FEST).days).toEqual([D3, D4])
+  })
+
+  it("calls every day chosen no choice at all", () => {
+    expect(daysItem(FEST, FEST).days).toBeNull()
+    expect(daysItem([D4, D1, D1], FEST).days).toEqual([D1, D4])
+  })
+
+  it("finds unbroken runs", () => {
+    expect(runsOf([D4, D1, D2])).toEqual([
+      { first: D1, last: D2 },
+      { first: D4, last: D4 },
+    ])
   })
 })
 
