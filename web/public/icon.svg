@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<style>.screen{fill:#E9EBEC}.ink{fill:#000}.stamp{fill:#2323C8}
+@media (prefers-color-scheme:dark){.screen{fill:#000}.ink{fill:#E9EBEC}.stamp{fill:#8C8CFF}}</style>
+<rect class="screen" width="64" height="64"/>
+<path class="ink" d="M0 0H64V64H60C52 56 48 44 48 8H16C16 44 12 56 4 64H0Z"/>
+<path class="stamp" d="M23.4 40.0V38.4Q27.4 38.4 30.9 37.3Q34.4 36.2 37.0 33.9Q39.6 31.6 40.9 28.2Q42.2 24.8 41.8 20.2H42.3Q42.3 22.3 40.9 24.2Q39.5 26.2 37.3 27.4Q35.2 28.6 32.8 28.6Q28.5 28.6 26.0 25.8Q23.5 23.0 23.5 19.3Q23.5 16.8 24.9 14.7Q26.3 12.6 28.5 11.3Q30.8 10.0 33.5 10.0Q36.2 10.0 38.5 11.5Q40.8 13.0 42.2 15.7Q43.6 18.4 43.6 22.0Q43.6 27.4 41.1 31.5Q38.5 35.5 34.0 37.8Q29.4 40.0 23.4 40.0Z"/>
+</svg>

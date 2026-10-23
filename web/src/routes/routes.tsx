@@ -1,6 +1,6 @@
 // Routes connect one page hook to one view. Nothing else.
 
-import { Navigate, Outlet, useParams, useSearchParams } from "react-router"
+import { Outlet, useParams, useSearchParams } from "react-router"
 
 import {
   useComparePage,
@@ -8,12 +8,12 @@ import {
   useDraftsPage,
   useFilmPage,
   useFrame,
+  useHomePage,
   useProgrammePage,
   useTicketsPage,
   useTray,
   useSchedulePage,
 } from "@/app/pages"
-import { useFestivals } from "@/app/queries"
 import { useSession } from "@/app/session"
 import type { Load } from "@/app/view-models"
 import { AccountView } from "@/views/account"
@@ -21,6 +21,7 @@ import { CompareView } from "@/views/compare"
 import { DraftListView, DraftView } from "@/views/drafts"
 import { FilmView } from "@/views/film"
 import { FrameView } from "@/views/frame"
+import { HomeView } from "@/views/home"
 import { Loading, Missing } from "@/views/parts"
 import { ProgrammeView } from "@/views/programme"
 import { TicketsView } from "@/views/tickets"
@@ -45,18 +46,12 @@ function Show<T>({
 const useSlug = () => useParams().slug ?? ""
 
 export function Home() {
-  const festivals = useFestivals()
-  if (festivals.isPending) return <Loading />
-  const first = festivals.data?.[0]
-  if (!first)
-    return (
-      <Missing
-        message={
-          festivals.isError ? "Server unreachable." : "No festivals yet."
-        }
-      />
-    )
-  return <Navigate to={`/${first.slug}`} replace />
+  return (
+    <Show
+      load={useHomePage()}
+      render={(festivals) => <HomeView festivals={festivals} />}
+    />
+  )
 }
 
 export function Frame() {

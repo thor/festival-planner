@@ -1,6 +1,8 @@
 import type { ProgrammePort } from "@/domain/ports"
 
-import { festival, programme } from "./seed"
+import { festival, otherFestivals, programme } from "./seed"
+
+const festivals = [festival, ...otherFestivals]
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -8,11 +10,11 @@ export function memoryProgramme(): ProgrammePort {
   return {
     async festivals() {
       await wait(60)
-      return [festival]
+      return festivals
     },
     async festival(slug) {
       await wait(60)
-      return slug === festival.slug ? festival : null
+      return festivals.find((f) => f.slug === slug) ?? null
     },
     async programme(id) {
       await wait(120)

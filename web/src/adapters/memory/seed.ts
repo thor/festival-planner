@@ -36,6 +36,26 @@ export const festival: Festival = {
   timeZone: ZONE,
 }
 
+/** Other festivals, for the list on Home. Their programmes are empty. */
+export const otherFestivals: Festival[] = [
+  {
+    id: "RmVzdGl2YWw6Mg==" as FestivalId,
+    slug: "oslo-pix",
+    name: "Oslo Pix",
+    startDate: iso(new Date(first.getTime() + 220 * DAY)),
+    endDate: iso(new Date(first.getTime() + 226 * DAY)),
+    timeZone: ZONE,
+  },
+  {
+    id: "RmVzdGl2YWw6Mw==" as FestivalId,
+    slug: "biff",
+    name: "Bergen International Film Festival",
+    startDate: iso(new Date(first.getTime() - 40 * DAY)),
+    endDate: iso(new Date(first.getTime() - 32 * DAY)),
+    timeZone: ZONE,
+  },
+]
+
 const venue = (n: number, name: string): Venue => ({
   id: `venue-${n}` as VenueId,
   name,

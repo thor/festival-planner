@@ -8,6 +8,7 @@ import {
 import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
+import { AppIcon } from "./brand"
 import { DockContext } from "./dock"
 import { NavIcon } from "./parts"
 
@@ -39,12 +40,19 @@ export function FrameView({
       </a>
       <header className="sticky top-0 z-20 flex h-10 items-stretch border-b border-ink bg-screen">
         <Link
+          to="/"
+          aria-label="All festivals"
+          className="aspect-square h-full shrink-0"
+        >
+          <AppIcon className="size-full" />
+        </Link>
+        <Link
           to={`/${slug}`}
-          className="flex min-w-0 flex-1 items-center px-4 text-lg md:px-8"
+          className="hidden min-w-0 flex-1 items-center px-4 text-lg md:flex"
         >
           <span className="truncate">{festival}</span>
         </Link>
-        <nav aria-label="Main" className="flex">
+        <nav aria-label="Main" className="ml-auto flex">
           <NavIcon to={`/${slug}`} icon={FilmStripIcon} label="Programme" />
           <NavIcon
             to={`/${slug}/schedule`}

@@ -42,6 +42,7 @@ format and fix. `mise run fix` covers the Python side too.
 
 ## Pages
 
+- `/` Home: every festival, on now first, then ahead, then over
 - `/:slug` programme, filter by day
 - `/:slug/film/:id` one film, its screenings, tickets
 - `/:slug/schedule` the Active Schedule as day tracks

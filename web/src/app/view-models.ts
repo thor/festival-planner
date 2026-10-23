@@ -7,6 +7,14 @@ export type Load<T> =
   | { state: "missing"; message: string }
   | { state: "ready"; value: T }
 
+export interface FestivalVM {
+  slug: string
+  name: string
+  href: string
+  dates: string
+  phase: "now" | "ahead" | "over"
+}
+
 export interface Marks {
   committed: boolean
   excluded: boolean

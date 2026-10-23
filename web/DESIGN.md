@@ -28,6 +28,13 @@ Icons. Phosphor, light weight, 18px. No icon without a label or tooltip.
 
 ## Layout
 
+Home: the wordmark across the top, its apostrophe in stamp, dropping in
+once on load. One line of copy. Then the Festivals as a credits roll,
+name left, dates right; past ones in grain.
+
+Header: the app icon at left, back to Home. On wide screens the Festival's
+name follows it; on phones the icon stands alone.
+
 Programme: a credits roll. One column of titles, each on its own rule.
 Times sit to the right, small. Days run across the top.
 

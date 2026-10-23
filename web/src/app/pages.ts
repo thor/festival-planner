@@ -7,6 +7,7 @@ import { useNavigate } from "react-router"
 
 import { recordComparison, removeAt, type ChangeSet } from "@/domain/change-set"
 import { describeProblem, problemOf } from "@/domain/errors"
+import { dateSpan, festivalsInOrder, phaseOf } from "@/domain/festivals"
 import {
   describeItem,
   lookupOf,
@@ -30,6 +31,7 @@ import {
   keys,
   useDraft,
   useFestival,
+  useFestivals,
   usePlanning,
   useProgramme,
 } from "./queries"
@@ -41,6 +43,7 @@ import type {
   DiffRowVM,
   DraftListItemVM,
   DraftVM,
+  FestivalVM,
   FilmVM,
   ItemVM,
   Load,
@@ -60,6 +63,22 @@ function useFestivalData(slug: string) {
   const programme = useProgramme(festival.data)
   const planning = usePlanning(festival.data)
   return { festival, programme, planning }
+}
+
+export function useHomePage(): Load<FestivalVM[]> {
+  const festivals = useFestivals()
+  if (festivals.isPending) return loading
+  if (festivals.isError) return missing("Server unreachable.")
+  if (!festivals.data.length) return missing("No festivals yet.")
+  return ready(
+    festivalsInOrder(festivals.data).map((f) => ({
+      slug: f.slug,
+      name: f.name,
+      href: `/${f.slug}`,
+      dates: dateSpan(f),
+      phase: phaseOf(f),
+    }))
+  )
 }
 
 export function useFrame(slug: string) {

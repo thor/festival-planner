@@ -8,6 +8,10 @@ a shorter or friendlier word, this file says which concept it stands for.
 
 ### Pages
 
+**Home**:
+The first page: the app's name, one line on what it does, and every Festival, on now first, then those ahead, then those over. The app icon in the header leads back to it.
+_Avoid_: Landing, index, festival picker
+
 **Programme**:
 The page listing a Festival's Programme Entries and their Screenings, one Festival Day at a time or all at once.
 _Avoid_: Catalogue, listing, lineup
