@@ -1,3 +1,7 @@
+directive @oneOf on INPUT_OBJECT
+
+union AcceptDraftResult = ScheduleResult | DraftNotAcceptable | NotFound | NotSignedIn
+
 type AddExcludedProgrammeEntry {
   programmeEntry: ProgrammeEntry!
 }
@@ -17,6 +21,47 @@ type AddScreeningCommitment {
 """One change a Change Set proposes."""
 union ChangeSetItem = AddScreeningCommitment | ReleaseScreeningCommitment | AddFilmCommitment | ReleaseFilmCommitment | AddExcludedScreening | RemoveExcludedScreening | AddExcludedProgrammeEntry | RemoveExcludedProgrammeEntry | SetProgrammeEntryWeight | SetScreeningWeight | SetYearWeight | SetBuffer | SetDateRange | SetEventWeight | SetAttendEvents | SetTransportMode | SetComparisonWeight | RecordComparison
 
+"""One change a Change Set proposes: exactly one field."""
+input ChangeSetItemInput @oneOf {
+  addScreeningCommitment: ScreeningInput
+  releaseScreeningCommitment: ScreeningInput
+  addFilmCommitment: ProgrammeEntryInput
+  releaseFilmCommitment: ProgrammeEntryInput
+  addExcludedScreening: ScreeningInput
+  removeExcludedScreening: ScreeningInput
+  addExcludedProgrammeEntry: ProgrammeEntryInput
+  removeExcludedProgrammeEntry: ProgrammeEntryInput
+  setProgrammeEntryWeight: SetProgrammeEntryWeightInput
+  setScreeningWeight: SetScreeningWeightInput
+  setYearWeight: SetYearWeightInput
+  setBuffer: SetBufferInput
+  setDateRange: SetDateRangeInput
+  setEventWeight: SetEventWeightInput
+  setAttendEvents: SetAttendEventsInput
+  setTransportMode: SetTransportModeInput
+  setComparisonWeight: SetComparisonWeightInput
+  recordComparison: RecordComparisonInput
+}
+
+"""One thing wrong with a Change Set."""
+type ChangeSetProblem {
+  code: ChangeSetProblemCode!
+
+  """Indexes of the Change Set items involved, if any."""
+  items: [Int!]!
+  message: String!
+}
+
+"""What is wrong with a Change Set."""
+enum ChangeSetProblemCode {
+  UNKNOWN_ID
+  CONFLICTING_ITEMS
+  NO_OP
+  COMMITTED_AND_EXCLUDED
+  TWO_SCREENING_COMMITMENTS
+  INVALID_ITEM
+}
+
 """The User would rather watch `preferred` than `other`."""
 type Comparison {
   preferred: ProgrammeEntry!
@@ -32,11 +77,25 @@ type ComparisonSuggestion {
   other: ProgrammeEntry!
 }
 
+input CreateDraftInput {
+  festivalId: ID!
+  changeSet: [ChangeSetItemInput!]! = []
+}
+
+union CreateDraftResult = DraftResult | InvalidChangeSet | NotFound | NotSignedIn
+
 """Date (isoformat)"""
 scalar Date
 
 """Date with time (isoformat)"""
 scalar DateTime
+
+union DiscardDraftResult = Discarded | NotFound | NotSignedIn
+
+"""The Draft is gone."""
+type Discarded {
+  draftId: ID!
+}
 
 """A proposed Schedule: a Change Set and the Schedule solved from it."""
 type Draft implements Node {
@@ -84,12 +143,31 @@ type DraftDiff {
   droppedTickets: [Screening!]!
 }
 
+"""A Draft, by id."""
+input DraftInput {
+  draftId: ID!
+}
+
+"""The Draft is not READY, or is Stale; re-solve it first."""
+type DraftNotAcceptable {
+  message: String!
+}
+
+type DraftResult {
+  draft: Draft!
+}
+
 """Where a Draft's solve is."""
 enum DraftStatus {
   SOLVING
   READY
   INFEASIBLE
   FAILED
+}
+
+"""The Draft is still solving; wait for it first."""
+type DraftStillSolving {
+  message: String!
 }
 
 """Something belonging to a Screening beyond the film."""
@@ -212,10 +290,43 @@ enum FlagKind {
   WITHDRAWN_IN_SCHEDULE
 }
 
+"""The Change Set cannot be applied."""
+type InvalidChangeSet {
+  problems: [ChangeSetProblem!]!
+}
+
+type Mutation {
+  """
+  A Draft of a Festival's Schedule with this Change Set, solved if that is quick; else poll it with `node`.
+  """
+  createDraft(input: CreateDraftInput!): CreateDraftResult!
+
+  """Solve a Draft again against the current Active Schedule and inputs."""
+  resolveDraft(input: DraftInput!): ResolveDraftResult!
+
+  """
+  Make a READY, non-Stale Draft's Schedule the Active Schedule and apply its Change Set. The Draft is gone after.
+  """
+  acceptDraft(input: DraftInput!): AcceptDraftResult!
+
+  """Throw a Draft away."""
+  discardDraft(input: DraftInput!): DiscardDraftResult!
+}
+
 """An object with a Globally Unique ID"""
 interface Node {
   """The Globally Unique ID of this object"""
   id: ID!
+}
+
+"""An id is garbage, of the wrong type, unknown or not yours."""
+type NotFound {
+  message: String!
+}
+
+"""The mutation needs a signed-in User."""
+type NotSignedIn {
+  message: String!
 }
 
 """Information to aid in pagination."""
@@ -311,6 +422,11 @@ type ProgrammeEntryEdge {
   node: ProgrammeEntry!
 }
 
+"""A Programme Entry, by id."""
+input ProgrammeEntryInput {
+  programmeEntryId: ID!
+}
+
 type ProgrammeEntryWeight {
   programmeEntry: ProgrammeEntry!
   weight: Float!
@@ -340,6 +456,12 @@ type RecordComparison {
   other: ProgrammeEntry!
 }
 
+"""Replaces any earlier Comparison of the same pair."""
+input RecordComparisonInput {
+  preferredId: ID!
+  otherId: ID!
+}
+
 type ReleaseFilmCommitment {
   programmeEntry: ProgrammeEntry!
 }
@@ -355,6 +477,8 @@ type RemoveExcludedProgrammeEntry {
 type RemoveExcludedScreening {
   screening: Screening!
 }
+
+union ResolveDraftResult = DraftResult | InvalidChangeSet | DraftStillSolving | NotFound | NotSignedIn
 
 """
 An accepted Schedule. The one with the highest number is the Active Schedule; the others form the history.
@@ -390,6 +514,10 @@ type ScheduleEdge {
 
   """The item at the end of the edge"""
   node: Schedule!
+}
+
+type ScheduleResult {
+  schedule: Schedule!
 }
 
 """A Screening in a Draft's Schedule."""
@@ -433,6 +561,11 @@ type ScreeningEdge {
   node: Screening!
 }
 
+"""A Screening, by id."""
+input ScreeningInput {
+  screeningId: ID!
+}
+
 type ScreeningWeight {
   screening: Screening!
   weight: Float!
@@ -443,6 +576,11 @@ type SetAttendEvents {
   attend: Boolean
 }
 
+input SetAttendEventsInput {
+  """Null or left out resets the setting to its default."""
+  attend: Boolean
+}
+
 """The general buffer, or with a Venue that Venue's."""
 type SetBuffer {
   """Null resets the setting to its default."""
@@ -450,8 +588,21 @@ type SetBuffer {
   venue: Venue
 }
 
+"""The general buffer, or with a Venue that Venue's."""
+input SetBufferInput {
+  venueId: ID
+
+  """Null or left out resets the setting to its default."""
+  minutes: Int
+}
+
 type SetComparisonWeight {
   """Null resets the setting to its default."""
+  weight: Float
+}
+
+input SetComparisonWeightInput {
+  """Null or left out resets the setting to its default."""
   weight: Float
 }
 
@@ -460,8 +611,18 @@ type SetDateRange {
   endDate: Date
 }
 
+input SetDateRangeInput {
+  startDate: Date
+  endDate: Date
+}
+
 type SetEventWeight {
   """Null resets the setting to its default."""
+  weight: Float
+}
+
+input SetEventWeightInput {
+  """Null or left out resets the setting to its default."""
   weight: Float
 }
 
@@ -472,10 +633,24 @@ type SetProgrammeEntryWeight {
   weight: Float
 }
 
+input SetProgrammeEntryWeightInput {
+  programmeEntryId: ID!
+
+  """Null or left out resets the setting to its default."""
+  weight: Float
+}
+
 type SetScreeningWeight {
   screening: Screening!
 
   """Null resets the setting to its default."""
+  weight: Float
+}
+
+input SetScreeningWeightInput {
+  screeningId: ID!
+
+  """Null or left out resets the setting to its default."""
   weight: Float
 }
 
@@ -484,10 +659,22 @@ type SetTransportMode {
   mode: String
 }
 
+input SetTransportModeInput {
+  """Null or left out resets the setting to its default."""
+  mode: String
+}
+
 type SetYearWeight {
   year: Int!
 
   """Null resets the setting to its default."""
+  weight: Float
+}
+
+input SetYearWeightInput {
+  year: Int!
+
+  """Null or left out resets the setting to its default."""
   weight: Float
 }
 

@@ -8,6 +8,7 @@ from strawberry import relay
 
 from .context import Info
 from .ids import decode_any
+from .mutations import Mutation
 from .planning_types import PLANNING_NODES, Viewer
 from .programme_types import PROGRAMME_NODES, NodeResolver, ProgrammeQuery
 
@@ -47,4 +48,4 @@ class Query(ProgrammeQuery):
         return Viewer(issuer=user.issuer, subject=user.subject, user_id=user.id)
 
 
-schema = strawberry.Schema(query=Query)
+schema = strawberry.Schema(query=Query, mutation=Mutation)

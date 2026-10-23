@@ -199,6 +199,8 @@ class ProblemCode(enum.StrEnum):
     NO_OP = "NO_OP"
     COMMITTED_AND_EXCLUDED = "COMMITTED_AND_EXCLUDED"
     TWO_SCREENING_COMMITMENTS = "TWO_SCREENING_COMMITMENTS"
+    INVALID_ITEM = "INVALID_ITEM"
+    """An item that is not valid on its own, e.g. a date range ending before it starts."""
 
 
 class ChangeSetProblem(Value):
