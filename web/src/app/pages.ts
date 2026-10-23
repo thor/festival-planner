@@ -70,16 +70,17 @@ function useFestivalData(slug: string) {
 
 export function useHomePage(): Load<FestivalVM[]> {
   const festivals = useFestivals()
+  const now = useNow()
   if (festivals.isPending) return loading
   if (festivals.isError) return missing("Server unreachable.")
   if (!festivals.data.length) return missing("No festivals yet.")
   return ready(
-    festivalsInOrder(festivals.data).map((f) => ({
+    festivalsInOrder(festivals.data, now).map((f) => ({
       slug: f.slug,
       name: f.name,
       href: `/${f.slug}`,
       dates: dateSpan(f),
-      phase: phaseOf(f),
+      phase: phaseOf(f, now),
     }))
   )
 }

@@ -1,6 +1,6 @@
 // Lay Screenings out on a day track: one row per festival day, x by time.
 
-import type { DayKey, DraftDiff, Festival, Instant, Screening } from "./model"
+import type { DayKey, DraftDiff, Festival, Screening } from "./model"
 import { addDays, dayKey, festivalDays, minuteOfDay } from "./time"
 
 /** The hours a track shows, in minutes from its day's midnight; past 24h runs on. */
@@ -101,11 +101,12 @@ export function hourTicks(span: Span): { label: string; left: number }[] {
 export function nowOn(
   festival: Festival,
   span: Span,
-  now: Instant
+  now: Date
 ): { day: DayKey; left: number } | null {
-  const today = dayKey(now, festival.timeZone)
+  const at = now.toISOString()
+  const today = dayKey(at, festival.timeZone)
   for (const day of [today, addDays(today, -1)]) {
-    const minute = minuteOfDay(now, day, festival.timeZone)
+    const minute = minuteOfDay(at, day, festival.timeZone)
     if (minute >= span.start && minute <= span.end)
       return { day, left: across(span, minute) }
   }
@@ -135,13 +136,13 @@ export interface Week<Row = DayRow> {
 export function layWeek(
   festival: Festival,
   screenings: Screening[],
-  now: Instant
+  now: Date
 ): Week {
   const span = fitSpan(festival, screenings)
   return {
     rows: layDays(festival, screenings, span),
     ticks: hourTicks(span),
-    today: dayKey(now, festival.timeZone),
+    today: dayKey(now.toISOString(), festival.timeZone),
     now: nowOn(festival, span, now),
   }
 }
@@ -154,7 +155,7 @@ export function layDiff(
   festival: Festival,
   draft: Screening[],
   { added, removed }: Pick<DraftDiff, "added" | "removed">,
-  now: Instant
+  now: Date
 ): Week<DiffRow> {
   const ins = new Set(added.map((s) => s.id))
   const outs = new Set(removed.map((s) => s.id))

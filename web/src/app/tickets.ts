@@ -27,6 +27,7 @@ import {
 } from "@/domain/tickets"
 
 import { usePendingChangeSet } from "./change-set-store"
+import { useNow } from "./now"
 import { usePorts } from "./ports"
 import { keys } from "./queries"
 import { entryHref } from "./screenings"
@@ -41,6 +42,7 @@ export function useTicketModels(
   const client = useQueryClient()
   const navigate = useNavigate()
   const [set, update] = usePendingChangeSet(festival?.id)
+  const now = useNow()
   const inputs = planning?.inputs ?? emptyInputs
   const settle = () =>
     festival &&
@@ -68,7 +70,7 @@ export function useTicketModels(
     programme ?? [],
     planning.flags
   )
-  const sorted = sortTickets(mine, scheduled)
+  const sorted = sortTickets(mine, scheduled, now)
 
   const row = (t: Ticket, notes: string[]): TicketVM => {
     const s = t.screening

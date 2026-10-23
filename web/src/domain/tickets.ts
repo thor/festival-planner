@@ -38,7 +38,7 @@ export function festivalTickets(
 export function sortTickets(
   tickets: Ticket[],
   scheduled: ReadonlySet<ScreeningId>,
-  now = new Date()
+  now: Date
 ): SortedTickets {
   const byTime = [...tickets].sort((a, b) =>
     a.screening.startTime.localeCompare(b.screening.startTime)

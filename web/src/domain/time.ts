@@ -95,6 +95,6 @@ export function minutesBetween(start: Instant, end: Instant): number {
   return Math.round((Date.parse(end) - Date.parse(start)) / 60000)
 }
 
-export function isPast(instant: Instant, now: Date = new Date()): boolean {
+export function isPast(instant: Instant, now: Date): boolean {
   return Date.parse(instant) < now.getTime()
 }

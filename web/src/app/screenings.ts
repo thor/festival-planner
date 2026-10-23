@@ -22,6 +22,7 @@ import type {
 import { clock, dayKey, isPast, shortDay } from "@/domain/time"
 
 import { usePendingChangeSet } from "./change-set-store"
+import { useNow } from "./now"
 import { usePorts } from "./ports"
 import { keys } from "./queries"
 import type { EntryVM, ScreeningVM } from "./view-models"
@@ -46,6 +47,7 @@ export function useEntryModels(
   const { planning: port } = usePorts()
   const client = useQueryClient()
   const [set, update] = usePendingChangeSet(festival?.id)
+  const now = useNow()
   const inputs = planning?.inputs ?? emptyInputs
   const signedIn = !!planning
   const scheduled = new Set(
@@ -63,7 +65,8 @@ export function useEntryModels(
 
   const screening = (s: Screening): ScreeningVM => {
     const tz = festival!.timeZone
-    const open = signedIn && !s.withdrawn && !isPast(s.startTime)
+    const past = isPast(s.startTime, now)
+    const open = signedIn && !s.withdrawn && !past
     const has = tickets.has(s.id)
     return {
       id: s.id,
@@ -72,7 +75,7 @@ export function useEntryModels(
       venue: s.venue.name,
       auditorium: s.auditorium,
       withdrawn: s.withdrawn,
-      past: isPast(s.startTime),
+      past,
       scheduled: scheduled.has(s.id),
       ticket: has,
       buyHref: open && !has && s.ticketUrl ? s.ticketUrl : null,

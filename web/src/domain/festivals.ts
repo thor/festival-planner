@@ -9,7 +9,7 @@ export type Phase = "now" | "ahead" | "over"
 const todayIn = (f: Festival, now: Date): DayKey =>
   dayKey(now.toISOString(), f.timeZone)
 
-export function phaseOf(f: Festival, now: Date = new Date()): Phase {
+export function phaseOf(f: Festival, now: Date): Phase {
   const today = todayIn(f, now)
   if (today < f.startDate) return "ahead"
   if (today > f.endDate) return "over"
@@ -19,10 +19,7 @@ export function phaseOf(f: Festival, now: Date = new Date()): Phase {
 const rank: Record<Phase, number> = { now: 0, ahead: 1, over: 2 }
 
 /** On now first, then the soonest ahead, then the most recently over. */
-export function festivalsInOrder(
-  festivals: Festival[],
-  now: Date = new Date()
-): Festival[] {
+export function festivalsInOrder(festivals: Festival[], now: Date): Festival[] {
   return [...festivals].sort((a, b) => {
     const pa = phaseOf(a, now)
     const pb = phaseOf(b, now)

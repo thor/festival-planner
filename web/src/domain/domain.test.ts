@@ -135,7 +135,8 @@ describe("timeline", () => {
   })
 
   it("puts now on its day, and just after midnight on the evening before", () => {
-    const on = (now: string) => nowOn(festival, DEFAULT_SPAN, now)?.day
+    const on = (now: string) =>
+      nowOn(festival, DEFAULT_SPAN, new Date(now))?.day
     expect(on("2026-10-24T16:00:00Z")).toBe("2026-10-24") // 18:00
     expect(on("2026-10-24T22:30:00Z")).toBe("2026-10-24") // 00:30
     expect(on("2026-10-24T06:00:00Z")).toBeUndefined() // 08:00, off the span
@@ -146,7 +147,7 @@ describe("timeline", () => {
     const week = layWeek(
       festival,
       [screening("2026-10-24T16:00:00Z", "2026-10-24T17:30:00Z")],
-      "2026-10-24T10:00:00Z"
+      new Date("2026-10-24T10:00:00Z")
     )
     const tick = week.ticks.find((t) => t.label === "18")
     expect(week.rows[0].placed[0].left).toBeCloseTo(tick!.left)
@@ -177,7 +178,7 @@ describe("draft timeline", () => {
       festival,
       [kept, added],
       { added: [added], removed: [out] },
-      "2026-10-24T10:00:00Z"
+      new Date("2026-10-24T10:00:00Z")
     )
     expect(rows.map((r) => r.day)).toEqual([
       "2026-10-24",
