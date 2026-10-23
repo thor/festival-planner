@@ -11,6 +11,7 @@ from ...path_providers import PathProvider, create_default_path_provider
 
 DATABASE_URL_ENV = "FESTIVAL_PLANNER_DATABASE_URL"
 MIGRATIONS = Path(__file__).parent / "migrations"
+SQLITE_BUSY_TIMEOUT_MS = 5000
 
 
 def resolve_database_url(
@@ -32,13 +33,16 @@ def resolve_database_url(
 def create_engine_for(url: str) -> Engine:
     engine = create_engine(url)
     if engine.dialect.name == "sqlite":
-        event.listen(engine, "connect", _enable_sqlite_foreign_keys)
+        event.listen(engine, "connect", _configure_sqlite)
     return engine
 
 
-def _enable_sqlite_foreign_keys(dbapi_connection, _record) -> None:
+def _configure_sqlite(dbapi_connection, _record) -> None:
+    """Enforce foreign keys; let readers and one writer work concurrently."""
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}")
+    cursor.execute("PRAGMA journal_mode=WAL")
     cursor.close()
 
 

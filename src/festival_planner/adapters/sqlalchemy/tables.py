@@ -3,14 +3,17 @@
 import datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
     MetaData,
     String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -141,3 +144,132 @@ class ScreeningEventRow(Base):
     description: Mapped[str] = mapped_column(String)
     start_time: Mapped[datetime.datetime | None] = mapped_column(UTCDateTime)
     end_time: Mapped[datetime.datetime | None] = mapped_column(UTCDateTime)
+
+
+PLANNING_TARGET_KINDS = (
+    "screening_commitments",
+    "film_commitments",
+    "excluded_screenings",
+    "excluded_programme_entries",
+)
+"""`PlanningTargetRow.kind` values: the set fields of `PlanningInputs`."""
+
+
+class UserRow(Base):
+    __tablename__ = "app_user"
+    id: Mapped[str] = mapped_column(ID, primary_key=True)
+    issuer: Mapped[str] = mapped_column(String)
+    subject: Mapped[str] = mapped_column(String)
+    __table_args__ = (UniqueConstraint("issuer", "subject"),)
+
+
+class PlanningInputsRow(Base):
+    __tablename__ = "planning_inputs"
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"), primary_key=True)
+    festival_id: Mapped[str] = mapped_column(
+        ForeignKey("festival.id"), primary_key=True
+    )
+    preferences: Mapped[str] = mapped_column(Text)
+    """`Preferences` as JSON."""
+
+
+class PlanningTargetRow(Base):
+    """One commitment or Excluded id of a User's accepted inputs."""
+
+    __tablename__ = "planning_target"
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"), primary_key=True)
+    festival_id: Mapped[str] = mapped_column(
+        ForeignKey("festival.id"), primary_key=True
+    )
+    kind: Mapped[str] = mapped_column(String, primary_key=True)
+    target_id: Mapped[str] = mapped_column(ID, primary_key=True)
+
+
+class ScheduleRow(Base):
+    __tablename__ = "schedule"
+    id: Mapped[str] = mapped_column(ID, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"))
+    festival_id: Mapped[str] = mapped_column(ForeignKey("festival.id"))
+    number: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float] = mapped_column(Float)
+    change_set: Mapped[str] = mapped_column(Text)
+    """`ChangeSet` as JSON."""
+    accepted_at: Mapped[datetime.datetime] = mapped_column(UTCDateTime)
+    screenings: Mapped[list["ScheduleScreeningRow"]] = relationship(
+        cascade="all, delete-orphan", order_by="ScheduleScreeningRow.screening_id"
+    )
+    __table_args__ = (UniqueConstraint("user_id", "festival_id", "number"),)
+
+
+class ScheduleScreeningRow(Base):
+    __tablename__ = "schedule_screening"
+    schedule_id: Mapped[str] = mapped_column(
+        ForeignKey("schedule.id", ondelete="CASCADE"), primary_key=True
+    )
+    screening_id: Mapped[str] = mapped_column(
+        ForeignKey("screening.id"), primary_key=True
+    )
+
+
+class DraftRow(Base):
+    __tablename__ = "draft"
+    id: Mapped[str] = mapped_column(ID, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"))
+    festival_id: Mapped[str] = mapped_column(ForeignKey("festival.id"))
+    base_schedule_id: Mapped[str | None] = mapped_column(ForeignKey("schedule.id"))
+    status: Mapped[str] = mapped_column(String)
+    attempt: Mapped[int] = mapped_column(Integer)
+    change_set: Mapped[str] = mapped_column(Text)
+    score: Mapped[float] = mapped_column(Float)
+    reasons: Mapped[str] = mapped_column(Text)
+    """JSON list of strings."""
+    notes: Mapped[str] = mapped_column(Text)
+    """JSON list of strings."""
+    created_at: Mapped[datetime.datetime] = mapped_column(UTCDateTime)
+    solved_at: Mapped[datetime.datetime | None] = mapped_column(UTCDateTime)
+    scheduled: Mapped[list["DraftScreeningRow"]] = relationship(
+        cascade="all, delete-orphan", order_by="DraftScreeningRow.position"
+    )
+    __table_args__ = (Index("ix_draft_user_id_festival_id", "user_id", "festival_id"),)
+
+
+class DraftScreeningRow(Base):
+    __tablename__ = "draft_screening"
+    draft_id: Mapped[str] = mapped_column(
+        ForeignKey("draft.id", ondelete="CASCADE"), primary_key=True
+    )
+    screening_id: Mapped[str] = mapped_column(
+        ForeignKey("screening.id"), primary_key=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    arrival_time: Mapped[datetime.datetime] = mapped_column(UTCDateTime)
+    weight: Mapped[float] = mapped_column(Float)
+
+
+class TicketRow(Base):
+    __tablename__ = "ticket"
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"), primary_key=True)
+    screening_id: Mapped[str] = mapped_column(
+        ForeignKey("screening.id"), primary_key=True
+    )
+    exchangeable: Mapped[bool] = mapped_column(Boolean)
+    refundable: Mapped[bool] = mapped_column(Boolean)
+
+
+class SeenRow(Base):
+    """A Film a User marked Seen by hand (or, later, by provider sync)."""
+
+    __tablename__ = "seen"
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"), primary_key=True)
+    film_id: Mapped[str] = mapped_column(ForeignKey("film.id"), primary_key=True)
+    source: Mapped[str] = mapped_column(String)
+
+
+class SeenDismissalRow(Base):
+    """A Screening the User did not attend, though it was in their Active Schedule."""
+
+    __tablename__ = "seen_dismissal"
+    user_id: Mapped[str] = mapped_column(ForeignKey("app_user.id"), primary_key=True)
+    screening_id: Mapped[str] = mapped_column(
+        ForeignKey("screening.id"), primary_key=True
+    )

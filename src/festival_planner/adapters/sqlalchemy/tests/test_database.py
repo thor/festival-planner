@@ -21,11 +21,27 @@ TABLES = {
     "screening",
     "screening_event",
     "alembic_version",
+    "app_user",
+    "planning_inputs",
+    "planning_target",
+    "schedule",
+    "schedule_screening",
+    "draft",
+    "draft_screening",
+    "ticket",
+    "seen",
+    "seen_dismissal",
 }
 
 
 def test_migrate_creates_every_table(engine):
     assert set(inspect(engine).get_table_names()) == TABLES
+
+
+def test_sqlite_runs_in_wal_mode_with_a_busy_timeout(engine):
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA journal_mode").scalar() == "wal"
+        assert connection.exec_driver_sql("PRAGMA busy_timeout").scalar() == 5000
 
 
 def test_migrations_match_the_table_definitions(engine):
