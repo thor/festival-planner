@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 from alembic import command
 from sqlalchemy import inspect, text
@@ -6,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from festival_planner.adapters.sqlalchemy.database import (
     DATABASE_URL_ENV,
     alembic_config,
+    create_engine_for,
     migrate,
     resolve_database_url,
 )
@@ -51,6 +54,17 @@ def test_migrations_match_the_table_definitions(engine):
 
 def test_migrate_is_idempotent(engine):
     migrate(engine)
+
+
+def test_migrate_logs_nothing_below_warning(tmp_path, caplog):
+    engine = create_engine_for(f"sqlite:///{tmp_path / 'quiet.db'}")
+    try:
+        with caplog.at_level(logging.INFO):
+            migrate(engine)
+    finally:
+        engine.dispose()
+    assert not [r for r in caplog.records if r.name.startswith("alembic")]
+    assert logging.getLogger("alembic").level == logging.NOTSET
 
 
 def test_sqlite_enforces_foreign_keys(engine):

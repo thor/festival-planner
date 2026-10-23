@@ -1,5 +1,6 @@
 """Locating, connecting to and migrating the database."""
 
+import logging
 import os
 from pathlib import Path
 
@@ -55,6 +56,12 @@ def alembic_config(connection: Connection | None = None) -> Config:
 
 
 def migrate(engine: Engine, revision: str = "head") -> None:
-    """Bring the schema up to `revision`."""
-    with engine.begin() as connection:
-        command.upgrade(alembic_config(connection), revision)
+    """Bring the schema up to `revision`, without Alembic's INFO messages."""
+    alembic_logger = logging.getLogger("alembic")
+    level = alembic_logger.level
+    alembic_logger.setLevel(max(level, logging.WARNING))
+    try:
+        with engine.begin() as connection:
+            command.upgrade(alembic_config(connection), revision)
+    finally:
+        alembic_logger.setLevel(level)
