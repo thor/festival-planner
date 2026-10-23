@@ -5,17 +5,17 @@ import time
 from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 from urllib.parse import quote
+
 import httpx
 from bs4 import BeautifulSoup, Tag
 from hishel import BaseFilter, FilterPolicy, Response, SyncSqliteStorage
 from hishel.httpx import SyncCacheTransport
 from pydantic import ValidationError
 
+from .._logging import get_logger
 from ..models import Film, FilmList
 from .base import BaseScraper
-from .._logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -26,7 +26,7 @@ class _SuccessfulResponseFilter(BaseFilter[Response]):
     def needs_body(self) -> bool:
         return False
 
-    def apply(self, item: Response, body: Optional[bytes]) -> bool:
+    def apply(self, item: Response, body: bytes | None) -> bool:
         return 200 <= item.status_code < 300
 
 
@@ -73,11 +73,11 @@ class FilmfrasorScraper(BaseScraper):
 
     def __init__(
         self,
-        cache_dir: Optional[Path] = None,
-        year: Optional[int] = None,
+        cache_dir: Path | None = None,
+        year: int | None = None,
         force_refresh: bool = False,
         known_venue_names: Iterable[str] = (),
-        language: Optional[str] = "no",
+        language: str | None = "no",
     ):
         """Initialize the Filmfrasor scraper.
 
@@ -314,7 +314,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return screenings
 
-    def _extract_title(self, soup: BeautifulSoup) -> Optional[str]:
+    def _extract_title(self, soup: BeautifulSoup) -> str | None:
         """Extract film title from the page."""
         # Try h1 first
         h1 = soup.find("h1")
@@ -335,7 +335,7 @@ class FilmfrasorScraper(BaseScraper):
 
     def _extract_country_and_year(
         self, soup: BeautifulSoup
-    ) -> tuple[str, Optional[int]]:
+    ) -> tuple[str, int | None]:
         """Extract country and year information from the page.
 
         The facts live in .entry-info > .extra as label/value pairs, where each
@@ -395,7 +395,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return screening_elements
 
-    def _parse_screening_element(self, element: Tag) -> Optional[tuple]:
+    def _parse_screening_element(self, element: Tag) -> tuple | None:
         """Parse a screening element to extract time, cinema, etc.
 
         The element is a div with class "show-item" and a data-start attribute
@@ -496,7 +496,7 @@ class FilmfrasorScraper(BaseScraper):
 
     def _split_cinema_and_auditorium(
         self, cinema_text: str
-    ) -> tuple[str, Optional[str]]:
+    ) -> tuple[str, str | None]:
         """Split cinema text into cinema name and auditorium.
 
         Uses config-based cinema names to intelligently parse the text.
@@ -565,7 +565,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return "Unknown"
 
-    def _extract_special_notes(self, text: str) -> Optional[str]:
+    def _extract_special_notes(self, text: str) -> str | None:
         """Extract special notes like Q&A, premiere, etc."""
         keywords = [
             "Q&A",

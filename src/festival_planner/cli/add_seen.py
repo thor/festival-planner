@@ -1,15 +1,14 @@
 """CLI commands for marking films as seen or to be ignored."""
 
 import datetime
-from typing import Optional
-from iterfzf import iterfzf
+
 import typer
+from iterfzf import iterfzf
 from rich.console import Console
 
+from .._logging import get_logger
 from ..config import Config, ConfigLoader
 from ..models import SeenFilm
-from .._logging import get_logger
-
 
 console = Console()
 logger = get_logger(__name__)
@@ -18,19 +17,19 @@ app = typer.Typer()
 
 @app.command()
 def add_seen(
-    title: Optional[str] = typer.Option(
+    title: str | None = typer.Option(
         None,
         "--title",
         "-t",
         help="Film title",
     ),
-    search: Optional[str] = typer.Option(
+    search: str | None = typer.Option(
         None,
         "--search",
         "-s",
         help="Initial search term to filter films",
     ),
-    date: Optional[str] = typer.Option(
+    date: str | None = typer.Option(
         None,
         "--date",
         "-d",

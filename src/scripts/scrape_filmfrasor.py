@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Standalone script to scrape Filmfrasor.no programme."""
 
-import sys
 import argparse
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # Add parent directory to path to import festival_planner
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from festival_planner.scrapers import FilmfrasorScraper
 from festival_planner.config import ConfigLoader
 from festival_planner.models import normalise_cinemas
+from festival_planner.scrapers import FilmfrasorScraper
 
 
 def main():

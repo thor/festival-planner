@@ -1,7 +1,9 @@
 """Test cases for cinema and auditorium parsing logic."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from festival_planner.config import ConfigLoader
 from festival_planner.scrapers.filmfrasor import FilmfrasorScraper
 

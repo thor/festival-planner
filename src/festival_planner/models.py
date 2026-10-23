@@ -1,7 +1,7 @@
 """Pydantic models for festival planner data structures."""
 
 import datetime
-from typing import Optional
+
 from pydantic import AliasChoices, BaseModel, Field
 
 from ._logging import get_logger
@@ -33,21 +33,21 @@ class Film(BaseModel):
 
     title: str = Field(..., description="Film title")
     country: str = Field(..., description="Country of origin")
-    year: Optional[int] = Field(default=None, description="Year of release")
-    url: Optional[str] = Field(
+    year: int | None = Field(default=None, description="Year of release")
+    url: str | None = Field(
         default=None, description="URL to the film's page on the festival website"
     )
-    ticket_url: Optional[str] = Field(
+    ticket_url: str | None = Field(
         default=None,
         description="URL to the film's ticket page on the festival website",
     )
     start_time: datetime.datetime = Field(..., description="Screening start time")
     end_time: datetime.datetime = Field(..., description="Screening end time")
     cinema: str = Field(..., description="Cinema/venue name")
-    auditorium: Optional[str] = Field(
+    auditorium: str | None = Field(
         default=None, description="Auditorium number or name (None if unknown)"
     )
-    special_notes: Optional[str] = Field(
+    special_notes: str | None = Field(
         default=None, description="Special event information (Q&A, premiere, etc.)"
     )
     preference_weight: float = Field(
@@ -84,7 +84,7 @@ class SeenFilm(BaseModel):
     """Represents a film that has been seen or should be ignored."""
 
     title: str
-    date: Optional[datetime.date] = None
+    date: datetime.date | None = None
 
 
 class FilmWeight(BaseModel):
@@ -95,7 +95,7 @@ class FilmWeight(BaseModel):
     """
 
     title: str = Field(..., description="Film title")
-    start_time: Optional[datetime.datetime] = Field(
+    start_time: datetime.datetime | None = Field(
         default=None, description="Screening start time (None for film-level weight)"
     )
     weight: float = Field(..., description="Custom weight override")
@@ -105,8 +105,8 @@ class ScheduleConfig(BaseModel):
     """Configuration for the schedule optimizer."""
 
     buffer_time_minutes: int = 15
-    start_date: Optional[datetime.date] = None
-    end_date: Optional[datetime.date] = None
+    start_date: datetime.date | None = None
+    end_date: datetime.date | None = None
     time_zone: str = "Europe/Oslo"
     """The festival's IANA time zone; legacy naive times are interpreted in it."""
 

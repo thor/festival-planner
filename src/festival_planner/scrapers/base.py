@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 from ..models import FilmList
 
@@ -10,7 +9,7 @@ from ..models import FilmList
 class BaseScraper(ABC):
     """Abstract base class for festival scrapers."""
 
-    def __init__(self, cache_dir: Optional[Path] = None):
+    def __init__(self, cache_dir: Path | None = None):
         """Initialize the scraper.
 
         Args:
@@ -25,7 +24,6 @@ class BaseScraper(ABC):
         Returns:
             FilmList containing all scraped films
         """
-        pass
 
     @abstractmethod
     def get_festival_name(self) -> str:
@@ -34,4 +32,3 @@ class BaseScraper(ABC):
         Returns:
             Festival name as a string
         """
-        pass

@@ -11,7 +11,6 @@ References:
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 
 class PathProvider(ABC):
@@ -28,7 +27,6 @@ class PathProvider(ABC):
         Returns:
             Path to the writable configuration directory
         """
-        pass
 
     @abstractmethod
     def get_config_dirs(self) -> list[Path]:
@@ -37,7 +35,6 @@ class PathProvider(ABC):
         Returns:
             List of paths to search for configuration files, ordered by priority
         """
-        pass
 
     @abstractmethod
     def get_data_home(self) -> Path:
@@ -46,7 +43,6 @@ class PathProvider(ABC):
         Returns:
             Path to the writable data directory
         """
-        pass
 
     @abstractmethod
     def get_data_dirs(self) -> list[Path]:
@@ -55,7 +51,6 @@ class PathProvider(ABC):
         Returns:
             List of paths to search for data files, ordered by priority
         """
-        pass
 
     @abstractmethod
     def get_state_home(self) -> Path:
@@ -64,7 +59,6 @@ class PathProvider(ABC):
         Returns:
             Path to the state directory
         """
-        pass
 
     @abstractmethod
     def get_cache_home(self) -> Path:
@@ -73,7 +67,6 @@ class PathProvider(ABC):
         Returns:
             Path to the cache directory
         """
-        pass
 
 
 class XDGPathProvider(PathProvider):

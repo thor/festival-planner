@@ -3,9 +3,8 @@
 import typer
 from rich.console import Console
 
-from ..config import ConfigLoader
 from .._logging import get_logger
-
+from ..config import ConfigLoader
 
 console = Console()
 logger = get_logger(__name__)

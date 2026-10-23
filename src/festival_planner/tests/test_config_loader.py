@@ -1,21 +1,21 @@
 """High-level tests for configuration loader with XDG path support."""
 
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 from ruamel.yaml import YAML
 
 from festival_planner.config import (
     CONFIG_FILE,
-    PREFERENCES_FILE,
     FILMS_FILE,
+    PREFERENCES_FILE,
     ConfigLoader,
     FilmPreferences,
 )
-from festival_planner.models import Film, FilmList, SeenFilm, FilmWeight
-from festival_planner.path_providers import XDGPathProvider, PathProvider
+from festival_planner.models import Film, FilmList, FilmWeight, SeenFilm
+from festival_planner.path_providers import PathProvider, XDGPathProvider
 
 
 class MockPathProvider(PathProvider):
@@ -230,7 +230,7 @@ class TestConfigLoaderFiltering:
 
     def test_filter_seen_films(self) -> None:
         """Test filtering of seen films (all screenings and specific dates)."""
-        from datetime import datetime, date
+        from datetime import date, datetime
         
         loader = ConfigLoader()
         
@@ -330,7 +330,6 @@ class TestConfigLoaderIntegration:
         yaml_writer: YAML,
     ) -> None:
         """Test complete workflow: setup, load, filter, apply weights, save."""
-        from datetime import datetime, date
         
         # Set up initial configuration
         config_dir = mock_provider.get_config_home()

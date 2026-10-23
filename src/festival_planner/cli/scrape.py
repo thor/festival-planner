@@ -1,15 +1,14 @@
 """CLI commands for scraping film festival programme data."""
 
 from pathlib import Path
-from typing import Optional
+
 import typer
 from rich.console import Console
 
+from .._logging import get_logger
 from ..config import ConfigLoader
 from ..models import normalise_cinemas
 from ..scrapers import FilmfrasorScraper
-from .._logging import get_logger
-
 
 console = Console()
 logger = get_logger(__name__)
@@ -19,13 +18,13 @@ app = typer.Typer()
 
 @app.command()
 def scrape(
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output",
         "-o",
         help="Output file path (default: data/films.yaml)",
     ),
-    year: Optional[int] = typer.Option(
+    year: int | None = typer.Option(
         None,
         "--year",
         "-y",

@@ -1,20 +1,21 @@
 """Configuration management for loading and validating YAML files."""
 
 from pathlib import Path
-from typing import Optional, TypeVar, Type
-from ruamel.yaml import YAML
-from pydantic import BaseModel, Field
+from typing import TypeVar
 
-from .models import (
-    FilmList,
-    PriorityConfig,
-    CinemaConfig,
-    ScheduleConfig,
-    Film,
-    SeenFilm,
-    FilmWeight,
-)
+from pydantic import BaseModel, Field
+from ruamel.yaml import YAML
+
 from ._logging import get_logger
+from .models import (
+    CinemaConfig,
+    Film,
+    FilmList,
+    FilmWeight,
+    PriorityConfig,
+    ScheduleConfig,
+    SeenFilm,
+)
 from .path_providers import PathProvider, create_default_path_provider
 
 # Configuration file
@@ -33,9 +34,9 @@ logger = get_logger(__name__)
 
 
 def _load_yaml_model(
-    model_class: Type[T],
+    model_class: type[T],
     default_path: Path,
-    filepath: Optional[Path] = None,
+    filepath: Path | None = None,
 ) -> T:
     """Generic YAML model loader with validation.
 
@@ -62,7 +63,7 @@ def _load_yaml_model(
     return model_class(**data)
 
 
-def _find_file_in_search_paths(filename: str, search_paths: list[Path]) -> Optional[Path]:
+def _find_file_in_search_paths(filename: str, search_paths: list[Path]) -> Path | None:
     """Search for a file in multiple directories.
     
     Args:
@@ -124,9 +125,9 @@ class ConfigLoader:
 
     def __init__(
         self,
-        path_provider: Optional[PathProvider] = None,
-        config_dir: Optional[Path] = None,
-        data_dir: Optional[Path] = None,
+        path_provider: PathProvider | None = None,
+        config_dir: Path | None = None,
+        data_dir: Path | None = None,
     ):
         """Initialize the configuration loader.
 
@@ -167,7 +168,7 @@ class ConfigLoader:
         """Load configuration from YAML file."""
         return self.load_composite_config()
 
-    def load_composite_config(self, filepath: Optional[Path] = None) -> Config:
+    def load_composite_config(self, filepath: Path | None = None) -> Config:
         """Load configuration from multiple files based on model field metadata.
 
         Searches for configuration files in XDG-compliant directories in order:
@@ -201,7 +202,7 @@ class ConfigLoader:
             config = loader.load_composite_config()
         """
         # Extract file sources and key mappings from model metadata
-        field_sources: dict[str, tuple[str, Optional[str]]] = {}
+        field_sources: dict[str, tuple[str, str | None]] = {}
 
         for field_name, field_info in Config.model_fields.items():
             # Get metadata from json_schema_extra
@@ -270,7 +271,7 @@ class ConfigLoader:
 
         return Config(**config_data)
 
-    def load_films(self, filepath: Optional[Path] = None) -> FilmList:
+    def load_films(self, filepath: Path | None = None) -> FilmList:
         """Load films from YAML file.
         
         Searches for films file in XDG-compliant data directories in order.
@@ -298,7 +299,7 @@ class ConfigLoader:
         logger.debug("Loading films file", filepath=str(found_path))
         return _load_yaml_model(FilmList, found_path, found_path)
 
-    def save_films(self, film_list: FilmList, filepath: Optional[Path] = None) -> None:
+    def save_films(self, film_list: FilmList, filepath: Path | None = None) -> None:
         """Save films to YAML file in writable data directory.
         
         Always writes to the primary data directory (XDG_DATA_HOME), never to
@@ -323,7 +324,7 @@ class ConfigLoader:
             yaml_dumper.dump(film_list.model_dump(mode="json"), f)
 
     def save_preferences(
-        self, preferences: FilmPreferences, filepath: Optional[Path] = None
+        self, preferences: FilmPreferences, filepath: Path | None = None
     ) -> None:
         """Save film preferences to YAML file in writable config directory.
         

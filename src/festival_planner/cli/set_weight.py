@@ -1,15 +1,14 @@
 """CLI commands for setting custom preference weights on films."""
 
-from typing import Optional
+
 import typer
+from iterfzf import iterfzf
 from rich.console import Console
 from rich.prompt import Prompt
-from iterfzf import iterfzf
 
+from .._logging import get_logger
 from ..config import ConfigLoader
 from ..models import FilmWeight
-from .._logging import get_logger
-
 
 console = Console()
 logger = get_logger(__name__)
@@ -18,7 +17,7 @@ app = typer.Typer()
 
 @app.command()
 def set_weight(
-    search: Optional[str] = typer.Option(
+    search: str | None = typer.Option(
         None,
         "--search",
         "-s",
