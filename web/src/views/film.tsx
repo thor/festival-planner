@@ -9,7 +9,7 @@ import type { EntryVM, FilmVM, ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
 import { Docked } from "./dock"
-import { Action, ExternalLink, Meta, Page } from "./parts"
+import { Action, ExternalLink, Meta, Page, Place } from "./parts"
 import { ScreeningRow } from "./screening-row"
 
 export function FilmView({ vm }: { vm: FilmVM }) {
@@ -81,7 +81,8 @@ function BuyTicket({
         Buy ticket
       </span>
       <span className="truncate opacity-80">
-        {buy.day} {buy.time} {buy.venue}
+        {buy.day} {buy.time}{" "}
+        <Place venue={buy.venue} auditorium={buy.auditorium} />
       </span>
     </ExternalLink>
   )

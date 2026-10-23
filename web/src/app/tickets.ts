@@ -78,6 +78,7 @@ export function useTicketModels(
       href: entryHref(festival, { id: s.programmeEntryId }),
       when: when(s, tz),
       venue: s.venue.name,
+      auditorium: s.auditorium,
       notes: [
         ...notes,
         t.refundable ? "Refundable" : null,

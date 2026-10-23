@@ -44,6 +44,10 @@ _Avoid_: Metadata, extra info
 A fixed physical place where screenings take place, known in advance of a festival.
 _Avoid_: Cinema, location, theatre
 
+**Auditorium**:
+The room within a Venue where a Screening takes place, named or numbered by the Venue ("3", "Lillebil"). Optional: not every programme says.
+_Avoid_: Room, hall, screen, sal
+
 **Route**:
 A precalculated way of travelling from one Venue to another by a given Transport Mode, with its own travel time. There can be several Routes between the same two Venues.
 _Avoid_: Travel time, path, leg

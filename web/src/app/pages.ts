@@ -182,6 +182,7 @@ export function useSchedulePage(
           title: s.title,
           time: clock(s.startTime, f.timeZone),
           venue: s.venue.name,
+          auditorium: s.auditorium,
           href: entryHref(f, { id: s.programmeEntryId }),
           left,
           width,
@@ -309,6 +310,7 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
     title: s.title,
     when: when(s, tz),
     venue: s.venue.name,
+    auditorium: s.auditorium,
     ticket: tickets.has(s.id),
   })
   const failed = accept.error ?? discard.error ?? resolve.error

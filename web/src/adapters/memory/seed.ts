@@ -57,6 +57,17 @@ type Row = [
   slots: string[],
 ]
 
+// Auditoriums by Venue: numbered, named, or unknown (Klingenberg).
+const rooms: (string[] | null)[] = [
+  ["1", "2", "3", "4", "5", "6"],
+  ["1", "2", "3", "4"],
+  ["Tancred", "Lillebil"],
+  ["1", "2", "3", "4", "5", "6"],
+  null,
+]
+const auditorium = (v: number, n: number) =>
+  rooms[v]?.[n % rooms[v].length] ?? null
+
 // Each slot: "day hh:mm venue": day 0 is the opening Friday.
 const films: Row[] = [
   ["Sirāt", 2025, "Spain", 115, ["0 18:00 0", "3 21:15 3", "7 14:30 1"]],
@@ -122,7 +133,7 @@ export const programme: ProgrammeEntry[] = films
         startTime: instant(Number(day), time),
         endTime: instant(Number(day), time, minutes),
         venue: venues[Number(v)],
-        auditorium: null,
+        auditorium: auditorium(Number(v), f + s),
         ticketUrl: `https://tickets.example/ffs/${f + 1}-${s + 1}`,
         events:
           f % 4 === 0 && s === 0

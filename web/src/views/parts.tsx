@@ -201,3 +201,21 @@ export function Meta({
     </p>
   )
 }
+
+/** Venue, then its Auditorium a step quieter: "Vika 3", "Cinemateket Lillebil". */
+export function Place({
+  venue,
+  auditorium,
+  className,
+}: {
+  venue: string
+  auditorium: string | null
+  className?: string
+}) {
+  return (
+    <span className={className}>
+      {venue}
+      {auditorium && <span className="opacity-65"> {auditorium}</span>}
+    </span>
+  )
+}

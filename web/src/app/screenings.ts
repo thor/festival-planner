@@ -70,6 +70,7 @@ export function useEntryModels(
       day: shortDay(dayKey(s.startTime, tz)),
       time: clock(s.startTime, tz),
       venue: s.venue.name,
+      auditorium: s.auditorium,
       withdrawn: s.withdrawn,
       past: isPast(s.startTime),
       scheduled: scheduled.has(s.id),

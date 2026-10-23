@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
 
-import { Page } from "./parts"
+import { Page, Place } from "./parts"
 
 export function ScheduleView({ vm }: { vm: ScheduleVM }) {
   if (vm.number === null) {
@@ -90,7 +90,7 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
                     {b.ticket && (
                       <TicketIcon size={14} weight="bold" aria-label="Ticket" />
                     )}
-                    {b.time} {b.venue}
+                    {b.time} <Place venue={b.venue} auditorium={b.auditorium} />
                   </span>
                 </Link>
               ))}
@@ -112,9 +112,21 @@ export function ScheduleView({ vm }: { vm: ScheduleVM }) {
                     )}
                   >
                     <span className="w-12 shrink-0 text-right">{b.time}</span>
-                    <span className="swipe min-w-0 flex-1">{b.title}</span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="swipe">{b.title}</span>
+                      <Place
+                        venue={b.venue}
+                        auditorium={b.auditorium}
+                        className="truncate text-sm text-grain"
+                      />
+                    </span>
                     {b.ticket && (
-                      <TicketIcon size={16} weight="bold" aria-label="Ticket" />
+                      <TicketIcon
+                        size={16}
+                        weight="bold"
+                        aria-label="Ticket"
+                        className="shrink-0 self-center"
+                      />
                     )}
                   </Link>
                 </li>

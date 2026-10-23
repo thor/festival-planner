@@ -4,7 +4,7 @@ import type { TicketsVM, TicketVM } from "@/app/view-models"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-import { ExternalLink, Page } from "./parts"
+import { ExternalLink, Page, Place } from "./parts"
 
 /** Tickets to let go on top, the rest below. Letting go is its own job. */
 export function TicketsView({ vm }: { vm: TicketsVM }) {
@@ -80,7 +80,7 @@ function When({ t }: { t: TicketVM }) {
   return (
     <p className="flex gap-4 text-grain">
       <span>{t.when}</span>
-      <span>{t.venue}</span>
+      <Place venue={t.venue} auditorium={t.auditorium} />
     </p>
   )
 }

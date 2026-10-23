@@ -9,7 +9,7 @@ import {
 import type { ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
 
-import { Action } from "./parts"
+import { Action, Place } from "./parts"
 
 export function ScreeningRow({
   s,
@@ -37,7 +37,15 @@ export function ScreeningRow({
         {s.time}
       </span>
       <span className="flex min-w-0 items-center gap-2">
-        <span className="truncate">{s.withdrawn ? "Withdrawn" : s.venue}</span>
+        {s.withdrawn ? (
+          <span className="truncate">Withdrawn</span>
+        ) : (
+          <Place
+            venue={s.venue}
+            auditorium={s.auditorium}
+            className="truncate"
+          />
+        )}
         {s.event && (
           <MicrophoneStageIcon
             size={16}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { ItemLine } from "./items"
-import { Page, Spinner } from "./parts"
+import { Page, Place, Spinner } from "./parts"
 
 const statusWord: Record<DraftVM["status"], string> = {
   solving: "Solving",
@@ -163,7 +163,7 @@ function DiffList({
             </p>
             <p className="mt-2 flex items-center gap-4 text-grain">
               <span>{r.when}</span>
-              <span>{r.venue}</span>
+              <Place venue={r.venue} auditorium={r.auditorium} />
               {r.ticket && (
                 <TicketIcon
                   size={16}

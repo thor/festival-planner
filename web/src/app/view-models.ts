@@ -18,6 +18,8 @@ export interface ScreeningVM {
   day: string
   time: string
   venue: string
+  /** A number or a name; null when the programme does not say. */
+  auditorium: string | null
   withdrawn: boolean
   past: boolean
   /** In the Active Schedule. */
@@ -74,6 +76,8 @@ export interface BlockVM {
   title: string
   time: string
   venue: string
+  /** A number or a name; null when the programme does not say. */
+  auditorium: string | null
   href: string
   left: number
   width: number
@@ -117,6 +121,8 @@ export interface TicketVM {
   href: string
   when: string
   venue: string
+  /** A number or a name; null when the programme does not say. */
+  auditorium: string | null
   /** Why it is here and what the ticket allows: "Not scheduled", "Refundable". */
   notes: string[]
   /** Let go only: put it back in the Schedule, through the tray. */
@@ -155,6 +161,8 @@ export interface DiffRowVM {
   title: string
   when: string
   venue: string
+  /** A number or a name; null when the programme does not say. */
+  auditorium: string | null
   ticket: boolean
 }
 
