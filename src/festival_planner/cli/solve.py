@@ -5,6 +5,7 @@ import zoneinfo
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from rich import box
@@ -110,40 +111,52 @@ def _load_request_from_yaml() -> SolveRequest:
 
 @app.command()
 def solve(
-    dates: str | None = typer.Option(
-        None,
-        "--dates",
-        "-d",
-        help="Date range filter (format: YYYY-MM-DD:YYYY-MM-DD or single date)",
-    ),
-    output: Path | None = typer.Option(
-        None,
-        "--output",
-        "-o",
-        help="Output file for schedule",
-    ),
-    time_limit: int | None = typer.Option(
-        None,
-        "--time-limit",
-        "-t",
-        help="Solver time limit in seconds (default: 60, or the request's own)",
-    ),
-    buffer_time: int | None = typer.Option(
-        None,
-        "--buffer",
-        "-b",
-        help="Buffer time before each film in minutes",
-    ),
-    request_file: Path | None = typer.Option(
-        None,
-        "--request",
-        help="Solve a JSON solve request instead of the YAML configuration",
-    ),
-    export_request: Path | None = typer.Option(
-        None,
-        "--export-request",
-        help="Write the solve request as JSON before solving",
-    ),
+    dates: Annotated[
+        str | None,
+        typer.Option(
+            "--dates",
+            "-d",
+            help="Date range filter (format: YYYY-MM-DD:YYYY-MM-DD or single date)",
+        ),
+    ] = None,
+    output: Annotated[
+        Path | None,
+        typer.Option(
+            "--output",
+            "-o",
+            help="Output file for schedule",
+        ),
+    ] = None,
+    time_limit: Annotated[
+        int | None,
+        typer.Option(
+            "--time-limit",
+            "-t",
+            help="Solver time limit in seconds (default: 60, or the request's own)",
+        ),
+    ] = None,
+    buffer_time: Annotated[
+        int | None,
+        typer.Option(
+            "--buffer",
+            "-b",
+            help="Buffer time before each film in minutes",
+        ),
+    ] = None,
+    request_file: Annotated[
+        Path | None,
+        typer.Option(
+            "--request",
+            help="Solve a JSON solve request instead of the YAML configuration",
+        ),
+    ] = None,
+    export_request: Annotated[
+        Path | None,
+        typer.Option(
+            "--export-request",
+            help="Write the solve request as JSON before solving",
+        ),
+    ] = None,
 ) -> None:
     """Solve the scheduling optimization problem."""
     if request_file:

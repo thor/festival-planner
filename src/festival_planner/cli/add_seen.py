@@ -71,7 +71,7 @@ def _save_seen_film(
 ) -> None:
     # Convert date string to datetime.date for proper comparison
     film_date = datetime.date.fromisoformat(date) if date else None
-    
+
     seen_map = {(f.title, f.date): f for f in config.films.seen}
     if (title, film_date) in seen_map:
         console.print(

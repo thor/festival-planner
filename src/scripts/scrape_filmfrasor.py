@@ -65,41 +65,31 @@ def main():
     )
 
     # Scrape programme, then normalise and filter cinemas
-    try:
-        film_list = normalise_cinemas(scraper.scrape(), cinemas)
-        print(f"✓ Successfully scraped {len(film_list.films)} films")
+    film_list = normalise_cinemas(scraper.scrape(), cinemas)
+    print(f"✓ Successfully scraped {len(film_list.films)} films")
 
-        # Save to YAML
-        output_file = data_dir / "films.yaml"
-        loader.save_films(film_list, output_file)
+    # Save to YAML
+    output_file = data_dir / "films.yaml"
+    loader.save_films(film_list, output_file)
 
-        print(f"✓ Saved to {output_file}")
+    print(f"✓ Saved to {output_file}")
 
-        # Display summary
-        if film_list.films:
-            print("\nSummary:")
-            cinemas = set(film.cinema for film in film_list.films)
-            print(f"  Cinemas: {len(cinemas)}")
-            print(f"  Cinema names: {', '.join(sorted(cinemas))}")
+    # Display summary
+    if film_list.films:
+        print("\nSummary:")
+        cinemas = {film.cinema for film in film_list.films}
+        print(f"  Cinemas: {len(cinemas)}")
+        print(f"  Cinema names: {', '.join(sorted(cinemas))}")
 
-            auditoriums = set(
-                f"{film.cinema} {film.auditorium}" for film in film_list.films
-            )
-            print(f"  Total auditoriums: {len(auditoriums)}")
+        auditoriums = {f"{film.cinema} {film.auditorium}" for film in film_list.films}
+        print(f"  Total auditoriums: {len(auditoriums)}")
 
-            dates = set(film.date for film in film_list.films)
-            print(f"  Dates: {len(dates)}")
-            if dates:
-                print(f"  Date range: {min(dates)} to {max(dates)}")
+        dates = {film.date for film in film_list.films}
+        print(f"  Dates: {len(dates)}")
+        if dates:
+            print(f"  Date range: {min(dates)} to {max(dates)}")
 
-        return 0
-
-    except Exception as e:
-        print(f"✗ Error: {e}", file=sys.stderr)
-        import traceback
-
-        traceback.print_exc()
-        return 1
+    return 0
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 """CLI commands for setting custom preference weights on films."""
 
-
 import typer
 from iterfzf import iterfzf
 from rich.console import Console

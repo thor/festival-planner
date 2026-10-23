@@ -33,7 +33,7 @@ T = TypeVar("T", bound=BaseModel)
 logger = get_logger(__name__)
 
 
-def _load_yaml_model(
+def _load_yaml_model[T: BaseModel](
     model_class: type[T],
     default_path: Path,
     filepath: Path | None = None,
@@ -65,11 +65,11 @@ def _load_yaml_model(
 
 def _find_file_in_search_paths(filename: str, search_paths: list[Path]) -> Path | None:
     """Search for a file in multiple directories.
-    
+
     Args:
         filename: Name of the file to find
         search_paths: List of directories to search in order
-        
+
     Returns:
         Path to the first existing file, or None if not found
     """
@@ -114,7 +114,7 @@ class Data(BaseModel):
 
 class ConfigLoader:
     """Loads and validates configuration files using XDG Base Directory specification.
-    
+
     Follows SOLID principles:
     - Single Responsibility: Manages configuration file I/O
     - Open/Closed: Extended via PathProvider injection
@@ -138,9 +138,9 @@ class ConfigLoader:
         """
         if path_provider is None:
             path_provider = create_default_path_provider()
-        
+
         self.path_provider = path_provider
-        
+
         # Support legacy config_dir/data_dir parameters for backward compatibility
         # but prefer PathProvider for new code
         if config_dir is not None:
@@ -149,14 +149,14 @@ class ConfigLoader:
         else:
             self.config_write_dir = path_provider.get_config_home()
             self.config_search_dirs = path_provider.get_config_dirs()
-        
+
         if data_dir is not None:
             self.data_write_dir = data_dir
             self.data_search_dirs = [data_dir]
         else:
             self.data_write_dir = path_provider.get_data_home()
             self.data_search_dirs = path_provider.get_data_dirs()
-        
+
         # Maintain backward compatibility attributes
         self.config_dir = self.config_write_dir
         self.data_dir = self.data_write_dir
@@ -224,13 +224,13 @@ class ConfigLoader:
 
         # Cache to avoid multiple reads of the same file
         file_data_cache: dict[str, dict] = {}
-        
+
         # Find and load each unique source file
-        unique_files = set(filename for filename, _ in field_sources.values())
+        unique_files = {filename for filename, _ in field_sources.values()}
         for filename in unique_files:
             # Search for file in XDG directories
             found_path = _find_file_in_search_paths(filename, self.config_search_dirs)
-            
+
             if found_path is None:
                 logger.debug(
                     "Config file not found in search paths",
@@ -239,9 +239,9 @@ class ConfigLoader:
                 )
                 file_data_cache[filename] = {}
                 continue
-            
+
             logger.debug("Loading config file", filepath=str(found_path))
-            
+
             with open(found_path, "r") as f:
                 yaml_loader = YAML()
                 file_data_cache[filename] = yaml_loader.load(f) or {}
@@ -273,7 +273,7 @@ class ConfigLoader:
 
     def load_films(self, filepath: Path | None = None) -> FilmList:
         """Load films from YAML file.
-        
+
         Searches for films file in XDG-compliant data directories in order.
 
         Args:
@@ -284,10 +284,10 @@ class ConfigLoader:
         """
         if filepath is not None:
             return _load_yaml_model(FilmList, filepath, filepath)
-        
+
         # Search for films file in data directories
         found_path = _find_file_in_search_paths(FILMS_FILE, self.data_search_dirs)
-        
+
         if found_path is None:
             logger.debug(
                 "Films file not found in search paths",
@@ -295,13 +295,13 @@ class ConfigLoader:
                 search_dirs=[str(d) for d in self.data_search_dirs],
             )
             return FilmList()
-        
+
         logger.debug("Loading films file", filepath=str(found_path))
         return _load_yaml_model(FilmList, found_path, found_path)
 
     def save_films(self, film_list: FilmList, filepath: Path | None = None) -> None:
         """Save films to YAML file in writable data directory.
-        
+
         Always writes to the primary data directory (XDG_DATA_HOME), never to
         system-wide directories.
 
@@ -317,9 +317,9 @@ class ConfigLoader:
         yaml_dumper = YAML()
         yaml_dumper.default_flow_style = False
         yaml_dumper.allow_unicode = True
-        
+
         logger.debug("Saving films file", filepath=str(filepath))
-        
+
         with open(filepath, "w") as f:
             yaml_dumper.dump(film_list.model_dump(mode="json"), f)
 
@@ -327,7 +327,7 @@ class ConfigLoader:
         self, preferences: FilmPreferences, filepath: Path | None = None
     ) -> None:
         """Save film preferences to YAML file in writable config directory.
-        
+
         Always writes to the primary config directory (XDG_CONFIG_HOME), never to
         system-wide directories.
 
@@ -343,9 +343,9 @@ class ConfigLoader:
         yaml_dumper = YAML()
         yaml_dumper.default_flow_style = False
         yaml_dumper.allow_unicode = True
-        
+
         logger.debug("Saving preferences file", filepath=str(filepath))
-        
+
         with open(filepath, "w") as f:
             yaml_dumper.dump(preferences.model_dump(mode="json"), f)
 
@@ -435,9 +435,9 @@ class ConfigLoader:
 
 def get_default_paths():
     """Get default paths for config and data directories.
-    
+
     Returns XDG-compliant paths for configuration and data.
-    
+
     Returns:
         Tuple of (config_home, data_home) paths
     """

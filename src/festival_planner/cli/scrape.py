@@ -1,6 +1,7 @@
 """CLI commands for scraping film festival programme data."""
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -18,24 +19,24 @@ app = typer.Typer()
 
 @app.command()
 def scrape(
-    output: Path | None = typer.Option(
-        None,
-        "--output",
-        "-o",
-        help="Output file path (default: data/films.yaml)",
-    ),
-    year: int | None = typer.Option(
-        None,
-        "--year",
-        "-y",
-        help="Festival year (default: current year)",
-    ),
-    refresh: bool = typer.Option(
-        False,
-        "--refresh",
-        "-r",
-        help="Force refresh: bypass HTTP cache and fetch fresh data from server",
-    ),
+    output: Annotated[
+        Path | None,
+        typer.Option(
+            "--output", "-o", help="Output file path (default: data/films.yaml)"
+        ),
+    ] = None,
+    year: Annotated[
+        int | None,
+        typer.Option("--year", "-y", help="Festival year (default: current year)"),
+    ] = None,
+    refresh: Annotated[
+        bool,
+        typer.Option(
+            "--refresh",
+            "-r",
+            help="Force refresh: bypass HTTP cache and fetch fresh data from server",
+        ),
+    ] = False,
 ) -> None:
     """Scrape the Filmfrasor.no programme and cache the results."""
     loader = ConfigLoader()

@@ -190,14 +190,15 @@ class FilmfrasorScraper(BaseScraper):
                         url=film_url,
                     )
 
-                except Exception as e:
-                    logger.error("Error scraping film page", url=film_url, error=str(e))
+                except Exception:
+                    # One broken film page must not stop the whole scrape.
+                    logger.exception("Error scraping film page", url=film_url)
                     continue
 
-        except httpx.HTTPError as e:
-            logger.error("HTTP error while scraping", error=str(e), exc_info=True)
-        except Exception as e:
-            logger.error("Error while scraping", error=str(e), exc_info=True)
+        except httpx.HTTPError:
+            logger.exception("HTTP error while scraping")
+        except Exception:
+            logger.exception("Error while scraping")
 
         logger.info("Scraping complete", total_screenings=len(films))
         return FilmList(films=sorted(films, key=lambda x: x.title))
@@ -301,16 +302,15 @@ class FilmfrasorScraper(BaseScraper):
                         )
                         continue
 
-                except Exception as e:
+                except Exception:
+                    # Skip a screening the page lays out in a way we do not expect.
                     logger.warning(
-                        "Error parsing screening element",
-                        title=title,
-                        error=str(e),
+                        "Error parsing screening element", title=title, exc_info=True
                     )
                     continue
 
-        except Exception as e:
-            print(f"  Error parsing film page {url}: {e}")
+        except Exception:
+            logger.exception("Error parsing film page", url=url)
 
         return screenings
 
@@ -333,9 +333,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return None
 
-    def _extract_country_and_year(
-        self, soup: BeautifulSoup
-    ) -> tuple[str, int | None]:
+    def _extract_country_and_year(self, soup: BeautifulSoup) -> tuple[str, int | None]:
         """Extract country and year information from the page.
 
         The facts live in .entry-info > .extra as label/value pairs, where each
@@ -494,9 +492,7 @@ class FilmfrasorScraper(BaseScraper):
 
         return (start_time, end_time, cinema, auditorium, special_notes, ticket_url)
 
-    def _split_cinema_and_auditorium(
-        self, cinema_text: str
-    ) -> tuple[str, str | None]:
+    def _split_cinema_and_auditorium(self, cinema_text: str) -> tuple[str, str | None]:
         """Split cinema text into cinema name and auditorium.
 
         Uses config-based cinema names to intelligently parse the text.
