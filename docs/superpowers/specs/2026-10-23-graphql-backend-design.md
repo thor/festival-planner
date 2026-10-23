@@ -272,6 +272,12 @@ Each step is its own plan and leaves working, tested software:
    `ProgrammeEntry.festival` is missing because the domain value has no
    `festival_id`; subscriptions and the `call_soon_threadsafe` hand-off are
    still open, and so is a sign-in path for a frontend.
+   Also open after the final review: rate-limit JWKS refetches on an
+   unknown `kid` before any `jwks_uri` issuer goes live; an `OSError` while
+   reading a remote JWKS escapes as a 500, not a 401; error masking hides
+   Strawberry's own paging errors (`first` above 100, a bad cursor), so
+   validate `first` and `after` and raise a `GraphQLError`; SQLAlchemy reads
+   use unbounded `IN` lists and load `Screening.events` lazily.
 5. **Curation**: Organizations, Memberships, Admin, Curations, Curator Notes,
    Suggested Schedules (signed in and anonymous), curation weight in
    Preferences and the adopt-a-Curation change-set item.
