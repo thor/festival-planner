@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { ItemLine } from "./items"
 import { Spinner } from "./parts"
 
-/** The pending Change Set, pinned to the bottom edge. */
+/** The pending Change Set, in the frame's bottom dock. */
 export function TrayView({ vm }: { vm: TrayVM }) {
   if (vm.items.length === 0) return null
   const count = vm.items.length
   return (
-    <aside aria-label="Changes" className="fixed inset-x-0 bottom-0 z-20 border-t border-ink bg-screen">
+    <aside aria-label="Changes" className="border-t border-ink bg-screen">
       <div className="mx-auto flex max-w-[90rem] items-center gap-3 px-4 py-3 md:px-8">
         <Dialog>
           <DialogTrigger render={<Button variant="ghost" className="h-10 gap-2 px-2 text-base" />}>

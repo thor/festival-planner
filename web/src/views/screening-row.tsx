@@ -1,4 +1,4 @@
-import { MicrophoneStageIcon, PlusIcon, TicketIcon, XIcon } from "@phosphor-icons/react"
+import { MicrophoneStageIcon, PlusIcon, ShoppingCartSimpleIcon, TicketIcon, XIcon } from "@phosphor-icons/react"
 
 import type { ScreeningVM } from "@/app/view-models"
 import { cn } from "@/lib/utils"
@@ -28,6 +28,14 @@ export function ScreeningRow({ s, withTicket = false }: { s: ScreeningVM; withTi
         {s.marks.pending && <span aria-label="Changed" className="size-1.5 shrink-0 bg-stamp" />}
       </span>
       <span className="flex">
+        {withTicket && s.buyHref && (
+          <Action
+            icon={ShoppingCartSimpleIcon}
+            label="Buy ticket"
+            href={s.buyHref}
+            className="mr-2 border-stamp text-stamp hover:bg-stamp hover:text-stamp-ink dark:border-stamp"
+          />
+        )}
         <Action
           icon={PlusIcon}
           label={s.marks.committed ? "Release" : "Commit"}

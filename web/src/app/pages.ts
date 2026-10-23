@@ -26,6 +26,7 @@ import type {
   ItemVM,
   Load,
   ProgrammeVM,
+  ScreeningVM,
   TrayVM,
   WeekVM,
 } from "./view-models"
@@ -77,13 +78,21 @@ export function useFilmPage(slug: string, entryId: string): Load<FilmVM> {
   if (festival.isPending || programme.isPending) return loading
   const entry = programme.data?.find((e) => e.id === entryId)
   if (!festival.data || !entry) return missing("No such film.")
+  const vm = models.entry(entry)
+  const selected = selectedViewing(vm.screenings)
   return ready({
     title: entry.title,
+    buy: !vm.screenings.some((s) => s.ticket) && selected?.buyHref ? selected : null,
     meta: metaOf(entry),
     url: entry.url,
-    entry: models.entry(entry),
+    entry: vm,
     backHref: `/${festival.data.slug}`,
   })
+}
+
+/** The viewing in the Active Schedule, else the committed one. */
+function selectedViewing(screenings: ScreeningVM[]) {
+  return screenings.find((s) => s.scheduled && !s.marks.excluded) ?? screenings.find((s) => s.marks.committed)
 }
 
 export function useWeekPage(slug: string): Load<WeekVM> & { signedIn: boolean } {

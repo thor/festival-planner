@@ -59,6 +59,7 @@ export function useEntryModels(festival: Festival | null | undefined, planning: 
       past: isPast(s.startTime),
       scheduled: scheduled.has(s.id),
       ticket: has,
+      buyHref: open && !has && s.ticketUrl ? s.ticketUrl : null,
       event: s.events[0]?.description ?? null,
       marks: screeningMarks(s.id, inputs, set),
       onCommit: open ? () => update((cs) => toggleScreeningCommitment(s.id, inputs, cs)) : undefined,

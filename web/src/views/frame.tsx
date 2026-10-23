@@ -1,7 +1,8 @@
 import { ArrowsLeftRightIcon, CalendarBlankIcon, FilmStripIcon, StackIcon } from "@phosphor-icons/react"
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Link } from "react-router"
 
+import { DockContext } from "./dock"
 import { NavIcon } from "./parts"
 
 export function FrameView({
@@ -17,6 +18,8 @@ export function FrameView({
   tray: ReactNode
   children: ReactNode
 }) {
+  // Layout only: the dock's node, for pages to render bars into.
+  const [dock, setDock] = useState<HTMLElement | null>(null)
   return (
     <div className="min-h-svh">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-screen focus:p-2">
@@ -34,8 +37,13 @@ export function FrameView({
         </nav>
         {account}
       </header>
-      <div id="main">{children}</div>
-      {tray}
+      <DockContext value={dock}>
+        <div id="main">{children}</div>
+      </DockContext>
+      <div className="fixed inset-x-0 bottom-0 z-20 flex flex-col">
+        <div ref={setDock} className="flex flex-col" />
+        {tray}
+      </div>
     </div>
   )
 }

@@ -23,6 +23,8 @@ export interface ScreeningVM {
   /** In the Active Schedule. */
   scheduled: boolean
   ticket: boolean
+  /** Where to buy a ticket; null when one is held, there is nowhere, or it is too late. */
+  buyHref: string | null
   event: string | null
   marks: Marks
   onCommit?: () => void
@@ -59,6 +61,8 @@ export interface ProgrammeVM {
 
 export interface FilmVM {
   title: string
+  /** The selected viewing, while it can be bought; null once a ticket is held. */
+  buy: ScreeningVM | null
   meta: string[]
   url: string | null
   entry: EntryVM

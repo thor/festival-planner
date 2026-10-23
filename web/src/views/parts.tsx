@@ -1,19 +1,25 @@
 import type { Icon } from "@phosphor-icons/react"
 import { CircleNotchIcon } from "@phosphor-icons/react"
-import type { ReactNode } from "react"
+import type { ComponentProps, ReactNode } from "react"
 import { Link } from "react-router"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-/** An icon button that names itself in a tooltip. */
+/** A link that opens outside the app, in a new tab. */
+export function ExternalLink(props: Omit<ComponentProps<"a">, "target" | "rel">) {
+  return <a {...props} target="_blank" rel="noreferrer" />
+}
+
+/** An icon button, or with `href` an external icon link, that names itself in a tooltip. */
 export function Action({
   icon: Glyph,
   label,
   on = false,
   tone = "ink",
   onClick,
+  href,
   className,
 }: {
   icon: Icon
@@ -21,26 +27,36 @@ export function Action({
   on?: boolean
   tone?: "ink" | "stamp"
   onClick?: () => void
+  href?: string
   className?: string
 }) {
+  const classes = cn(
+    "border-ink bg-transparent disabled:opacity-30 dark:border-ink dark:bg-transparent dark:hover:bg-haze",
+    on && tone === "stamp" && "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85 hover:text-stamp-ink dark:border-stamp dark:bg-stamp dark:hover:bg-stamp/85",
+    on && tone === "ink" && "bg-ink text-screen hover:bg-ink/85 hover:text-screen dark:bg-ink dark:hover:bg-ink/85",
+    className,
+  )
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label={label}
-            aria-pressed={on}
-            disabled={!onClick}
-            onClick={onClick}
-            className={cn(
-              "border-ink bg-transparent disabled:opacity-30 dark:border-ink dark:bg-transparent dark:hover:bg-haze",
-              on && tone === "stamp" && "border-stamp bg-stamp text-stamp-ink hover:bg-stamp/85 hover:text-stamp-ink dark:border-stamp dark:bg-stamp dark:hover:bg-stamp/85",
-              on && tone === "ink" && "bg-ink text-screen hover:bg-ink/85 hover:text-screen dark:bg-ink dark:hover:bg-ink/85",
-              className,
-            )}
-          />
+          href ? (
+            <ExternalLink
+              href={href}
+              aria-label={label}
+              className={cn(buttonVariants({ variant: "outline", size: "icon" }), classes)}
+            />
+          ) : (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={label}
+              aria-pressed={on}
+              disabled={!onClick}
+              onClick={onClick}
+              className={classes}
+            />
+          )
         }
       >
         <Glyph size={18} weight={on ? "bold" : "light"} />
