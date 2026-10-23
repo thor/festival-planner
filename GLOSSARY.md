@@ -70,6 +70,14 @@ _Avoid_: Current plan, live schedule
 A proposed Schedule not yet accepted. A User may have several Drafts for the same Festival at once.
 _Avoid_: Draft plan, proposal, candidate
 
+**Change Set**:
+The changes a Draft proposes to a User's commitments, Excluded Programme Entries and Screenings, and Preferences for one Festival. They take effect only when the Draft is accepted.
+_Avoid_: Diff, patch, edits
+
+**Stale**:
+A Draft whose Change Set was made against an Active Schedule that has since been replaced. A Stale Draft cannot be accepted until it is re-solved against the current Active Schedule.
+_Avoid_: Outdated, expired, invalid
+
 **Screening Commitment**:
 A User's commitment to attend one specific Screening.
 _Avoid_: Pin, booking, will-watch
@@ -97,7 +105,7 @@ _Avoid_: Settings, config
 ### Viewing history
 
 **Seen**:
-A User's record that they have watched a Film, whether entered by hand, synchronised from an external provider, or inferred from a past committed Screening.
+A User's record that they have watched a Film, whether entered by hand, synchronised from an external provider, or inferred from a Screening in their Active Schedule that has ended. An inference can be dismissed ("I didn't go").
 _Avoid_: Watched, ignored
 
 ### Curation

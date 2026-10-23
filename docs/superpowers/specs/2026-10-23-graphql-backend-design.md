@@ -93,9 +93,38 @@ providers).
 - A Draft is a change set plus the Schedule solved from it
   ([ADR-0004](../../adr/0004-drafts-are-change-sets.md)). Change-set items:
   add/release Screening Commitment, add/release Film Commitment,
-  add/remove Excluded, change a Preference, record a Comparison, adopt a
-  Curation. Accepting applies the change set and makes the Schedule Active
-  atomically. Other Drafts become Stale and can be re-solved (nice-to-have).
+  add/remove Excluded, set or reset one Preference setting, record a
+  Comparison, adopt a Curation (step 5). Accepting applies the change set and
+  makes the Schedule Active atomically. A Draft is **Stale** once the Active
+  Schedule it was based on is replaced; it cannot be accepted, and re-solving
+  re-validates its change set against the new base and solves it again.
+  Re-ingestion, Seen and Ticket edits do not make Drafts Stale.
+- The accepted inputs are a snapshot per (User, Festival) (commitments,
+  Excluded, a Preferences document); each Schedule in the history keeps the
+  change set that produced it.
+- Tickets and Seen are edited directly, never through change sets.
+- Change sets are validated on Draft creation against the current inputs
+  and the Festival's programme. Rejected: unknown ids; the same target added
+  and released, or committed and Excluded, in one set; two items for one
+  Preference setting key; "A over B" with "B over A"; two Screening
+  Commitments for one Programme Entry; releasing or un-Excluding what is not
+  there; adding what is already there; committing to something Excluded in
+  the base unless the set also removes that Excluded. Re-solving a Stale
+  Draft drops items that became no-ops (with a note) and fails, leaving the
+  Draft unchanged, on contradictions.
+- Draft statuses: `SOLVING`, `READY`, `INFEASIBLE`, `FAILED` (solver error,
+  or no Schedule within the time limit); Stale is derived. Only a `READY`,
+  non-Stale Draft can be accepted; accepting records a Schedule in the
+  history (Screenings, change set, score, accepted-at) and removes the
+  Draft. Discarding deletes a Draft. Empty change sets are allowed. Screenings
+  that started between solving and accepting are accepted as they are.
+- Solving is deterministic (fixed seed, interleaved search, deterministic time
+  limit). Ties between equally good Schedules break towards the Active
+  Schedule, then lower Screening ids, via a second lexicographic pass
+  ([ADR-0004](../../adr/0004-drafts-are-change-sets.md)).
+- Solve jobs read in one short unit of work, solve outside any transaction
+  and write in another; SQLite runs in WAL mode with a busy timeout. Drafts
+  left `SOLVING` at startup are resubmitted.
 - **Screening Commitment**: hard constraint, that exact Screening.
   **Film Commitment**: hard constraint, exactly one Screening of that Programme
   Entry. Releasing one is a change-set item.
@@ -112,20 +141,36 @@ providers).
   Draft if done; otherwise the frontend polls. "Draft solved" goes through a
   port so a subscription can replace polling later.
 - Every Draft exposes its changes against the Active Schedule (added, removed,
-  score delta).
+  score delta). The delta compares the Draft with the Active Schedule
+  re-scored under the Draft's Preferences; it warns when a ticketed Screening
+  is dropped.
+- Flags per (User, Festival): Commitments or Tickets on Withdrawn Screenings,
+  Tickets outside the Active Schedule, Withdrawn Screenings in the Active
+  Schedule.
+- Exported solve requests carry a format version.
 - **Preferences** (first version): per-Programme-Entry and per-Screening
   weights, year weights, Event weight (for Screenings with Events), attend
   Events (separately timed Events block time), general buffer and per-Venue
-  buffer, date range, curation weight, Transport Mode, Comparisons. Likely
+  buffer, date range, Transport Mode, Comparisons; curation weight arrives
+  with Curations (step 5). Preferences stay a frozen Pydantic value. Likely
   next: actors, genres, daily time window.
-- **Comparison**: "A over B", a change-set item and Preference. A query
-  suggests pairs that conflicted in the latest Draft. Turning Comparisons into
-  solver weights is an implementation detail (e.g. Bradley–Terry-style).
+- **Comparison**: "A over B", a change-set item and Preference; one per
+  unordered pair, the latest replacing the earlier. `formulate` fits
+  Bradley–Terry strengths (deterministic MM iteration, weak prior) over the
+  compared Programme Entries and adds `comparison_weight` (default 0.5) times
+  the centred log-strength to their weights. A query suggests up to N pairs
+  that conflicted in the latest `READY` Draft where exactly one was
+  scheduled, not yet compared, closest weights first; conflicts are
+  recomputed with `formulate`, not stored.
+- **Ticket**: one per (User, Screening) with `exchangeable` and `refundable`
+  flags; never commits; kept and flagged when its Screening is Withdrawn.
 
 ## Seen and watch history
 
-- Seen is per Film; sources: manual, provider sync, or a past committed
-  Screening (automatic, undoable).
+- Seen is per Film; sources: manual, provider sync, or a Screening in the
+  Active Schedule that has ended. The latter is derived, not stored;
+  dismissing it ("I didn't go") is stored. Manual Seen is stored per (User, Film);
+  unmarking deletes it.
 - Letterboxd sync is import-only and on demand (a mutation that runs a job);
   CSV upload is its own mutation. Imports that match no Film are dropped.
 
@@ -177,8 +222,10 @@ Each step is its own plan and leaves working, tested software:
    Comparisons, Tickets, Seen-from-schedule; in-process `JobRunner`.
    Also: deterministic solving (CP-SAT seed and tie-break, so Draft diffs
    don't show noise), change-set validation for contradictory inputs, a
-   format version in exported solve requests, curation weight and
-   Comparisons in Preferences, and Pydantic vs. dataclasses for Preferences.
+   format version in exported solve requests, Comparisons in Preferences,
+   a bare User keyed on (issuer, subject) with the CLI acting as a local
+   User, and a minimal `plan` CLI. Preferences stay Pydantic. Decided
+   2026-10-23.
 4. **GraphQL API and auth**: distinct id types (`NewType`) before the
    global-id mapping; Strawberry schema over the use-cases,
    `TokenVerifier` adapters, local token issuer, SDL export. Evaluate
@@ -188,6 +235,7 @@ Each step is its own plan and leaves working, tested software:
    (ADR-0001), so domain models may become Pydantic models where that lets
    Strawberry derive types directly.
 5. **Curation**: Organizations, Memberships, Admin, Curations, Curator Notes,
-   Suggested Schedules (signed in and anonymous).
+   Suggested Schedules (signed in and anonymous), curation weight in
+   Preferences and the adopt-a-Curation change-set item.
 6. **Watch history and Enrichment**: Letterboxd RSS/CSV import, enrichment
    fetch job.

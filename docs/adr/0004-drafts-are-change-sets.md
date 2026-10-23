@@ -5,3 +5,5 @@ A Draft holds a change set (e.g. add a Screening Commitment, release a commitmen
 ## Consequences
 
 Solving deliberately has no stability bonus towards the current Active Schedule: if a change reshuffles uncommitted Screenings for a better result, that is accepted, and heavy reshuffling is treated as a signal that the User has expressed too few preferences rather than something to suppress.
+
+Ties are different: among Schedules with the same optimal score, the solver picks the one closest to the Active Schedule, then the one with the lowest Screening ids, and solves deterministically. This never trades score for stability, so it is not a stability bonus; it only keeps Draft diffs free of noise between equally good Schedules.
