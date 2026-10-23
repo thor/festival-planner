@@ -50,7 +50,12 @@ class _AsciiHeadersTransport(httpx.BaseTransport):
         return httpx.Response(
             status_code=response.status_code,
             headers=[
-                (key, value if value.isascii() else quote(value, safe=self._SAFE))
+                (
+                    key,
+                    value
+                    if value.isascii()
+                    else quote(value, safe=self._SAFE).encode("ascii"),
+                )
                 for key, value in response.headers.raw
             ],
             stream=response.stream,

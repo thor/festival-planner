@@ -46,7 +46,7 @@ def main():
     if args.refresh:
         print("Force refresh enabled - fetching fresh data")
 
-    loader = ConfigLoader(config_dir, data_dir)
+    loader = ConfigLoader(config_dir=config_dir, data_dir=data_dir)
     cinemas = loader.load_config().cinemas
 
     # Initialize scraper with known cinema names for auditorium parsing

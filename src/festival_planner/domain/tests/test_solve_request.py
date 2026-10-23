@@ -46,7 +46,15 @@ def test_unknown_venue_is_rejected_naming_both_ids():
 
 def test_unknown_fields_are_rejected():
     with pytest.raises(ValueError, match="surprise"):
-        SolveRequest(venues=(), programme_entries=(), screenings=(), surprise=1)
+        SolveRequest.model_validate(
+            {
+                "venues": (),
+                "programme_entries": (),
+                "screenings": (),
+                "time_zone": "Europe/Oslo",
+                "surprise": 1,
+            }
+        )
 
 
 def test_unknown_time_zone_is_rejected():

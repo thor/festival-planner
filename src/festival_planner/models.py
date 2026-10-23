@@ -2,7 +2,7 @@
 
 import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import AliasChoices, BaseModel, Field
 
 from ._logging import get_logger
 
@@ -69,10 +69,14 @@ class Film(BaseModel):
 class TravelTime(BaseModel):
     """Represents travel time between two cinemas."""
 
-    model_config = ConfigDict(populate_by_name=True)
-
-    from_cinema: str = Field(..., alias="from", description="Origin cinema name")
-    to_cinema: str = Field(..., alias="to", description="Destination cinema name")
+    from_cinema: str = Field(
+        validation_alias=AliasChoices("from", "from_cinema"),
+        description="Origin cinema name",
+    )
+    to_cinema: str = Field(
+        validation_alias=AliasChoices("to", "to_cinema"),
+        description="Destination cinema name",
+    )
     minutes: int = Field(..., description="Travel time in minutes")
 
 
@@ -92,7 +96,7 @@ class FilmWeight(BaseModel):
 
     title: str = Field(..., description="Film title")
     start_time: Optional[datetime.datetime] = Field(
-        None, description="Screening start time (None for film-level weight)"
+        default=None, description="Screening start time (None for film-level weight)"
     )
     weight: float = Field(..., description="Custom weight override")
 

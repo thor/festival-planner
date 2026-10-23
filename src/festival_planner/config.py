@@ -222,7 +222,7 @@ class ConfigLoader:
                 field_sources[field_name] = (CONFIG_FILE, None)
 
         # Cache to avoid multiple reads of the same file
-        file_data_cache: dict[Path, dict] = {}
+        file_data_cache: dict[str, dict] = {}
         
         # Find and load each unique source file
         unique_files = set(filename for filename, _ in field_sources.values())
@@ -315,7 +315,6 @@ class ConfigLoader:
 
         yaml_dumper = YAML()
         yaml_dumper.default_flow_style = False
-        yaml_dumper.sort_keys = False
         yaml_dumper.allow_unicode = True
         
         logger.debug("Saving films file", filepath=str(filepath))
@@ -342,7 +341,6 @@ class ConfigLoader:
 
         yaml_dumper = YAML()
         yaml_dumper.default_flow_style = False
-        yaml_dumper.sort_keys = False
         yaml_dumper.allow_unicode = True
         
         logger.debug("Saving preferences file", filepath=str(filepath))

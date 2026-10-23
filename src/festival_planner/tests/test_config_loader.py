@@ -68,7 +68,6 @@ def yaml_writer() -> YAML:
     """Create a YAML writer for test files."""
     yaml = YAML()
     yaml.default_flow_style = False
-    yaml.sort_keys = False
     return yaml
 
 
@@ -240,7 +239,6 @@ class TestConfigLoaderFiltering:
                 title="Seen All",
                 country="Test",
                 year=2024,
-                date=date(2024, 11, 8),
                 start_time=datetime(2024, 11, 8, 14, 0),
                 end_time=datetime(2024, 11, 8, 16, 0),
                 cinema="Vika",
@@ -249,7 +247,6 @@ class TestConfigLoaderFiltering:
                 title="Seen Specific",
                 country="Test",
                 year=2024,
-                date=date(2024, 11, 8),
                 start_time=datetime(2024, 11, 8, 14, 0),
                 end_time=datetime(2024, 11, 8, 16, 0),
                 cinema="Vika",
@@ -258,7 +255,6 @@ class TestConfigLoaderFiltering:
                 title="Seen Specific",
                 country="Test",
                 year=2024,
-                date=date(2024, 11, 9),
                 start_time=datetime(2024, 11, 9, 14, 0),
                 end_time=datetime(2024, 11, 9, 16, 0),
                 cinema="Vika",
@@ -267,7 +263,6 @@ class TestConfigLoaderFiltering:
                 title="Unseen",
                 country="Test",
                 year=2024,
-                date=date(2024, 11, 8),
                 start_time=datetime(2024, 11, 8, 18, 0),
                 end_time=datetime(2024, 11, 8, 20, 0),
                 cinema="Vega",

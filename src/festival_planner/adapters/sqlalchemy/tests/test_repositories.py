@@ -80,9 +80,8 @@ def test_saving_a_festival_again_updates_it(stored):
     with SqlAlchemyUnitOfWork(stored) as uow:
         uow.festivals.save(FESTIVAL.model_copy(update={"name": "Renamed"}))
         uow.commit()
-    assert read(stored, lambda uow: uow.festivals.by_slug("fests-2025").name) == (
-        "Renamed"
-    )
+    festival = read(stored, lambda uow: uow.festivals.by_slug("fests-2025"))
+    assert festival is not None and festival.name == "Renamed"
 
 
 def test_venue_aliases_are_replaced(stored):
@@ -159,7 +158,8 @@ def test_screenings_round_trip_with_events_as_utc_instants(stored):
     [screening] = read(stored, lambda uow: uow.programme.screenings("f"))
     assert screening == SCREENING
     assert screening.start_time.tzinfo == datetime.UTC
-    assert screening.events[1].start_time.tzinfo == datetime.UTC
+    event_start = screening.events[1].start_time
+    assert event_start is not None and event_start.tzinfo == datetime.UTC
 
 
 def test_screenings_belong_to_their_festival(stored):
