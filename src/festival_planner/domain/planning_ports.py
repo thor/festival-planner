@@ -10,6 +10,10 @@ from .programme import FilmId, ScreeningId
 from .users import UserId, UserRepository
 
 
+class ConflictError(Exception):
+    """A concurrent change won; retry."""
+
+
 class PlanningRepository(Protocol):
     def inputs(self, user_id: UserId, festival_id: FestivalId) -> PlanningInputs:
         """The accepted inputs; empty `PlanningInputs()` if none yet."""
@@ -33,9 +37,14 @@ class PlanningRepository(Protocol):
         """The history, oldest first; the last is Active."""
         ...
 
-    def save_schedule(self, schedule: Schedule) -> None: ...
+    def save_schedule(self, schedule: Schedule) -> None:
+        """Raises `ConflictError` if a concurrent write took the same (User,
+        Festival, number)."""
+        ...
+
     def draft(self, draft_id: DraftId, *, for_update: bool = False) -> Draft | None:
-        """With `for_update`, lock the Draft until the unit of work ends."""
+        """With `for_update`, lock the Draft until the unit of work ends, where
+        the database supports row locks."""
         ...
 
     def drafts(self, user_id: UserId, festival_id: FestivalId) -> tuple[Draft, ...]:

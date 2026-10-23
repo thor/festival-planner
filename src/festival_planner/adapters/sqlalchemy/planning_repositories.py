@@ -4,11 +4,13 @@
 import json
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ...domain.change_sets import ChangeSet
 from ...domain.drafts import Draft, DraftStatus, Schedule
 from ...domain.planning import PlanningInputs, Preferences, Ticket
+from ...domain.planning_ports import ConflictError
 from ...domain.solving import ScheduledScreening
 from ...domain.users import User
 from .tables import (
@@ -44,7 +46,7 @@ class SqlAlchemyUserRepository:
         row = self._session.get(UserRow, user.id) or UserRow(id=user.id)
         row.issuer, row.subject = user.issuer, user.subject
         self._session.add(row)
-        self._session.flush()
+        _flush_or_conflict(self._session)
 
 
 class SqlAlchemyPlanningRepository:
@@ -139,7 +141,7 @@ class SqlAlchemyPlanningRepository:
             for i in sorted(schedule.screening_ids - known)
         ]
         self._session.add(row)
-        self._session.flush()
+        _flush_or_conflict(self._session)
 
     def draft(self, draft_id: str, *, for_update: bool = False) -> Draft | None:
         row = self._session.get(DraftRow, draft_id, with_for_update=for_update)
@@ -193,6 +195,14 @@ class SqlAlchemyPlanningRepository:
         if (row := self._session.get(DraftRow, draft_id)) is not None:
             self._session.delete(row)
             self._session.flush()
+
+
+def _flush_or_conflict(session: Session) -> None:
+    """Flush; a unique key taken by a concurrent write is a `ConflictError`."""
+    try:
+        session.flush()
+    except IntegrityError as e:
+        raise ConflictError(str(e.orig)) from e
 
 
 def _schedule(row: ScheduleRow) -> Schedule:

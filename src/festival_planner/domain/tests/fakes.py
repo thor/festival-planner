@@ -10,6 +10,7 @@ from typing import Self
 from festival_planner.domain.drafts import Draft, DraftStatus, Schedule
 from festival_planner.domain.festival import Festival, FestivalSeries
 from festival_planner.domain.planning import PlanningInputs, Ticket
+from festival_planner.domain.planning_ports import ConflictError
 from festival_planner.domain.programme import (
     Film,
     ProgrammeEntry,
@@ -53,12 +54,24 @@ class _State:
         self.dismissals: set[tuple[str, str]] = set()
 
 
+Hook = Callable[[_State], None]
+
+
 class InMemoryUnitOfWork:
-    """Works on a copy of `stored`; `commit()` makes the copy the stored state."""
+    """Works on a copy of `stored`; `commit()` makes the copy the stored state.
+
+    `hooks` maps a repository method ("planning.inputs", "users.save", ...) to
+    a function run once, on the working state, just before that method's next
+    call; see `concurrently`."""
 
     def __init__(self) -> None:
         self.stored = _State()
         self.committed = False
+        self.hooks: dict[str, Hook] = {}
+
+    def _fire(self, name: str) -> None:
+        if (hook := self.hooks.pop(name, None)) is not None:
+            hook(self._work)
 
     def __enter__(self) -> Self:
         self._work = copy.deepcopy(self.stored)
@@ -67,8 +80,8 @@ class InMemoryUnitOfWork:
         self.routes = _Routes(self._work)
         self.films = _Films(self._work)
         self.programme = _Programme(self._work)
-        self.users = _Users(self._work)
-        self.planning = _Planning(self._work)
+        self.users = _Users(self._work, self._fire)
+        self.planning = _Planning(self._work, self._fire)
         self.tickets = _Tickets(self._work)
         self.seen = _Seen(self._work)
         return self
@@ -84,6 +97,17 @@ class InMemoryUnitOfWork:
     def commit(self) -> None:
         self.stored = copy.deepcopy(self._work)
         self.committed = True
+
+
+def concurrently(uow: InMemoryUnitOfWork, change: Hook) -> Hook:
+    """A hook for `uow.hooks`: another unit of work commits `change`, visible
+    to the running one too (as under read-committed isolation)."""
+
+    def hook(work: _State) -> None:
+        change(uow.stored)
+        change(work)
+
+    return hook
 
 
 class _Festivals:
@@ -182,8 +206,9 @@ class _Programme:
 
 
 class _Users:
-    def __init__(self, state: _State) -> None:
+    def __init__(self, state: _State, fire: Callable[[str], None]) -> None:
         self.s = state
+        self._fire = fire
 
     def by_identity(self, issuer: str, subject: str) -> User | None:
         return next(
@@ -196,14 +221,22 @@ class _Users:
         )
 
     def save(self, user: User) -> None:
+        self._fire("users.save")
+        if any(
+            (u.issuer, u.subject) == (user.issuer, user.subject) and u.id != user.id
+            for u in self.s.users.values()
+        ):
+            raise ConflictError(f"A User for {user.issuer}/{user.subject} exists")
         self.s.users[user.id] = user
 
 
 class _Planning:
-    def __init__(self, state: _State) -> None:
+    def __init__(self, state: _State, fire: Callable[[str], None]) -> None:
         self.s = state
+        self._fire = fire
 
     def inputs(self, user_id: str, festival_id: str) -> PlanningInputs:
+        self._fire("planning.inputs")
         return self.s.inputs.get((user_id, festival_id), PlanningInputs())
 
     def save_inputs(
@@ -236,6 +269,12 @@ class _Planning:
         )
 
     def save_schedule(self, schedule: Schedule) -> None:
+        key = (schedule.user_id, schedule.festival_id, schedule.number)
+        if any(
+            (s.user_id, s.festival_id, s.number) == key and s.id != schedule.id
+            for s in self.s.schedules.values()
+        ):
+            raise ConflictError(f"Schedule number {schedule.number} exists")
         self.s.schedules[schedule.id] = schedule
 
     def draft(self, draft_id: str, *, for_update: bool = False) -> Draft | None:

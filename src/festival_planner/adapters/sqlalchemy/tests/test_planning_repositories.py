@@ -12,7 +12,7 @@ from festival_planner.domain.planning import (
     Preferences,
     Ticket,
 )
-from festival_planner.domain.planning_ports import PlanningUnitOfWork
+from festival_planner.domain.planning_ports import ConflictError, PlanningUnitOfWork
 from festival_planner.domain.programme import Film, ProgrammeEntry, Screening, Venue
 from festival_planner.domain.solving import ScheduledScreening
 from festival_planner.domain.users import User
@@ -187,3 +187,16 @@ def test_lookups_by_id(stored):
             "s2",
         ]
         assert [e.id for e in uow.programme.entries_by_id(["e", "nope"])] == ["e"]
+
+
+def test_a_schedule_number_taken_by_another_unit_of_work_conflicts(stored):
+    with stored as uow:
+        uow.planning.save_schedule(schedule("first", 1))
+        uow.commit()
+    with stored as uow, pytest.raises(ConflictError):
+        uow.planning.save_schedule(schedule("second", 1))
+
+
+def test_an_identity_taken_by_another_unit_of_work_conflicts(stored):
+    with stored as uow, pytest.raises(ConflictError):
+        uow.users.save(User(id="other", issuer="local", subject="thor"))

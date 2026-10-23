@@ -9,15 +9,16 @@ from festival_planner.domain.change_sets import (
     InvalidChangeSetError,
     SetProgrammeEntryWeight,
 )
-from festival_planner.domain.drafts import DraftStatus
+from festival_planner.domain.drafts import Draft, DraftStatus, Schedule
 from festival_planner.domain.festival import Festival
 from festival_planner.domain.planner import (
     DraftNotAcceptableError,
+    DraftStillSolvingError,
     NotFoundError,
     Planner,
     PlanningError,
 )
-from festival_planner.domain.planning import Ticket
+from festival_planner.domain.planning import PlanningInputs, Ticket
 from festival_planner.domain.programme import Film, Venue
 
 from .builders import DAY, ZONE, at, entry, screening
@@ -29,6 +30,7 @@ from .fakes import (
     InMemoryUnitOfWork,
     RecordingNotifier,
     TickingClock,
+    concurrently,
     sequential_ids,
 )
 
@@ -228,8 +230,9 @@ def test_discarding_deletes_the_draft(uow):
 def test_resolving_while_solving_is_refused(uow):
     p = planner(uow, jobs=DeferredJobRunner())
     view = p.create_draft("u", SLUG)
-    with pytest.raises(PlanningError):
+    with pytest.raises(DraftStillSolvingError):
         p.resolve("u", view.draft.id)
+    assert issubclass(DraftStillSolvingError, PlanningError)
 
 
 def test_resume_solving_resubmits_solving_drafts(uow):
@@ -322,3 +325,53 @@ def test_a_job_that_breaks_outside_the_solver_fails_the_draft(uow):
     assert failed.status is DraftStatus.FAILED
     assert "failed" in failed.reasons[0]
     assert [d.id for d in notifier.solved] == [view.draft.id]
+
+
+def _accept_sibling(state) -> None:
+    """Another process accepts a sibling Draft: Schedule 1, excluding "a"."""
+    state.schedules["sibling"] = Schedule(
+        id="sibling",
+        user_id="u",
+        festival_id="f",
+        number=1,
+        screening_ids=frozenset({"b"}),
+        score=1.0,
+        change_set=ChangeSet(items=(AddExcludedScreening(screening_id="a"),)),
+        accepted_at=at("09:00"),
+    )
+    state.inputs["u", "f"] = state.inputs.get(("u", "f"), PlanningInputs()).model_copy(
+        update={"excluded_screenings": frozenset({"a"})}
+    )
+
+
+def test_a_sibling_accepted_while_creating_a_draft_makes_it_stale(uow):
+    uow.hooks["planning.inputs"] = concurrently(uow, _accept_sibling)
+    view = planner(uow).create_draft("u", SLUG, weights(b=2.0))
+    assert view.stale
+
+
+def test_a_sibling_accepted_while_resolving_a_draft_makes_it_stale(uow):
+    p = planner(uow)
+    view = p.create_draft("u", SLUG)
+    uow.hooks["planning.inputs"] = concurrently(uow, _accept_sibling)
+    assert p.resolve("u", view.draft.id).stale
+
+
+def test_a_sibling_accepted_while_accepting_wins(uow):
+    p = planner(uow)
+    view = p.create_draft("u", SLUG, weights(b=2.0))
+    uow.hooks["planning.inputs"] = concurrently(uow, _accept_sibling)
+    with pytest.raises(DraftNotAcceptableError, match="meanwhile"):
+        p.accept("u", view.draft.id)
+    assert [s.id for s in p.schedules("u", SLUG)] == ["sibling"]
+    assert p.draft("u", view.draft.id).stale
+
+
+class RaisingNotifier:
+    def draft_solved(self, draft: Draft) -> None:
+        raise RuntimeError("notifier exploded")
+
+
+def test_a_failing_notifier_does_not_fail_the_solved_draft(uow):
+    view = planner(uow, notifier=RaisingNotifier()).create_draft("u", SLUG)
+    assert view.draft.status is DraftStatus.READY

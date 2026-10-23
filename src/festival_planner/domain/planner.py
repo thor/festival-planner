@@ -20,7 +20,7 @@ from .insights import (
 )
 from .jobs import Job, JobRunner
 from .planning import Ticket
-from .planning_ports import DraftSolvedNotifier, PlanningUnitOfWork
+from .planning_ports import ConflictError, DraftSolvedNotifier, PlanningUnitOfWork
 from .programme import FilmId, ScreeningId
 from .solving import ScheduleSolver, SolveRequest, SolveResult, SolveStatus
 from .travel import RouteTable
@@ -41,6 +41,10 @@ class NotFoundError(PlanningError):
 
 
 class DraftNotAcceptableError(PlanningError):
+    pass
+
+
+class DraftStillSolvingError(PlanningError):
     pass
 
 
@@ -84,12 +88,14 @@ class Planner:
         change_set = change_set or ChangeSet()
         with self._uow() as uow:
             festival = _festival(uow, festival_slug)
+            # The Active Schedule before the inputs: a sibling accepted between
+            # the two reads then leaves this Draft Stale, which is safe.
+            active = uow.planning.active_schedule(user_id, festival.id)
             check(
                 change_set,
                 uow.planning.inputs(user_id, festival.id),
                 _programme_index(uow, festival.id),
             )
-            active = uow.planning.active_schedule(user_id, festival.id)
             draft = Draft(
                 id=self._new_id(),
                 user_id=user_id,
@@ -108,13 +114,14 @@ class Planner:
         with self._uow() as uow:
             draft = _owned_draft(uow, user_id, draft_id, for_update=True)
             if draft.status is DraftStatus.SOLVING:
-                raise PlanningError(f"Draft {draft_id!r} is still solving")
+                raise DraftStillSolvingError(f"Draft {draft_id!r} is still solving")
+            # The Active Schedule before the inputs, as in `create_draft`.
+            active = uow.planning.active_schedule(user_id, draft.festival_id)
             change_set, notes = rebase(
                 draft.change_set,
                 uow.planning.inputs(user_id, draft.festival_id),
                 _programme_index(uow, draft.festival_id),
             )
-            active = uow.planning.active_schedule(user_id, draft.festival_id)
             draft = draft.model_copy(
                 update={
                     "change_set": change_set,
@@ -141,7 +148,8 @@ class Planner:
                 raise DraftNotAcceptableError(
                     f"Draft {draft_id!r} is {draft.status}, not READY"
                 )
-            if draft.is_stale(uow.planning.active_schedule(user_id, draft.festival_id)):
+            active = uow.planning.active_schedule(user_id, draft.festival_id)
+            if draft.is_stale(active):
                 raise DraftNotAcceptableError(
                     f"Draft {draft_id!r} is Stale; re-solve it first"
                 )
@@ -153,13 +161,21 @@ class Planner:
                 id=self._new_id(),
                 user_id=user_id,
                 festival_id=draft.festival_id,
-                number=len(uow.planning.schedules(user_id, draft.festival_id)) + 1,
+                # The number follows the Active Schedule this Draft is based
+                # on. Its uniqueness per (User, Festival), not the Draft lock,
+                # serialises accepting: of two siblings, the second conflicts.
+                number=(active.number if active else 0) + 1,
                 screening_ids=draft.screening_ids,
                 score=draft.score,
                 change_set=draft.change_set,
                 accepted_at=self._clock(),
             )
-            uow.planning.save_schedule(schedule)
+            try:
+                uow.planning.save_schedule(schedule)
+            except ConflictError as e:
+                raise DraftNotAcceptableError(
+                    "another Draft was accepted meanwhile; re-solve this one"
+                ) from e
             uow.planning.delete_draft(draft.id)
             uow.commit()
         return schedule
@@ -361,7 +377,11 @@ class Planner:
             )
             uow.planning.save_draft(solved)
             uow.commit()
-        self._notifier.draft_solved(solved)
+        try:
+            self._notifier.draft_solved(solved)
+        except Exception:
+            # Best effort: the outcome is committed and stays as it is.
+            logger.exception("Notifying that draft %s was solved failed", draft_id)
 
     def _view(self, uow: PlanningUnitOfWork, draft: Draft) -> DraftView:
         active = uow.planning.active_schedule(draft.user_id, draft.festival_id)
