@@ -22,6 +22,7 @@ import {
   hourTicks,
   layDays,
   layDiff,
+  layWeek,
   nowOn,
 } from "./timeline"
 
@@ -140,6 +141,17 @@ describe("timeline", () => {
     expect(on("2026-10-24T06:00:00Z")).toBeUndefined() // 08:00, off the span
   })
 
+  it("lays blocks and ticks on one span", () => {
+    // 18:00 to 19:30.
+    const week = layWeek(
+      festival,
+      [screening("2026-10-24T16:00:00Z", "2026-10-24T17:30:00Z")],
+      "2026-10-24T10:00:00Z"
+    )
+    const tick = week.ticks.find((t) => t.label === "18")
+    expect(week.rows[0].placed[0].left).toBeCloseTo(tick!.left)
+  })
+
   it("places a Screening by time on its day", () => {
     const rows = layDays(
       festival,
@@ -161,11 +173,11 @@ describe("draft timeline", () => {
     const kept = at("kept", "2026-10-24")
     const added = at("in", "2026-10-25")
     const out = at("out", "2026-10-25")
-    const rows = layDiff(
+    const { rows } = layDiff(
       festival,
       [kept, added],
       { added: [added], removed: [out] },
-      DEFAULT_SPAN
+      "2026-10-24T10:00:00Z"
     )
     expect(rows.map((r) => r.day)).toEqual([
       "2026-10-24",

@@ -40,7 +40,7 @@ export interface DayRow {
   placed: Placed[]
 }
 
-export function byDay(
+function byDay(
   festival: Festival,
   screenings: Screening[]
 ): Map<DayKey, Screening[]> {
@@ -122,22 +122,48 @@ export interface DiffRow {
   placed: (Placed & { change: Change })[]
 }
 
+/** A week on day tracks: rows and ticks on one span, and where now is. */
+export interface Week<Row = DayRow> {
+  rows: Row[]
+  ticks: { label: string; left: number }[]
+  /** The calendar day of now, in the Festival's zone. */
+  today: DayKey
+  /** Now on the tracks; null when it is off the span. */
+  now: { day: DayKey; left: number } | null
+}
+
+export function layWeek(
+  festival: Festival,
+  screenings: Screening[],
+  now: Instant
+): Week {
+  const span = fitSpan(festival, screenings)
+  return {
+    rows: layDays(festival, screenings, span),
+    ticks: hourTicks(span),
+    today: dayKey(now, festival.timeZone),
+    now: nowOn(festival, span, now),
+  }
+}
+
 /**
- * Lay a Draft's Schedule and its Out Screenings on one set of days, so the
- * Out ones line up under the day they leave.
+ * Lay a Draft's Schedule and its Out Screenings on one week, so the Out ones
+ * line up under the day they leave.
  */
 export function layDiff(
   festival: Festival,
   draft: Screening[],
   { added, removed }: Pick<DraftDiff, "added" | "removed">,
-  span: Span
-): DiffRow[] {
+  now: Instant
+): Week<DiffRow> {
   const ins = new Set(added.map((s) => s.id))
   const outs = new Set(removed.map((s) => s.id))
   const changeOf = (s: Screening): Change =>
     outs.has(s.id) ? "out" : ins.has(s.id) ? "in" : "kept"
-  return layDays(festival, [...draft, ...removed], span).map(
-    ({ day, placed }) => {
+  const week = layWeek(festival, [...draft, ...removed], now)
+  return {
+    ...week,
+    rows: week.rows.map(({ day, placed }) => {
       const tagged = placed.map((p) => ({
         ...p,
         change: changeOf(p.screening),
@@ -147,6 +173,6 @@ export function layDiff(
         changed: tagged.some((p) => p.change !== "kept"),
         placed: tagged,
       }
-    }
-  )
+    }),
+  }
 }

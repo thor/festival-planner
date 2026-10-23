@@ -25,14 +25,7 @@ import type {
   Screening,
 } from "@/domain/model"
 import { clock, dayKey, dayNumber, festivalDays, weekday } from "@/domain/time"
-import {
-  fitSpan,
-  hourTicks,
-  layDays,
-  layDiff,
-  nowOn,
-  type Placed,
-} from "@/domain/timeline"
+import { layDiff, layWeek, type Placed, type Week } from "@/domain/timeline"
 
 import { usePendingChangeSet } from "./change-set-store"
 import { useNow } from "./now"
@@ -191,9 +184,7 @@ export function useSchedulePage(
   const p = planning.data
   const schedule = p?.activeSchedule
   const screenings = schedule?.screenings ?? []
-  const span = fitSpan(f, screenings)
-  const today = dayKey(now, f.timeZone)
-  const mark = nowOn(f, span, now)
+  const week = layWeek(f, screenings, now)
   const tickets = new Set(p?.tickets.map((t) => t.screening.id))
   const committed = new Set(p?.inputs.screeningCommitments)
   const films = new Set(p?.inputs.filmCommitments)
@@ -203,12 +194,12 @@ export function useSchedulePage(
       number: schedule?.number ?? null,
       count: screenings.length,
       programmeHref: `/${f.slug}`,
-      ticks: hourTicks(span),
+      ticks: week.ticks,
       letGo: ticketModels.letGo.length,
       ticketsHref: `/${f.slug}/tickets`,
       problems: ticketModels.problems,
-      days: layDays(f, screenings, span).map((row) => ({
-        ...dayOf(row.day, today, mark),
+      days: week.rows.map((row) => ({
+        ...dayOf(row.day, week),
         blocks: row.placed.map((placed) => ({
           ...blockOf(f, placed),
           ticket: tickets.has(placed.screening.id),
@@ -225,13 +216,13 @@ export function useSchedulePage(
  * A Festival Day's heading on its track, and now on it. Just after midnight
  * now is on the evening before, while today has moved on.
  */
-function dayOf(day: DayKey, today: DayKey, mark: ReturnType<typeof nowOn>) {
+function dayOf(day: DayKey, { today, now }: Pick<Week, "today" | "now">) {
   return {
     key: day,
     number: dayNumber(day),
     weekday: weekday(day),
     today: day === today,
-    now: mark?.day === day ? mark.left : null,
+    now: now?.day === day ? now.left : null,
   }
 }
 
@@ -368,12 +359,10 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
     ...(d.diff?.droppedTickets.map((s) => s.id) ?? []),
     ...(planning.data?.tickets.map((t) => t.screening.id) ?? []),
   ])
-  const span = fitSpan(f, [...d.screenings, ...(d.diff?.removed ?? [])])
-  const today = dayKey(now, tz)
-  const mark = nowOn(f, span, now)
+  const laid = d.diff && layDiff(f, d.screenings, d.diff, now)
   const week =
-    d.diff &&
-    layDiff(f, d.screenings, d.diff, span).map((row) => {
+    laid &&
+    laid.rows.map((row) => {
       const blocks = row.placed.map(({ change, ...placed }) => ({
         ...blockOf(f, placed),
         ticket: held.has(placed.screening.id),
@@ -381,7 +370,7 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
         word: change === "kept" ? null : changeWord[change],
       }))
       return {
-        ...dayOf(row.day, today, mark),
+        ...dayOf(row.day, laid),
         changed: row.changed,
         blocks: blocks.filter((b) => b.change !== "out"),
         ghosts: blocks.filter((b) => b.change === "out"),
@@ -407,7 +396,7 @@ export function useDraftPage(slug: string, draftId: string): Load<DraftVM> {
     out: d.diff?.removed.map(row) ?? [],
     droppedTickets: d.diff?.droppedTickets.length ?? 0,
     week,
-    ticks: hourTicks(span),
+    ticks: laid?.ticks ?? [],
     reasons: d.reasons,
     items: itemsOf(d.changeSet, lookup),
     busy: accept.isPending || discard.isPending || resolve.isPending,
