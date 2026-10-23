@@ -56,6 +56,10 @@ class SqlAlchemyFestivalRepository:
         self._session.add(row)
         self._session.flush()
 
+    def by_id(self, festival_id: FestivalId) -> Festival | None:
+        row = self._session.get(FestivalRow, festival_id)
+        return None if row is None else _festival(row)
+
     def series_by_slug(self, slug: str) -> FestivalSeries | None:
         row = self._session.scalars(
             select(FestivalSeriesRow).where(FestivalSeriesRow.slug == slug)
@@ -166,6 +170,10 @@ class SqlAlchemyFilmRepository:
         ).first()
         return None if row is None else Film(id=row.id, title=row.title, year=row.year)
 
+    def by_id(self, film_id: str) -> Film | None:
+        row = self._session.get(FilmRow, film_id)
+        return None if row is None else Film(id=row.id, title=row.title, year=row.year)
+
     def save(self, film: Film) -> None:
         row = self._session.get(FilmRow, film.id) or FilmRow(id=film.id)
         row.title, row.year, row.match_key = (
@@ -187,17 +195,23 @@ class SqlAlchemyProgrammeRepository:
             .where(ProgrammeEntryRow.festival_id == festival_id)
             .order_by(ProgrammeEntryRow.source_key)
         )
-        return {
-            row.source_key: ProgrammeEntry(
-                id=row.id,
-                film_id=row.film_id,
-                title=row.title,
-                year=row.year,
-                country=row.country,
-                url=row.url,
-            )
-            for row in rows
-        }
+        return {row.source_key: _entry(row) for row in rows}
+
+    def entries_by_id(self, ids: Iterable[str]) -> tuple[ProgrammeEntry, ...]:
+        rows = self._session.scalars(
+            select(ProgrammeEntryRow)
+            .where(ProgrammeEntryRow.id.in_(sorted(set(ids))))
+            .order_by(ProgrammeEntryRow.id)
+        )
+        return tuple(_entry(row) for row in rows)
+
+    def screenings_by_id(self, ids: Iterable[str]) -> tuple[Screening, ...]:
+        rows = self._session.scalars(
+            select(ScreeningRow)
+            .where(ScreeningRow.id.in_(sorted(set(ids))))
+            .order_by(ScreeningRow.start_time, ScreeningRow.id)
+        )
+        return tuple(_screening(row) for row in rows)
 
     def save_entry(
         self, festival_id: FestivalId, source_key: str, entry: ProgrammeEntry
@@ -248,6 +262,17 @@ class SqlAlchemyProgrammeRepository:
         ]
         self._session.add(row)
         self._session.flush()
+
+
+def _entry(row: ProgrammeEntryRow) -> ProgrammeEntry:
+    return ProgrammeEntry(
+        id=row.id,
+        film_id=row.film_id,
+        title=row.title,
+        year=row.year,
+        country=row.country,
+        url=row.url,
+    )
 
 
 def _screening(row: ScreeningRow) -> Screening:

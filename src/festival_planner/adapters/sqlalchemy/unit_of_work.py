@@ -6,6 +6,12 @@ from typing import Self
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from .planning_repositories import (
+    SqlAlchemyPlanningRepository,
+    SqlAlchemySeenRepository,
+    SqlAlchemyTicketRepository,
+    SqlAlchemyUserRepository,
+)
 from .repositories import (
     SqlAlchemyFestivalRepository,
     SqlAlchemyFilmRepository,
@@ -24,6 +30,10 @@ class SqlAlchemyUnitOfWork:
     routes: SqlAlchemyRouteRepository
     films: SqlAlchemyFilmRepository
     programme: SqlAlchemyProgrammeRepository
+    users: SqlAlchemyUserRepository
+    planning: SqlAlchemyPlanningRepository
+    tickets: SqlAlchemyTicketRepository
+    seen: SqlAlchemySeenRepository
 
     def __init__(self, engine: Engine):
         self._sessions = sessionmaker(engine, expire_on_commit=False)
@@ -35,6 +45,10 @@ class SqlAlchemyUnitOfWork:
         self.routes = SqlAlchemyRouteRepository(self._session)
         self.films = SqlAlchemyFilmRepository(self._session)
         self.programme = SqlAlchemyProgrammeRepository(self._session)
+        self.users = SqlAlchemyUserRepository(self._session)
+        self.planning = SqlAlchemyPlanningRepository(self._session)
+        self.tickets = SqlAlchemyTicketRepository(self._session)
+        self.seen = SqlAlchemySeenRepository(self._session)
         return self
 
     def __exit__(
