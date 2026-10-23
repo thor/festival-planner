@@ -94,7 +94,7 @@ class SqlAlchemyPlanningRepository:
             for kind in PLANNING_TARGET_KINDS
             for i in sorted(getattr(inputs, kind))
         )
-        self._session.flush()
+        _flush_or_conflict(self._session)
 
     def schedules(self, user_id: str, festival_id: str) -> tuple[Schedule, ...]:
         rows = self._session.scalars(

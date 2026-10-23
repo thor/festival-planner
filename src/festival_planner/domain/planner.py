@@ -154,9 +154,6 @@ class Planner:
                     f"Draft {draft_id!r} is Stale; re-solve it first"
                 )
             inputs = uow.planning.inputs(user_id, draft.festival_id)
-            uow.planning.save_inputs(
-                user_id, draft.festival_id, apply(draft.change_set, inputs)
-            )
             schedule = Schedule(
                 id=self._new_id(),
                 user_id=user_id,
@@ -171,7 +168,13 @@ class Planner:
                 accepted_at=self._clock(),
             )
             try:
+                # The Schedule first, so the number is the first contended
+                # write; the inputs' own keys can conflict too, e.g. on a
+                # (User, Festival)'s first accept.
                 uow.planning.save_schedule(schedule)
+                uow.planning.save_inputs(
+                    user_id, draft.festival_id, apply(draft.change_set, inputs)
+                )
             except ConflictError as e:
                 raise DraftNotAcceptableError(
                     "another Draft was accepted meanwhile; re-solve this one"

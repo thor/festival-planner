@@ -21,7 +21,9 @@ class PlanningRepository(Protocol):
 
     def save_inputs(
         self, user_id: UserId, festival_id: FestivalId, inputs: PlanningInputs
-    ) -> None: ...
+    ) -> None:
+        """Raises `ConflictError` if a concurrent write took the same keys."""
+        ...
 
     def active_schedule(
         self, user_id: UserId, festival_id: FestivalId

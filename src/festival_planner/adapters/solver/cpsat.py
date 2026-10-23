@@ -82,9 +82,8 @@ class CpSatScheduleSolver:
         wall_time = solver.wall_time
 
         # Among Schedules at least as good, prefer Active Screenings (each
-        # outweighs everything else), then fewer extra Screenings (each costs),
-        # then lower Screening ids (cheaper, or worth more if Active); this
-        # never lowers the score.
+        # outweighs everything else), then the cheapest extra Screenings,
+        # where cost grows with the id; this never lowers the score.
         model.add(objective >= round(solver.objective_value))
         for i in ids:
             model.add_hint(attend[i], solver.boolean_value(attend[i]))
